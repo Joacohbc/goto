@@ -24,8 +24,8 @@ The configuration file is created automatically. To add or remove fav directorie
 of your config file, you only need add/remove the block between "{}" in the json
 
 { <br />
-  "Path": "<YOU-PATH>", <br />
-  "Short": "<YOU-ABBREVIATION>", <br />
+  "Path": "{YOU-PATH}", <br />
+  "Short": "{YOU-ABBREVIATION}", <br />
 } <br />
 
 And you need to add a "," after the "}" if it not the last of the list
