@@ -23,9 +23,9 @@ Goto is a command that can be used like cd, and also allows you to specify add p
 The configuration file is created automatically. To add or remove fav directories
 of your config file, you only need add/remove the block between "{}" in the json
 
-{
-  "Path": "<YOU-PATH>",
-  "Short": "<YOU-ABBREVIATION>",
-}
+{ <br />
+  "Path": "<YOU-PATH>", <br />
+  "Short": "<YOU-ABBREVIATION>", <br />
+} <br />
 
 And you need to add a "," after the "}" if it not the last of the list
