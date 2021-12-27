@@ -6,6 +6,8 @@ Goto is a command that can be used like cd, and also allows you to specify add p
 # How to install?
 
 1. **Clone** this the repository and go there
+    git clone https://github.com/Joacohbc/goto.git
+    cd ./goto/
 
 2. **Build** the bin: <br />
     go build -o goto ./main.go ./config.go 
