@@ -21,5 +21,6 @@ echo "Aliases to use goto:" >> $SHELL_FILE
 echo "" >> $SHELL_FILE #New line
 echo "source $CONFIG_DIR/alias.sh" >> $SHELL_FILE
 
-echo "This almost complete, please change GOTO_FILE variable in $CONFIG_DIR/alias.sh to complete"
+#Some advises:
+echo "This almost complete, please change GOTO_FILE variable in $CONFIG_DIR/alias.sh to complete, IF THE CURRENT GOTO_FILE DON'T WORK!"
 echo "If you want to add paths, use goto 1 to go the config dir and edit the config.json"
