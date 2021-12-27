@@ -1,5 +1,7 @@
 ##ADD THIS FILE TO .bashrc OR .zshrc WITH "SOURCE <ABSOLUTE-PATH-OF-THIS-FILE>"   
-GOTO_FILE="<ABSOLUTE-PATH-OF-THIS-FILE>"
+
+# -> GOTO_FILE="<ABSOLUTE-PATH-OF-THIS-FILE>"
+GOTO_FILE"$XDG_CONFIG_HOME/goto/config.json"
 
 gotor() {
     args=`echo $@`

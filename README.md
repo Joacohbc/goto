@@ -19,8 +19,11 @@ Goto is a command that can be used like cd, and also allows you to specify add p
     - cp ./* /home/{username}/.config/goto/ <br />
     - cd /home/{username}/.config/goto/
 
-5. To finish **add** the next file to your shell file: <br />
+5. **Add** the next file to your shell file: <br />
     - source ./alias.sh >> {SHELL_FILE}
+
+6. To finish the instalation you need to change the GOTO_FILE VARIABLE in alias.sh
+    **THIS IF THE GOTO_FILE DON'T WORK!**
 
 The configuration file is created automatically. To add or remove fav directories
 of your config file, you only need add/remove the block between "{}" in the json
