@@ -5,8 +5,8 @@ Goto is a command that can be used like cd, and also allows you to specify add p
 
 # How to install?
 
-1. **Clone** this the repository and go there
-    git clone https://github.com/Joacohbc/goto.git
+1. **Clone** this the repository and go there <br />
+    git clone https://github.com/Joacohbc/goto.git <br />
     cd ./goto/
 
 2. **Build** the bin: <br />
@@ -16,7 +16,7 @@ Goto is a command that can be used like cd, and also allows you to specify add p
     mkdir /home/username/.config/goto/
 
 4. **Move the files** to the config dir and go there: <br />
-    cp ./* /home/username/.config/goto/
+    cp ./* /home/username/.config/goto/ <br />
     cd /home/username/.config/goto/
 
 5. To finish **add** the next file to your shell file: <br />
