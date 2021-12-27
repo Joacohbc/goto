@@ -6,21 +6,29 @@ Goto is a command that can be used like cd, and also allows you to specify add p
 # How to install?
 
 1. **Clone** this the repository and go there <br />
-    - git clone https://github.com/Joacohbc/goto.git <br />
-    - cd ./goto/
+    ```bash
+    git clone https://github.com/Joacohbc/goto.git <br />
+    cd ./goto/
+    ```
 
 2. **Build** the bin: <br />
-    - go build -o goto ./main.go ./config.go 
-
+    ```bash
+    go build -o goto ./main.go ./config.go 
+    ```
 3. **Create** the config dir: <br />
-    - mkdir /home/{username}/.config/goto/
+    ```bash
+    mkdir /home/{username}/.config/goto/
+    ```
 
 4. **Move the files** to the config dir and go there: <br />
-    - cp ./* /home/{username}/.config/goto/ <br />
-    - cd /home/{username}/.config/goto/
-
+    ```bash
+    cp ./* /home/{username}/.config/goto/ <br />
+    cd /home/{username}/.config/goto/
+    ```
 5. **Add** the next file to your shell file: <br />
-    - source ./alias.sh >> {SHELL_FILE}
+    ```bash
+    source ./alias.sh >> {SHELL_FILE} 
+    ```
 
 6. To finish the instalation you need to change the GOTO_FILE VARIABLE in alias.sh <br />
     **THIS IF THE GOTO_FILE DON'T WORK!**
@@ -30,9 +38,10 @@ Goto is a command that can be used like cd, and also allows you to specify add p
 The configuration file is created automatically. To add or remove fav directories
 of your config file, you only need add/remove the block between "{}" in the .json
 
-{ <br />
-  "Path": "{THE-PATH}", <br />
-  "Short": "{THE-ABBREVIATION}", <br />
-} <br />
-
+```json
+{
+  "Path": "{THE-PATH}", 
+  "Short": "{THE-ABBREVIATION}", 
+} 
+```
 And you need to add a "," after the "}" if it not the last of the list
