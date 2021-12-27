@@ -85,6 +85,32 @@ func createConfigFile() {
 	}
 }
 
+func validConfiguredPaths(directories []directory) error {
+
+	checkExist := func(index int, path string) error {
+
+		fileInfo, err := os.Stat(path)
+		if err == nil {
+			//If it's a directory
+			if !fileInfo.IsDir() {
+				return fmt.Errorf("Error: The path: \"%v\"(index %v) is not a directory \n", index, path)
+			}
+		} else {
+			return fmt.Errorf("Error: The path: \"%v\"(index %v) doesn't exist \n", index, path)
+		}
+
+		return nil
+	}
+
+	for i, dir := range directories {
+		if err := checkExist(i, dir.Path); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func loadConfigFile(directories *[]directory) error {
 
 	var configFilePath string = configPath()[1]
@@ -102,9 +128,11 @@ func loadConfigFile(directories *[]directory) error {
 		err = json.Unmarshal(file, &directories)
 		if err != nil {
 			return fmt.Errorf("Error parsing config file")
-		} else {
-			return nil
 		}
+
+		//If all is okey, check dir and return
+		return validConfiguredPaths(*directories)
+
 	} else {
 		return fmt.Errorf("Config file is invalid")
 	}
