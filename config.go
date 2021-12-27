@@ -63,7 +63,9 @@ func createConfigFile() {
 		}
 
 		//Default Path:
-		add(home, "h")
+		add(home, "") //If you write only goto, this will the resulting directory
+
+		//add(home, "h")
 
 		//Your directories:
 		//add("<path>", "<name>")
@@ -93,10 +95,10 @@ func validConfiguredPaths(directories []directory) error {
 		if err == nil {
 			//If it's a directory
 			if !fileInfo.IsDir() {
-				return fmt.Errorf("Error: The path: \"%v\"(index %v) is not a directory \n", index, path)
+				return fmt.Errorf("Error: The path: \"%v\"(index %v) is not a directory \n", path, index)
 			}
 		} else {
-			return fmt.Errorf("Error: The path: \"%v\"(index %v) doesn't exist \n", index, path)
+			return fmt.Errorf("Error: The path: \"%v\"(index %v) doesn't exist \n", path, index)
 		}
 
 		return nil
@@ -105,6 +107,14 @@ func validConfiguredPaths(directories []directory) error {
 	for i, dir := range directories {
 		if err := checkExist(i, dir.Path); err != nil {
 			return err
+		}
+
+		//Check that 2 Path don't have the same abbreviation, where the indexs are diferents
+		//(With diferent index beacause obviously the same index have the same abbreviation and the same path)
+		for indexRepeated, dirRepeated := range directories {
+			if (dir.Short == dirRepeated.Short) && (i != indexRepeated) {
+				return fmt.Errorf("Error: The path: \"%v\"(index %v) have the same abbreviation that \"%v\"(index %v) \n", dir.Path, i, dirRepeated.Path, indexRepeated)
+			}
 		}
 	}
 
