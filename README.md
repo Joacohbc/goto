@@ -6,21 +6,21 @@ Goto is a command that can be used like cd, and also allows you to specify add p
 # How to install?
 
 1. **Clone** this the repository and go there <br />
-    git clone https://github.com/Joacohbc/goto.git <br />
-    cd ./goto/
+    - git clone https://github.com/Joacohbc/goto.git <br />
+    - cd ./goto/
 
 2. **Build** the bin: <br />
-    go build -o goto ./main.go ./config.go 
+    - go build -o goto ./main.go ./config.go 
 
 3. **Create** the config dir: <br />
-    mkdir /home/username/.config/goto/
+    - mkdir /home/username/.config/goto/
 
 4. **Move the files** to the config dir and go there: <br />
-    cp ./* /home/username/.config/goto/ <br />
-    cd /home/username/.config/goto/
+    - cp ./* /home/username/.config/goto/ <br />
+    - cd /home/username/.config/goto/
 
 5. To finish **add** the next file to your shell file: <br />
-    source ./alias.sh >> {SHELL_FILE}
+    - source ./alias.sh >> {SHELL_FILE}
 
 The configuration file is created automatically. To add or remove fav directories
 of your config file, you only need add/remove the block between "{}" in the json
