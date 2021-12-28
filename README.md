@@ -7,6 +7,9 @@ This works by means of a compiled Go file (goto.bin) that returns the correspond
 # How to install?
 
 ## Use the automatically way:
+
+**Note:** The install.sh is only for linux 64 bits and 32 bits 
+
 1. **Clone** repository: <br /> 
     ```bash 
     git clone https://github.com/Joacohbc/goto.git

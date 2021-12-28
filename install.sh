@@ -1,12 +1,31 @@
-rm -f goto.bin
+echo "You have go installed?(y/any)"
+read op
 
-#Build the code
-go build -o goto.bin ./main.go ./config.go 
+if [ "$op" == "y" ]; then
 
-if [ $? -eq 0 ]; then
-    echo "Compaling successfully"
+    GOTO_BIN="goto.bin"
+
+    rm -f $GOTO_BIN
+
+    #Build the code
+    go build -o $GOTO_BIN ./main.go ./config.go 
+
+    if [ $? -eq 0 ]; then
+        echo "Compaling successfully"
+    else
+        echo "Compaling failed"
+    fi
+
 else
-    echo "Compaling failed"
+    #Chek the ARCHITECTURE of the system, 32 bit or 64 bit
+    ARCHITECTURE=`uname -m`
+    
+    if [ "$ARCHITECTURE" == "x86_64" ]; then
+        GOTO_BIN="bin/goto64.bin"
+    else
+        GOTO_BIN="bin/goto32.bin"
+    fi
+
 fi
 
 #Define the config dir
@@ -27,7 +46,7 @@ fi
 echo "Enter the absolute path of you shell configure file: "
 read SHELL_FILE
 
-SHELL_FILE_ADDED=1
+SHELL_FILE_ADDED="1"
 if [ -f "$SHELL_FILE" ]; then
     #Add the alias.sh to $SHELL_FILE
     echo "" >> $SHELL_FILE #New line
@@ -36,7 +55,7 @@ if [ -f "$SHELL_FILE" ]; then
     echo "" >> $SHELL_FILE #New line
 else
     echo "$SHELL_FILE doesn't exist" 
-    SHELL_FILE_ADDED=0
+    SHELL_FILE_ADDED="0"
 fi
 
 #Number of linees of the text
@@ -46,7 +65,7 @@ num=$(wc -l alias.sh | cut -d " " -f 1)
 result=$(expr $num - 3)
 
 #Copy all of the repository to CONFIG_DIR
-cp ./* $CONFIG_DIR
+cp -r ./* $CONFIG_DIR
 
 if [ $? -eq 0 ]; then
     echo "All files copied successfully"
@@ -64,7 +83,7 @@ aliasFile=""$CONFIG_DIR"alias.sh.new"
 #Put the advise menssages and GOTO_FILE variable in the alias
 echo "##ADD THIS FILE TO .bashrc OR .zshrc WITH \"SOURCE <ABSOLUTE-PATH-OF-THIS-FILE>\"" > $aliasFile
 echo "#GOTO_FILE=\"<ABSOLUTE-PATH-OF-THIS-FILE>\"" >> $aliasFile
-echo "GOTO_FILE=\"$CONFIG_DIR/goto.bin\"" >> $aliasFile
+echo "GOTO_FILE=\"$CONFIG_DIR/$GOTO_BIN\"" >> $aliasFile
 echo "" >> $aliasFile
 
 #Text without 3 first lines

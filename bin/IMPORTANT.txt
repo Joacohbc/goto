@@ -1,0 +1,1 @@
+Is only for linux 64 bits and 32bits, in other you need to compile yourself 
