@@ -2,7 +2,7 @@
 # GOTO_FILE="<ABSOLUTE-PATH-OF-THIS-FILE>"
 GOTO_FILE="$XDG_CONFIG_HOME/goto/goto.bin"
 
-gotor() {
+gotop() {
     args=`echo $@`
     DESTINATION=$("$GOTO_FILE" --path="$args")
     echo $DESTINATION 
@@ -12,6 +12,10 @@ gotoc() {
     args=`echo $@`
     DESTINATION=$("$GOTO_FILE" --path="$args")
     echo "\"$DESTINATION\""
+}
+
+goto-add() {
+    echo `"$GOTO_FILE" --add="$1,$2"`
 }
 
 goto() {
@@ -34,13 +38,16 @@ goto() {
 }
 
 #Only return the path for the directory
-alias gotor="gotor"
+alias gotop="gotop"
 
 #Only return the path for the directory with ""
 alias gotoc="gotoc"
 
 #Move to the destination directory
 alias goto='goto'
+
+#Add new Path
+alias goto-add='goto-add'
 
 #Show help message
 alias gotoh="\"$GOTO_FILE\" --help"

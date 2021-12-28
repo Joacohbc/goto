@@ -3,6 +3,7 @@
 
 Goto is a command that can be used like cd, and also allows you to add specific path to move faster, this path can be used like abbreviation or a index number
 
+This works by means of a compiled Go file (goto.bin) that returns the corresponding path depending on the arguments passed as input. And the aliases allow to use it in the command line as cd
 # How to install?
 
 ## Use the automatically way:
@@ -55,3 +56,48 @@ of your config file, you only need add/remove the block between "{}" in the .jso
 } 
 ```
 And you need to add a "," after the "}" if it not the last of the list
+
+# Usage:
+
+## Help and version information
+In the alias.sh there are more options besides the goto to move
+```bash
+#Only return the path for the directory
+gotop /home/joaco 
+
+Output: /home/username
+
+#Only return the path for the directory with ""
+gotoc /home/joaco
+
+Output: "/home/joaco"
+```
+
+Also have ```bash gotoh``` to print help message and ```bash gotov``` to print version   
+
+## Move
+To use the main function of goto:
+```bash  
+#Move to the destination directory
+#home is the abreviation of /home/joaco/ in the config.json
+goto home
+
+Output: Go to: /home/joaco
+```
+
+Or also you can use goto like cd, use a complete/relative path:
+```bash  
+goto /home/joaco/.config/goto
+
+Output: Go to: /home/joaco/.config/goto
+```
+
+## Add new path
+To add a new path to the the config file:
+```bash
+goto-add ~/Wallpaper/ w 
+
+Output: The changes were applied successfully
+```
+
+**Note:** If you want to change the commands and their name you can, you only need change the alias file

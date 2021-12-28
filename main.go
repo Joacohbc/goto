@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func ArgIsDir(arg string) bool {
@@ -25,7 +26,6 @@ func ArgIsDir(arg string) bool {
 	} else {
 		return false //If not a file, continue
 	}
-
 }
 
 func ArgIsShortOrNumber(arg string) bool {
@@ -36,7 +36,7 @@ func ArgIsShortOrNumber(arg string) bool {
 
 	if err != nil {
 		fmt.Println("Error: ", err)
-		return true //In case of error, print th error and exit
+		return false //In case of error, print the error and exit
 	}
 
 	//Check if path is number
@@ -62,10 +62,11 @@ func ArgIsShortOrNumber(arg string) bool {
 			}
 		}
 	}
-	return false //In caes of args is not a number or a valid abbreviation, continue
+
+	return false //In case of args is not a number or a valid abbreviation, continue
 }
 
-const versionMessage string = "1.0" //Version
+const versionMessage string = "1.1" //Version
 
 func helpMessage() string {
 	helpMessage := `Goto is a command to move between folders, it has 3 way to use it, with abbreviations(config file), numbers(index of config file) and paths:
@@ -82,7 +83,10 @@ Path of config file:
 func main() {
 
 	//Create the config file
-	createConfigFile()
+	if err := createConfigFile(); err != nil {
+		fmt.Println("Error", err)
+		return
+	}
 
 	//Check if goto have argument
 	path := flag.String("path", "", "Path to go")
@@ -90,6 +94,8 @@ func main() {
 	help := flag.Bool("help", false, "Help message")
 
 	version := flag.Bool("version", false, "Print version")
+
+	addPath := flag.String("add", "", "[New Path],[Short]")
 
 	//Parse the flags
 	flag.Parse()
@@ -103,6 +109,35 @@ func main() {
 	//If the version argument is passed, print version message
 	if *version {
 		fmt.Printf("Version of goto: %v", versionMessage)
+		return
+	}
+
+	if *addPath != "" {
+
+		args := strings.Split(*addPath, ",")
+
+		checkEmpty := func(s string) bool {
+			if s == "" || s == " " {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		if checkEmpty(args[0]) || checkEmpty(args[1]) {
+			fmt.Println("Path and abbreviation can't be blank spaces")
+			return
+		}
+
+		dir := directory{Path: args[0], Short: args[1]}
+
+		if err := addNewPaths(dir); err != nil {
+			fmt.Println(err)
+			fmt.Println("The changes were not applied")
+			return
+		}
+
+		fmt.Println("The changes were applied successfully")
 		return
 	}
 
