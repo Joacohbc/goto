@@ -73,7 +73,7 @@ gotoc /home/joaco
 Output: "/home/joaco"
 ```
 
-Also have ```bash gotoh``` to print help message and ```bash gotov``` to print version   
+Also have ```gotoh``` to print help message and ```gotov``` to print version   
 
 ## Move
 To use the main function of goto:
