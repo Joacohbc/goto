@@ -5,6 +5,14 @@ Goto is a command that can be used like cd, and also allows you to add specific 
 
 # How to install?
 
+**Use install.sh**
+    ```bash 
+    git clone https://github.com/Joacohbc/goto.git
+    cd ./goto/
+    sh ./install.sh
+    ```
+**or do it yourself**
+
 1. **Clone** this the repository and go there <br />
     ```bash
     git clone https://github.com/Joacohbc/goto.git
