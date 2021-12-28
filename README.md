@@ -45,16 +45,19 @@ This works by means of a compiled Go file (goto.bin) that returns the correspond
     ```
 
 6. To finish the instalation you need to change the GOTO_FILE VARIABLE in alias.sh <br />
+    
+    **Note:** *This if the GOTO_FILE is incorrect or the goto command doesn't work!*
     ```bash
     #Use your fav text editor: nano, vi, vim, nvim, etc
     vim $HOME/.config/goto/alias.sh
     ```
+    In the editor:
     ```bash
     ##ADD THIS FILE TO .bashrc OR .zshrc WITH "SOURCE <ABSOLUTE-PATH-OF-THIS-FILE>"   
     # GOTO_FILE="<ABSOLUTE-PATH-OF-THIS-FILE>"
     GOTO_FILE="$XDG_CONFIG_HOME/goto/goto.bin" #<-- Here put the absolute path of the goto.bin ($HOME/.config/goto/goto.bin)
     ```
-    **Note:** *This if the GOTO_FILE is incorrect or the goto command doesn't work!*
+
 
 # How to configure it?
 
