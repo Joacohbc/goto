@@ -7,12 +7,12 @@ Goto is a command that can be used like cd, and also allows you to add specific 
 
 1. **Clone** this the repository and go there <br />
     ```bash
-    git clone https://github.com/Joacohbc/goto.git <br />
+    git clone https://github.com/Joacohbc/goto.git
     cd ./goto/
     ```
 2. **Compile** the code: <br />
     ```bash
-    go build -o goto ./main.go ./config.go 
+    go build -o goto.bin ./main.go ./config.go 
     ```
 3. **Create** the config dir: <br />
     ```bash
@@ -20,7 +20,7 @@ Goto is a command that can be used like cd, and also allows you to add specific 
     ```
 4. **Move the files** to the config dir and go there: <br />
     ```bash
-    cp ./* $HOME/.config/goto/ <br />
+    cp ./* $HOME/.config/goto/
     cd $HOME/.config/goto/
     ```
 5. **Add** the next file to your shell file: <br />
