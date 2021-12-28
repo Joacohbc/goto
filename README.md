@@ -8,12 +8,12 @@ This works by means of a compiled Go file (goto.bin) that returns the correspond
 
 ## Use the automatically way:
 
-**Note:** The install.sh is only for linux 64 bits and 32 bits 
+**Note:** *The install.sh is only for linux 64 bits and 32 bits*
 
 1. **Clone** repository: <br /> 
     ```bash 
     git clone https://github.com/Joacohbc/goto.git
-    cd ./goto/
+    cd ./goto
     ``` 
 2. **And use the install scripts**: <br />
     ```bash 
@@ -24,7 +24,7 @@ This works by means of a compiled Go file (goto.bin) that returns the correspond
 1. **Clone** this the repository and go there: <br />
     ```bash
     git clone https://github.com/Joacohbc/goto.git
-    cd ./goto/
+    cd ./goto
     ```
 2. **Compile** the code: <br />
     ```bash
@@ -39,13 +39,22 @@ This works by means of a compiled Go file (goto.bin) that returns the correspond
     cp ./* $HOME/.config/goto/
     cd $HOME/.config/goto/
     ```
-5. **Add** the next file to your shell file: <br />
+5. **Add** the next file to your shell file(ex: .bashrc or .zshrc): <br />
     ```bash
-    source ./alias.sh >> {SHELL_FILE} 
+    source $HOME/.config/goto/alias.sh >> {YOUR_SHELL_FILE} 
     ```
 
 6. To finish the instalation you need to change the GOTO_FILE VARIABLE in alias.sh <br />
-    **THIS IF THE GOTO_FILE DON'T WORK!**
+    ```bash
+    #Use your fav text editor: nano, vi, vim, nvim, etc
+    vim $HOME/.config/goto/alias.sh
+    ```
+    ```bash
+    ##ADD THIS FILE TO .bashrc OR .zshrc WITH "SOURCE <ABSOLUTE-PATH-OF-THIS-FILE>"   
+    # GOTO_FILE="<ABSOLUTE-PATH-OF-THIS-FILE>"
+    GOTO_FILE="$XDG_CONFIG_HOME/goto/goto.bin" #<-- Here put the absolute path of the goto.bin ($HOME/.config/goto/goto.bin)
+    ```
+    **Note:** *This if the GOTO_FILE is incorrect or the goto command doesn't work!*
 
 # How to configure it?
 
@@ -101,6 +110,10 @@ To add a new path to the the config file:
 goto-add ~/Wallpaper/ w 
 
 Output: The changes were applied successfully
+
+goto w
+
+Output: Go to: /home/joaco/Wallpaper/
 ```
 
-**Note:** If you want to change the commands and their name you can, you only need change the alias file
+**Note:** *If you want to change the commands and their name you can, you only need change the alias file*

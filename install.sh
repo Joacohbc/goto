@@ -43,7 +43,7 @@ fi
 #Absolute path line /home/username/.bashrc, not ~/.bashrc
 # SHELL_FILE="<PUT-PATH>"
 
-echo "Enter the absolute path of you shell configure file: "
+echo "Enter the ABSOLUTE PATH of you shell configure file: "
 read SHELL_FILE
 
 SHELL_FILE_ADDED="1"
