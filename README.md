@@ -15,7 +15,7 @@ Goto is a command that can be used like cd, and also allows you to add specific 
     ```bash 
     sh ./install.sh
     ```
-## Or do it yourself
+## Or do it yourself:
 
 1. **Clone** this the repository and go there: <br />
     ```bash
