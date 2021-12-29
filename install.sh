@@ -1,4 +1,4 @@
-echo "You have go installed?(y/any)"
+echo "You have go installed?(y or any)"
 read op
 
 if [ "$op" = "y" ]; then
@@ -42,7 +42,7 @@ mkdir -p $CONFIG_DIR
 if [ $? -eq 0 ]; then
     echo "Config dir created successfully"
 else
-    echo "Config dir created failed"
+    echo "Config dir couldn't be created"
 fi
 
 #Absolute path line /home/username/.bashrc, not ~/.bashrc
@@ -61,7 +61,7 @@ while true; do
 
         break
     else
-        echo "$SHELL_FILE doesn't exist" 
+        echo "\"$SHELL_FILE\" doesn't exist" 
     fi
 done 
 
@@ -74,13 +74,19 @@ result=$(expr $num - 3)
 #Copy all of the repository to CONFIG_DIR
 cp -r ./* $CONFIG_DIR
 
-#Give excute permission to the bin files
-chmod +x "$CONFIG_DIR/bin/*"
-
 if [ $? -eq 0 ]; then
     echo "All files copied successfully"
 else
-    echo "All files copied failed"
+    echo "Files couldn't be copied"
+fi
+
+#Give excute permission to the bin files
+chmod +x ""$CONFIG_DIR"bin/*"
+
+if [ $? -eq 0 ]; then
+    echo "Permission added successfully"
+else
+    echo "The permission couldn't be added"
 fi
 
 #---------------------------------------#
@@ -93,7 +99,7 @@ aliasFile=""$CONFIG_DIR"alias.sh.new"
 #Put the advise menssages and GOTO_FILE variable in the alias
 echo "##ADD THIS FILE TO .bashrc OR .zshrc WITH \"SOURCE <ABSOLUTE-PATH-OF-THIS-FILE>\"" > $aliasFile
 echo "#GOTO_FILE=\"<ABSOLUTE-PATH-OF-THIS-FILE>\"" >> $aliasFile
-echo "GOTO_FILE=\"$CONFIG_DIR/$GOTO_BIN\"" >> $aliasFile
+echo "GOTO_FILE=\""$CONFIG_DIR"$GOTO_BIN\"" >> $aliasFile
 echo "" >> $aliasFile
 
 #Text without 3 first lines
