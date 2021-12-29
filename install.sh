@@ -83,12 +83,6 @@ while true; do
     fi
 done 
 
-#Number of linees of the text
-num=$(wc -l alias.sh | cut -d " " -f 1)
-
-#Remainder of 3 first lines of orginal text(the lines of GOTO_FILE variable)
-result=$(expr $num - 3)
-
 #Copy all of the repository to CONFIG_DIR
 cp -r ./* $CONFIG_DIR
 
@@ -110,6 +104,12 @@ echo "##ADD THIS FILE TO .bashrc OR .zshrc WITH \"SOURCE <ABSOLUTE-PATH-OF-THIS-
 echo "#GOTO_FILE=\"<ABSOLUTE-PATH-OF-THIS-FILE>\"" >> $aliasFile
 echo "GOTO_FILE=\""$CONFIG_DIR"$GOTO_BIN\"" >> $aliasFile
 echo "" >> $aliasFile
+
+#Number of linees of the text
+num=$(wc -l alias.sh | cut -d " " -f 1)
+
+#Remainder of 3 first lines of orginal text(the lines of GOTO_FILE variable)
+result=$(expr $num - 3)
 
 #Text without 3 first lines
 tail -n$result ./alias.sh >> $aliasFile

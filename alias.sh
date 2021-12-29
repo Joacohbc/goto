@@ -1,13 +1,13 @@
 ##ADD THIS FILE TO .bashrc OR .zshrc WITH "SOURCE <PATH-OF-THIS-FILE>"   
-GOTO_FILE="/home/joaco/Archivos/Colegio y Estudio/Z-Proyectos/Go/goto/goto.test"
+GOTO_FILE="$XDG_CONFIG_HOME/goto/goto64.bin"
 
 goto() {
     args=`echo $@`
     
     DESTINATION=$("$GOTO_FILE" $args)
 
-    #If the return isn't an error
-    if [[ "$DESTINATION" != *"Error:"* ]] || [[ "$DESTINATION" != *"flag provided but not defined:"* ]]; then
+    #If the return isn't an error, put a bad argument, or the args have argument don't use the cd
+    if [[ "$DESTINATION" != *"Error:"* ]] && [[ "$DESTINATION" != *"flag provided but not defined:"* ]] && [[ "$args" != "-"* ]]; then
 
         cd "$DESTINATION"   
 

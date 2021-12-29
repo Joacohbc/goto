@@ -66,7 +66,7 @@ func ArgIsShortOrNumber(arg string) bool {
 	return false //In case of args is not a number or a valid abbreviation, continue
 }
 
-const versionMessage string = "1.1" //Version
+const versionMessage string = "1.2" //Version
 
 func helpMessage() string {
 	helpMessage := `Three ways to use it, with abbreviations(config file), numbers(index of config file) and paths:

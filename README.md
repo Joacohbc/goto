@@ -74,23 +74,20 @@ of your config file, you only need add/remove the block between "{}" in the .jso
 ```
 And you need to add a "," after the "}" if it not the last of the list
 
+**Note:** *You can do this with ```goto --add```*
+
 # Usage:
 
 ## Help and version information
 In the alias.sh there are more options besides the goto to move
 ```bash
-#Only return the path for the directory
-gotop /home/joaco 
-
-Output: /home/username
-
-#Only return the path for the directory with ""
-gotoc /home/joaco
+#Only return the path for the directory with quotes
+goto -q /home/joaco
 
 Output: "/home/joaco"
 ```
 
-Also have ```gotoh``` to print help message and ```gotov``` to print version   
+Also have ```goto -help``` to print help message and ```goto -v``` to print version   
 
 ## Move
 To use the main function of goto:
@@ -98,6 +95,11 @@ To use the main function of goto:
 #Move to the destination directory
 #home is the abreviation of /home/joaco/ in the config.json
 goto home
+
+Output: Go to: /home/joaco
+
+#"0" is the number index of the /home/joaco/ in the config.json
+goto 0
 
 Output: Go to: /home/joaco
 ```
@@ -110,15 +112,36 @@ Output: Go to: /home/joaco/.config/goto
 ```
 
 ## Add new path
-To add a new path to the the config file:
+To add a new path to the config file:
 ```bash
-goto-add ~/Wallpaper/ w 
+#The new path will be ~/Wallpaper/ and "w" is the abreviation 
+goto --add="~/Wallpaper/,w" 
 
 Output: The changes were applied successfully
 
+#And try the new path 
 goto w
 
 Output: Go to: /home/joaco/Wallpaper/
 ```
 
-**Note:** *If you want to change the commands and their name you can, you only need change the alias file*
+## List paths
+To list the path of the config file:
+```bash
+goto -l 
+
+Output: 
+0- Path: "/home/joaco", Short: "home"
+1- Path: "/home/joaco/.config/goto/", Short: "conf"
+2- Path: "/home/joaco/Wallpaper", Short: "w"
+...
+```
+
+## Delete paths
+To delete a path to the config file:
+```bash
+#I want to delete the path /home/joaco/Wallpaper
+goto --del="/home/joaco/Wallpaper"  
+
+Output: The changes were applied successfully
+```
