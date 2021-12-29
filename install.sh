@@ -39,6 +39,8 @@ CONFIG_DIR="$XDG_CONFIG_HOME"/goto/
 #Create the config dir
 mkdir -p $CONFIG_DIR
 
+chmod -R 700 "$CONFIG_DIR"
+
 if [ $? -eq 0 ]; then
     echo "Config dir created successfully"
 else
