@@ -1,7 +1,7 @@
 echo "You have go installed?(y/any)"
 read op
 
-if [ "$op" == "y" ]; then
+if [ "$op" = "y" ]; then
 
     GOTO_BIN="goto.bin"
 
@@ -20,7 +20,7 @@ else
     #Chek the ARCHITECTURE of the system, 32 bit or 64 bit
     ARCHITECTURE=`uname -m`
     
-    if [ "$ARCHITECTURE" == "x86_64" ]; then
+    if [ "$ARCHITECTURE" = "x86_64" ]; then
         GOTO_BIN="bin/goto64.bin"
     else
         GOTO_BIN="bin/goto32.bin"
@@ -28,8 +28,13 @@ else
 
 fi
 
+#if $XDG_CONFIG_HOME is empty
+if [ $XDG_CONFIG_HOME ]; then
+    XDG_CONFIG_HOME="$HOME/.config"
+fi
+
 #Define the config dir
-CONFIG_DIR="$XDG_CONFIG_HOME"/goto/
+CONFIG_DIR=""/goto/
 
 #Create the config dir
 mkdir -p $CONFIG_DIR
@@ -96,7 +101,7 @@ rm ""$CONFIG_DIR"alias.sh"
 mv $aliasFile ""$CONFIG_DIR"alias.sh"
 
 #Some advises:
-if [ "$SHELL_FILE_ADDED" == "1" ]; then
+if [ $SHELL_FILE_ADDED == 1 ]; then
     echo "This almost complete, please change GOTO_FILE variable in $CONFIG_DIR/alias.sh to complete, IF THE CURRENT GOTO_FILE DON'T WORK!"
     echo "If you want to add paths, use goto 1 to go the config dir and edit the config.json"
 fi

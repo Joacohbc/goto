@@ -36,7 +36,7 @@ This works by means of a compiled Go file (goto.bin) that returns the correspond
     ```
 4. **Move the files** to the config dir and go there: <br />
     ```bash
-    cp ./* $HOME/.config/goto/
+    cp -r ./* $HOME/.config/goto/
     cd $HOME/.config/goto/
     ```
 5. **Add** the next file to your shell file(ex: .bashrc or .zshrc): <br />
