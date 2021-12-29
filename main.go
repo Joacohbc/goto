@@ -35,7 +35,7 @@ func ArgIsShortOrNumber(arg string) bool {
 	err := loadConfigFile(&directories)
 
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Print("Error: ", err)
 		return false //In case of error, print the error and exit
 	}
 
@@ -45,7 +45,7 @@ func ArgIsShortOrNumber(arg string) bool {
 		for i, dir := range directories {
 
 			if pathNumber == i {
-				fmt.Println(dir.Path)
+				fmt.Print(dir.Path)
 				return true //In case of correct pathNumber, print and exit
 			}
 		}
@@ -57,7 +57,7 @@ func ArgIsShortOrNumber(arg string) bool {
 		for _, dir := range directories {
 
 			if arg == dir.Short {
-				fmt.Println(dir.Path)
+				fmt.Print(dir.Path)
 				return true //In case of correct abbreviation, print and exit
 			}
 		}
@@ -69,7 +69,7 @@ func ArgIsShortOrNumber(arg string) bool {
 const versionMessage string = "1.1" //Version
 
 func helpMessage() string {
-	helpMessage := `Goto is a command to move between folders, it has 3 way to use it, with abbreviations(config file), numbers(index of config file) and paths:
+	helpMessage := `Three ways to use it, with abbreviations(config file), numbers(index of config file) and paths:
 
 -Abbreviations= "goto <abbreviation>"
 -Number="goto <number-of-the-index>"
@@ -89,13 +89,17 @@ func main() {
 	}
 
 	//Check if goto have argument
-	path := flag.String("path", "", "Path to go")
-
 	help := flag.Bool("help", false, "Help message")
 
-	version := flag.Bool("version", false, "Print version")
+	version := flag.Bool("v", false, "Print version")
 
-	addPath := flag.String("add", "", "[New Path],[Short]")
+	list := flag.Bool("l", false, "Print all path with abbreviations")
+
+	pathQuotes := flag.Bool("q", false, "Print the path with quotes")
+
+	addPath := flag.String("add", "", "Add a new path use: --add=\"[New Path],[New Short]\"")
+
+	delPath := flag.String("del", "", "Delete a path use: --del=\"[Path to Del]\"")
 
 	//Parse the flags
 	flag.Parse()
@@ -112,19 +116,31 @@ func main() {
 		return
 	}
 
+	if *list {
+		var directoriesToList []directory
+		if err := loadConfigFile(&directoriesToList); err != nil {
+			fmt.Print("Error:", err)
+			return
+		}
+
+		for i, dir := range directoriesToList {
+			fmt.Printf("%v- Path: \"%v\", Short: \"%v\" \n", i, dir.Path, dir.Short)
+		}
+		return
+	}
+
+	if *pathQuotes {
+		fmt.Print("\"")
+		ArgIsShortOrNumber(flag.Arg(0))
+		fmt.Printf("\"")
+		return
+	}
+
 	if *addPath != "" {
 
 		args := strings.Split(*addPath, ",")
 
-		checkEmpty := func(s string) bool {
-			if s == "" || s == " " {
-				return true
-			} else {
-				return false
-			}
-		}
-
-		if checkEmpty(args[0]) || checkEmpty(args[1]) {
+		if len(args[0]) == 0 || len(args[1]) == 0 {
 			fmt.Println("Path and abbreviation can't be blank spaces")
 			return
 		}
@@ -141,8 +157,25 @@ func main() {
 		return
 	}
 
+	if *delPath != "" {
+
+		if len(*delPath) == 0 {
+			fmt.Println("Path  can't be blank spaces")
+			return
+		}
+
+		if err := delPaths(*delPath); err != nil {
+			fmt.Println(err)
+			fmt.Println("The changes were not applied")
+			return
+		}
+
+		fmt.Println("The changes were applied successfully")
+		return
+	}
+
 	//Where the first argument will be stored
-	var arg string = *path
+	var arg string = flag.Arg(0)
 
 	//If exists like a Directory
 	if ArgIsDir(arg) {
@@ -156,4 +189,5 @@ func main() {
 
 	//If the code is here, it means that the arg is invalid
 	fmt.Print("Error: Invalid argument/s")
+
 }

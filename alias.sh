@@ -1,30 +1,13 @@
-##ADD THIS FILE TO .bashrc OR .zshrc WITH "SOURCE <ABSOLUTE-PATH-OF-THIS-FILE>"   
-# GOTO_FILE="<ABSOLUTE-PATH-OF-THIS-FILE>"
-GOTO_FILE="$XDG_CONFIG_HOME/goto/goto.bin"
-
-gotop() {
-    args=`echo $@`
-    DESTINATION=$("$GOTO_FILE" --path="$args")
-    echo $DESTINATION 
-}
-
-gotoc() {
-    args=`echo $@`
-    DESTINATION=$("$GOTO_FILE" --path="$args")
-    echo "\"$DESTINATION\""
-}
-
-goto-add() {
-    echo `"$GOTO_FILE" --add="$1,$2"`
-}
+##ADD THIS FILE TO .bashrc OR .zshrc WITH "SOURCE <PATH-OF-THIS-FILE>"   
+GOTO_FILE="/home/joaco/Archivos/Colegio y Estudio/Z-Proyectos/Go/goto/goto.test"
 
 goto() {
     args=`echo $@`
     
-    DESTINATION=$("$GOTO_FILE" --path="$args")
+    DESTINATION=$("$GOTO_FILE" $args)
 
     #If the return isn't an error
-    if [[ $DESTINATION != *"Error:"* ]]; then
+    if [[ "$DESTINATION" != *"Error:"* ]] || [[ "$DESTINATION" != *"flag provided but not defined:"* ]]; then
 
         cd "$DESTINATION"   
 
@@ -33,24 +16,5 @@ goto() {
     else 
         #If it is an error, print it
         echo "$DESTINATION"
-    fi
-    
+    fi  
 }
-
-#Only return the path for the directory
-alias gotop="gotop"
-
-#Only return the path for the directory with ""
-alias gotoc="gotoc"
-
-#Move to the destination directory
-alias goto='goto'
-
-#Add new Path
-alias goto-add='goto-add'
-
-#Show help message
-alias gotoh="\"$GOTO_FILE\" --help"
-
-#Show version information
-alias gotov="\"$GOTO_FILE\" --version"

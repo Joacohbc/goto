@@ -192,3 +192,32 @@ func addNewPaths(dir directory) error {
 
 	return nil
 }
+
+func delPaths(pathToDel string) error {
+
+	var directories []directory
+	loadConfigFile(&directories)
+
+	var find bool = false
+	for i, dir := range directories {
+		if dir.Path == pathToDel {
+			directories = append(directories[:i], directories[i+1:]...)
+			find = true
+			break
+		}
+	}
+
+	if !find {
+		return fmt.Errorf("Path \"%v\" doesn't exist", pathToDel)
+	}
+
+	if err := validConfiguredPaths(directories); err != nil {
+		return fmt.Errorf("Invalid new config file,\n%v", err)
+	}
+
+	if err := createJsonFile(directories); err != nil {
+		return err
+	}
+
+	return nil
+}
