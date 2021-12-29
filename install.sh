@@ -1,3 +1,21 @@
+##Colores##
+ESC=$(printf '\033')
+RESET="${ESC}[0m"
+RED="${ESC}[31m"
+GREEN="${ESC}[32m"
+
+##Funciones con colores##
+greenprint() { printf "${GREEN}%s${RESET}\n" "$1"; }
+redprint() { printf "${RED}%s${RESET}\n" "$1"; }
+
+error() {
+    echo "$(redprint "$1")"
+}
+
+exito() {
+    echo "$(greenprint "$1")"
+}
+
 echo "You have go installed?(y or any)"
 read op
 
@@ -11,9 +29,9 @@ if [ "$op" = "y" ]; then
     go build -o $GOTO_BIN ./main.go ./config.go 
 
     if [ $? -eq 0 ]; then
-        echo "Compaling successfully"
+        exito "Compaling successfully"
     else
-        echo "Compaling failed"
+        error "Compaling failed"
     fi
 
 else
@@ -40,9 +58,9 @@ CONFIG_DIR="$XDG_CONFIG_HOME"/goto/
 mkdir -p $CONFIG_DIR
 
 if [ $? -eq 0 ]; then
-    echo "Config dir created successfully"
+    exito "Config dir created successfully"
 else
-    echo "Config dir couldn't be created"
+    error "Config dir couldn't be created"
 fi
 
 #Absolute path line /home/username/.bashrc, not ~/.bashrc
@@ -61,7 +79,7 @@ while true; do
 
         break
     else
-        echo "\"$SHELL_FILE\" doesn't exist" 
+        error "\"$SHELL_FILE\" doesn't exist" 
     fi
 done 
 
@@ -75,18 +93,9 @@ result=$(expr $num - 3)
 cp -r ./* $CONFIG_DIR
 
 if [ $? -eq 0 ]; then
-    echo "All files copied successfully"
+    exito "All files copied successfully"
 else
-    echo "Files couldn't be copied"
-fi
-
-#Give excute permission to the bin files
-chmod +x ""$CONFIG_DIR"bin/*"
-
-if [ $? -eq 0 ]; then
-    echo "Permission added successfully"
-else
-    echo "The permission couldn't be added"
+    error "Files couldn't be copied"
 fi
 
 #---------------------------------------#
@@ -110,6 +119,15 @@ rm ""$CONFIG_DIR"alias.sh"
 
 #Change the name of alias.sh.new to alias.sh of the config file
 mv $aliasFile ""$CONFIG_DIR"alias.sh"
+
+#Give excute permission to the bin files
+chmod +x ""$CONFIG_DIR"bin/*"
+
+if [ $? -eq 0 ]; then
+    exito "Permission added successfully"
+else
+    error "The permission couldn't be added"
+fi
 
 #Some advises:
 echo "This almost complete, please restart the terminal and check if all work correctly"
