@@ -29,7 +29,7 @@ else
 fi
 
 #if $XDG_CONFIG_HOME is empty
-if [ "$XDG_CONFIG_HOME" ]; then
+if [ -z "$XDG_CONFIG_HOME" ]; then
     XDG_CONFIG_HOME="$HOME/.config"
 fi
 
