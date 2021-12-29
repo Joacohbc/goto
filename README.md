@@ -43,9 +43,11 @@ This works by means of a compiled Go file (goto.bin) that returns the correspond
     ```bash
     source $HOME/.config/goto/alias.sh >> {YOUR_SHELL_FILE} 
     ```
-
-6. To finish the instalation you need to change the GOTO_FILE VARIABLE in alias.sh <br />
-    
+6. **Give permissions of execute to bin files:**
+    ```bash
+    chmod +x $HOME/.config/goto/bin/*
+    ```
+7. To finish the instalation you need to change the GOTO_FILE VARIABLE in alias.sh <br />
     **Note:** *This if the GOTO_FILE is incorrect or the goto command doesn't work!*
     ```bash
     #Use your fav text editor: nano, vi, vim, nvim, etc
