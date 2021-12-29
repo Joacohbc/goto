@@ -1,6 +1,7 @@
 ##ADD THIS FILE TO .bashrc OR .zshrc WITH "SOURCE <PATH-OF-THIS-FILE>"   
 GOTO_FILE="$XDG_CONFIG_HOME/goto/goto64.bin"
 
+#GOTO FUNC
 goto() {
     args=`echo $@`
     
