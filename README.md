@@ -1,9 +1,9 @@
 # goto-command
- The ultimate way to move between folders
+ The ultimate way to move between folders in the command line
 
 Goto is a command that can be used like cd, and also allows you to add specific path to move faster, this path can be used like abbreviation or a index number
 
-This works by means of a compiled Go file (goto.bin) that returns the corresponding path depending on the arguments passed as input. And the aliases allow to use it in the command line as cd
+It works by means of a compiled Go file (goto.bin) that returns the corresponding path based on the arguments passed as input. And passes it as an argument to an alias that uses cd on the command line to move to the specified path
 # How to install?
 
 ## Use the automatically way:
@@ -43,7 +43,7 @@ This works by means of a compiled Go file (goto.bin) that returns the correspond
     ```bash
     source $HOME/.config/goto/alias.sh >> {YOUR_SHELL_FILE} 
     ```
-6. **Give permissions of execute to bin files:**
+6. **Give execution permissions to bin files:**
     ```bash
     chmod +x $HOME/.config/goto/bin/*
     ```
@@ -79,7 +79,7 @@ And you need to add a "," after the "}" if it not the last of the list
 # Usage:
 
 ## Help and version information
-In the alias.sh there are more options besides the goto to move
+In the alias.sh there are more options besides the goto to move:
 ```bash
 #Only return the path for the directory with quotes
 goto -q /home/joaco

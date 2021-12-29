@@ -63,6 +63,15 @@ else
     error "Config dir couldn't be created"
 fi
 
+#Copy all of the repository to CONFIG_DIR
+cp -r ./* $CONFIG_DIR
+
+if [ $? -eq 0 ]; then
+    exito "All files copied successfully"
+else
+    error "Files couldn't be copied"
+fi
+
 #Absolute path line /home/username/.bashrc, not ~/.bashrc
 # SHELL_FILE="<PUT-PATH>"
 
@@ -83,13 +92,13 @@ while true; do
     fi
 done 
 
-#Copy all of the repository to CONFIG_DIR
-cp -r ./* $CONFIG_DIR
+#Give excute permission to the bin file
+chmod +x ""$CONFIG_DIR"$GOTO_BIN"
 
 if [ $? -eq 0 ]; then
-    exito "All files copied successfully"
+    exito "Permission added successfully"
 else
-    error "Files couldn't be copied"
+    error "The permission couldn't be added"
 fi
 
 #---------------------------------------#
@@ -119,15 +128,6 @@ rm ""$CONFIG_DIR"alias.sh"
 
 #Change the name of alias.sh.new to alias.sh of the config file
 mv $aliasFile ""$CONFIG_DIR"alias.sh"
-
-#Give excute permission to the bin files
-chmod +x ""$CONFIG_DIR"$GOTO_BIN"
-
-if [ $? -eq 0 ]; then
-    exito "Permission added successfully"
-else
-    error "The permission couldn't be added"
-fi
 
 #Some advises:
 echo "This almost complete, please restart the terminal and check if all work correctly"
