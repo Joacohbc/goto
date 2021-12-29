@@ -39,8 +39,6 @@ CONFIG_DIR="$XDG_CONFIG_HOME"/goto/
 #Create the config dir
 mkdir -p $CONFIG_DIR
 
-chmod -R 700 "$CONFIG_DIR"
-
 if [ $? -eq 0 ]; then
     echo "Config dir created successfully"
 else
@@ -50,20 +48,22 @@ fi
 #Absolute path line /home/username/.bashrc, not ~/.bashrc
 # SHELL_FILE="<PUT-PATH>"
 
-echo "Enter the ABSOLUTE PATH of you shell configure file: "
-read SHELL_FILE
+while true; do
+    echo "Enter the ABSOLUTE PATH of you shell configure file: "
+    read SHELL_FILE
 
-SHELL_FILE_ADDED="1"
-if [ -f "$SHELL_FILE" ]; then
-    #Add the alias.sh to $SHELL_FILE
-    echo "" >> $SHELL_FILE #New line
-    echo "#Aliases to use goto:" >> $SHELL_FILE
-    echo "source "$CONFIG_DIR"alias.sh" >> $SHELL_FILE
-    echo "" >> $SHELL_FILE #New line
-else
-    echo "$SHELL_FILE doesn't exist" 
-    SHELL_FILE_ADDED="0"
-fi
+    if [ -f "$SHELL_FILE" ]; then
+        #Add the alias.sh to $SHELL_FILE
+        echo "" >> $SHELL_FILE #New line
+        echo "#Aliases to use goto:" >> $SHELL_FILE
+        echo "source "$CONFIG_DIR"alias.sh" >> $SHELL_FILE
+        echo "" >> $SHELL_FILE #New line
+
+        break
+    else
+        echo "$SHELL_FILE doesn't exist" 
+    fi
+done 
 
 #Number of linees of the text
 num=$(wc -l alias.sh | cut -d " " -f 1)
@@ -73,6 +73,9 @@ result=$(expr $num - 3)
 
 #Copy all of the repository to CONFIG_DIR
 cp -r ./* $CONFIG_DIR
+
+#Give excute permission to the bin files
+chmod +x "$CONFIG_DIR/bin/*"
 
 if [ $? -eq 0 ]; then
     echo "All files copied successfully"
@@ -103,7 +106,5 @@ rm ""$CONFIG_DIR"alias.sh"
 mv $aliasFile ""$CONFIG_DIR"alias.sh"
 
 #Some advises:
-if [ $SHELL_FILE_ADDED == 1 ]; then
-    echo "This almost complete, please change GOTO_FILE variable in $CONFIG_DIR/alias.sh to complete, IF THE CURRENT GOTO_FILE DON'T WORK!"
-    echo "If you want to add paths, use goto 1 to go the config dir and edit the config.json"
-fi
+echo "This almost complete, please restart the terminal and check if all work correctly"
+echo "If you want to add paths, use goto 1 to go the config dir and edit the config.json"
