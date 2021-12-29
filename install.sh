@@ -34,7 +34,7 @@ if [ $XDG_CONFIG_HOME ]; then
 fi
 
 #Define the config dir
-CONFIG_DIR=""/goto/
+CONFIG_DIR="$XDG_CONFIG_HOME"/goto/
 
 #Create the config dir
 mkdir -p $CONFIG_DIR
