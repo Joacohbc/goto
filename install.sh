@@ -121,7 +121,7 @@ rm ""$CONFIG_DIR"alias.sh"
 mv $aliasFile ""$CONFIG_DIR"alias.sh"
 
 #Give excute permission to the bin files
-chmod +x ""$CONFIG_DIR"bin/*"
+chmod +x ""$CONFIG_DIR"$GOTO_BIN"
 
 if [ $? -eq 0 ]; then
     exito "Permission added successfully"
