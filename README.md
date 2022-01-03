@@ -93,7 +93,7 @@ Also have ```goto -help``` to print help message and ```goto -v``` to print vers
 To use the main function of goto:
 ```bash  
 #Move to the destination directory
-#home is the abreviation of /home/joaco/ in the config.json
+#"home" is the abreviation of /home/joaco/ in the config.json
 goto home
 
 Output: Go to: /home/joaco
@@ -112,7 +112,7 @@ Output: Go to: /home/joaco/.config/goto
 ```
 
 ## Add new path
-To add a new path to the config file:
+To add a new path:
 ```bash
 #The new path will be ~/Wallpaper/ and "w" is the abreviation 
 goto --add="~/Wallpaper/,w" 
@@ -138,10 +138,28 @@ Output:
 ```
 
 ## Delete paths
-To delete a path to the config file:
+To delete a path:
 ```bash
 #I want to delete the path /home/joaco/Wallpaper
 goto --del="/home/joaco/Wallpaper"  
 
 Output: The changes were applied successfully
 ```
+
+## Modify paths
+To modify the abreviation of the path:
+```bash
+#I want to modify the path /home/joaco/.config/goto/
+#The new abreviation will be "conf"
+goto --modify="/home/joaco/.config/goto/,conf"  
+
+Output: The changes were applied successfully
+```
+**Note:** *The path will be exactly the same taht the path in the config file, so you should use the same path* ```goto -l```
+
+# IMPORTANT:
+**If you want to use only cd, not the alias of he goto function, you should use:**
+    ```bash
+    #This use the commnad cd and not the alias
+    \cd ~/home
+    ```

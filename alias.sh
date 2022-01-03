@@ -19,3 +19,6 @@ goto() {
         echo "$DESTINATION"
     fi  
 }
+
+#cd is change by goto function
+alias cd="goto"

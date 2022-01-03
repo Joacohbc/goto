@@ -43,7 +43,7 @@ func createJsonFile(directories []directory) error {
 
 	//Valid the config file
 	if !json.Valid(jsonFile) {
-		return fmt.Errorf("The new config file is invalid")
+		return fmt.Errorf("the new config file is invalid")
 	}
 
 	//Create the config file
@@ -118,10 +118,10 @@ func validConfiguredPaths(directories []directory) error {
 		if err == nil {
 			//If it's a directory
 			if !fileInfo.IsDir() {
-				return fmt.Errorf("The path: \"%v\"(index %v) is not a directory \n", path, index)
+				return fmt.Errorf("the path: \"%v\"(index %v) is not a directory", path, index)
 			}
 		} else {
-			return fmt.Errorf("The path: \"%v\"(index %v) doesn't exist \n", path, index)
+			return fmt.Errorf("the path: \"%v\"(index %v) doesn't exist", path, index)
 		}
 
 		return nil
@@ -137,7 +137,7 @@ func validConfiguredPaths(directories []directory) error {
 		//(With diferent index beacause obviously the same index have the same abbreviation and the same path)
 		for indexRepeated, dirRepeated := range directories {
 			if (dir.Short == dirRepeated.Short) && (i != indexRepeated) {
-				return fmt.Errorf("The path: \"%v\"(index %v) have the same abbreviation that \"%v\"(index %v) \n", dir.Path, i, dirRepeated.Path, indexRepeated)
+				return fmt.Errorf("the path: \"%v\"(index %v) have the same abbreviation that \"%v\"(index %v)", dir.Path, i, dirRepeated.Path, indexRepeated)
 			}
 		}
 	}
@@ -152,7 +152,7 @@ func loadConfigFile(directories *[]directory) error {
 	//Read the File
 	file, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
-		return fmt.Errorf("Error reading config file")
+		return fmt.Errorf("error reading config file")
 	}
 
 	//If it valid
@@ -161,29 +161,32 @@ func loadConfigFile(directories *[]directory) error {
 		//Load the Paths in []directories
 		err = json.Unmarshal(file, &directories)
 		if err != nil {
-			return fmt.Errorf("Error parsing config file")
+			return fmt.Errorf("error parsing config file")
 		}
 
 		//If all is okey, check dir and return
 		return validConfiguredPaths(*directories)
 
 	} else {
-		return fmt.Errorf("Config file is invalid")
+		return fmt.Errorf("config file is invalid")
 	}
 }
 
-func addNewPaths(dir directory) error {
+func addNewPaths(newDir directory) error {
 
 	var directories []directory
 	loadConfigFile(&directories)
 
-	directories = append(directories, directory{
-		Path:  dir.Path,
-		Short: dir.Short,
-	})
+	for _, dir := range directories {
+		if newDir.Path == dir.Path {
+			return fmt.Errorf("the path: \"%v\" already exists", newDir.Path)
+		}
+	}
+
+	directories = append(directories, newDir)
 
 	if err := validConfiguredPaths(directories); err != nil {
-		return fmt.Errorf("Invalid new config file,\n%v", err)
+		return fmt.Errorf("invalid new config file,\n%v", err)
 	}
 
 	if err := createJsonFile(directories); err != nil {
@@ -208,11 +211,43 @@ func delPaths(pathToDel string) error {
 	}
 
 	if !find {
-		return fmt.Errorf("Path \"%v\" doesn't exist", pathToDel)
+		return fmt.Errorf("path \"%v\" doesn't exist", pathToDel)
 	}
 
 	if err := validConfiguredPaths(directories); err != nil {
-		return fmt.Errorf("Invalid new config file,\n%v", err)
+		return fmt.Errorf("invalid new config file,\n%v", err)
+	}
+
+	if err := createJsonFile(directories); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func modPaths(pathToModif string, newShort string) error {
+
+	var directories []directory
+	err := loadConfigFile(&directories)
+	if err != nil {
+		return err
+	}
+
+	var exist bool = false
+	for i, dir := range directories {
+
+		if dir.Path == pathToModif {
+			directories[i].Short = newShort
+			exist = true
+		}
+	}
+
+	if !exist {
+		return fmt.Errorf("the path that you are trying to modify is not exists")
+	}
+
+	if err := validConfiguredPaths(directories); err != nil {
+		return fmt.Errorf("invalid new config file,\n%v", err)
 	}
 
 	if err := createJsonFile(directories); err != nil {

@@ -19,7 +19,7 @@ func ArgIsDir(arg string) bool {
 			return true //If a file and is a directory, print and exit
 
 		} else {
-			fmt.Println("Error: The path is not a directory")
+			fmt.Println("Error: the path is not a directory")
 			return true //If the file is a directory, print error and exit
 		}
 
@@ -35,7 +35,7 @@ func ArgIsShortOrNumber(arg string) bool {
 	err := loadConfigFile(&directories)
 
 	if err != nil {
-		fmt.Print("Error: ", err)
+		fmt.Println("Error: ", err)
 		return false //In case of error, print the error and exit
 	}
 
@@ -45,19 +45,19 @@ func ArgIsShortOrNumber(arg string) bool {
 		for i, dir := range directories {
 
 			if pathNumber == i {
-				fmt.Print(dir.Path)
+				fmt.Println(dir.Path)
 				return true //In case of correct pathNumber, print and exit
 			}
 		}
 
-		fmt.Println("Error: The number is invalid(should be: 0-" + strconv.Itoa(len(directories)-1) + "), check config file")
+		fmt.Println("Error: the number is invalid(should be: 0-" + strconv.Itoa(len(directories)-1) + "), check config file")
 		return true //In case of error, print the error and exit
 
 	} else { //If it isn't a number
 		for _, dir := range directories {
 
 			if arg == dir.Short {
-				fmt.Print(dir.Path)
+				fmt.Println(dir.Path)
 				return true //In case of correct abbreviation, print and exit
 			}
 		}
@@ -84,7 +84,7 @@ func main() {
 
 	//Create the config file
 	if err := createConfigFile(); err != nil {
-		fmt.Println("Error", err)
+		fmt.Println("Error:", err)
 		return
 	}
 
@@ -101,12 +101,14 @@ func main() {
 
 	delPath := flag.String("del", "", "Delete a path use: --del=\"[Path to Del]\"")
 
+	modifyPath := flag.String("modify", "", "Modify a path: --modif=\"[Path],[New Short]\"")
+
 	//Parse the flags
 	flag.Parse()
 
 	//If the help argument is passed, print help message
 	if *help {
-		fmt.Print(helpMessage())
+		fmt.Println(helpMessage())
 		return
 	}
 
@@ -119,7 +121,7 @@ func main() {
 	if *list {
 		var directoriesToList []directory
 		if err := loadConfigFile(&directoriesToList); err != nil {
-			fmt.Print("Error:", err)
+			fmt.Println("Error:", err)
 			return
 		}
 
@@ -136,19 +138,25 @@ func main() {
 		return
 	}
 
-	if *addPath != "" {
+	if len(*addPath) != 0 {
 
 		args := strings.Split(*addPath, ",")
 
+		if len(args) != 2 {
+			fmt.Println("Error: bad format of --add")
+			helpMessage()
+			return
+		}
+
 		if len(args[0]) == 0 || len(args[1]) == 0 {
-			fmt.Println("Path and abbreviation can't be blank spaces")
+			fmt.Println("Error: path and abbreviation can't be blank spaces")
 			return
 		}
 
 		dir := directory{Path: args[0], Short: args[1]}
 
 		if err := addNewPaths(dir); err != nil {
-			fmt.Println(err)
+			fmt.Println("Error:", err)
 			fmt.Println("The changes were not applied")
 			return
 		}
@@ -157,21 +165,47 @@ func main() {
 		return
 	}
 
-	if *delPath != "" {
+	if len(*delPath) != 0 {
 
 		if len(*delPath) == 0 {
-			fmt.Println("Path  can't be blank spaces")
+			fmt.Println("Error: path can't be blank spaces")
 			return
 		}
 
 		if err := delPaths(*delPath); err != nil {
-			fmt.Println(err)
+			fmt.Println("Error:", err)
 			fmt.Println("The changes were not applied")
 			return
 		}
 
 		fmt.Println("The changes were applied successfully")
 		return
+	}
+
+	if len(*modifyPath) != 0 {
+
+		args := strings.Split(*modifyPath, ",")
+
+		if len(args) != 2 {
+			fmt.Println("Error: bad format of --modify")
+			helpMessage()
+			return
+		}
+
+		if len(args[0]) == 0 || len(args[1]) == 0 {
+			fmt.Println("Error: path and abbreviation can't be blank spaces")
+			return
+		}
+
+		if err := modPaths(args[0], args[1]); err != nil {
+			fmt.Println("Error:", err)
+			fmt.Println("The changes were not applied")
+			return
+		}
+
+		fmt.Println("The changes were applied successfully")
+		return
+
 	}
 
 	//Where the first argument will be stored
@@ -188,6 +222,6 @@ func main() {
 	}
 
 	//If the code is here, it means that the arg is invalid
-	fmt.Print("Error: Invalid argument/s")
+	fmt.Println("Error: Invalid argument/s")
 
 }
