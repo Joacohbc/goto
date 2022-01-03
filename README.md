@@ -159,7 +159,7 @@ Output: The changes were applied successfully
 
 # IMPORTANT:
 **If you want to use only cd, not the alias of he goto function, you should use:**
-    ```bash
+```bash
     #This use the commnad cd and not the alias
     \cd ~/home
-    ```
+```
