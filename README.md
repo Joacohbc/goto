@@ -103,7 +103,7 @@ Output: Go to: /home/joaco/.config/goto
 To add a new path:
 ```bash
 #The new path will be ~/Wallpaper/ and "w" is the abreviation 
-goto -add=~/Wallpaper/ w 
+goto -add=~/Wallpaper/,w 
 
 Output: The changes were applied successfully
 
@@ -139,7 +139,7 @@ To modify the abreviation of the path:
 ```bash
 #I want to modify the path /home/joaco/.config/goto/
 #The new abreviation will be "conf"
-goto -modify=/home/joaco/.config/goto/ conf  
+goto -modify=/home/joaco/.config/goto/,conf  
 
 Output: The changes were applied successfully
 ```
