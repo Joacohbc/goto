@@ -89,15 +89,15 @@ func main() {
 
 	list := flag.Bool("l", false, "Print all path with abbreviations")
 
-	pathQuotes := flag.String("quotes", "", "Print the path with quotes: --quotes=\"[Path/Short]\"")
+	pathQuotes := flag.String("quotes", "", "Print the path with quotes: -quotes=[Path/Short/Dir]")
 
 	//pathQuotes := flag.Bool("q", false, "Print the path with quotes")
 
-	addPath := flag.String("add", "", "Add a new path use: --add=\"[New Path],[New Short]\"")
+	addPath := flag.String("add", "", "Add a new path use: -add=[New Path] [New Short]")
 
-	delPath := flag.String("del", "", "Delete a path use: --del=\"[Path to Del]\"")
+	delPath := flag.String("del", "", "Delete a path use: --del=[Path to Del]")
 
-	modifyPath := flag.String("modify", "", "Modify a path: --modif=\"[Path],[New Short]\"")
+	modifyPath := flag.String("modify", "", "Modify a path: -modif=[Path] [New Short]")
 
 	//Parse the flags
 	flag.Parse()
@@ -156,7 +156,7 @@ func main() {
 	//If the add argument is passed, use func add
 	if len(*addPath) != 0 {
 
-		args := strings.Split(*addPath, "")
+		args := strings.Split(*addPath, " ")
 
 		if len(args) != 2 {
 			fmt.Println("Error: bad format of --add")
@@ -202,7 +202,7 @@ func main() {
 	//If the modify argument is passed, use func modify
 	if len(*modifyPath) != 0 {
 
-		args := strings.Split(*modifyPath, ",")
+		args := strings.Split(*modifyPath, " ")
 
 		if len(args) != 2 {
 			fmt.Println("Error: bad format of --modify")
