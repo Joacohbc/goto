@@ -8,35 +8,32 @@ import (
 	"strings"
 )
 
-func ArgIsDir(arg string) bool {
+func ArgIsDir(arg string) (string, error) {
 
 	fileInfo, err := os.Stat(arg)
 
 	if err == nil {
 		//If it's a directory
 		if fileInfo.IsDir() {
-			fmt.Println(arg)
-			return true //If a file and is a directory, print and exit
+			return arg, nil //If a file and is a directory, print and exit
 
 		} else {
-			fmt.Println("Error: the path is not a directory")
-			return true //If the file is a directory, print error and exit
+			return arg, fmt.Errorf("the path is not a directory") //If the file is a directory, print error and exit
 		}
 
 	} else {
-		return false //If not a file, continue
+		return "", nil //If not a file return nil(because is not a dir), continue
 	}
 }
 
-func ArgIsShortOrNumber(arg string) bool {
+func ArgIsShortOrNumber(arg string) (string, error) {
 
 	//Load the config file in memory
 	var directories []directory
 	err := loadConfigFile(&directories)
 
 	if err != nil {
-		fmt.Println("Error: ", err)
-		return false //In case of error, print the error and exit
+		return "", err //In case of error, print the error and exit
 	}
 
 	//Check if path is number
@@ -45,28 +42,25 @@ func ArgIsShortOrNumber(arg string) bool {
 		for i, dir := range directories {
 
 			if pathNumber == i {
-				fmt.Println(dir.Path)
-				return true //In case of correct pathNumber, print and exit
+				return dir.Path, nil //In case of correct pathNumber, print and exit
 			}
 		}
 
-		fmt.Println("Error: the number is invalid(should be: 0-" + strconv.Itoa(len(directories)-1) + "), check config file")
-		return true //In case of error, print the error and exit
+		//In case of error, print the error and exit
+		return "", fmt.Errorf("the number is invalid(should be: 0-" + strconv.Itoa(len(directories)-1) + "), check config file")
 
 	} else { //If it isn't a number
 		for _, dir := range directories {
-
 			if arg == dir.Short {
-				fmt.Println(dir.Path)
-				return true //In case of correct abbreviation, print and exit
+				return dir.Path, nil //In case of correct abbreviation, print and exit
 			}
 		}
 	}
 
-	return false //In case of args is not a number or a valid abbreviation, continue
+	return "", nil //In case of args is not a number or a valid abbreviation, continue
 }
 
-const versionMessage string = "1.2" //Version
+const versionMessage string = "1.3" //Version
 
 func helpMessage() string {
 	helpMessage := `Three ways to use it, with abbreviations(config file), numbers(index of config file) and paths:
@@ -95,7 +89,9 @@ func main() {
 
 	list := flag.Bool("l", false, "Print all path with abbreviations")
 
-	pathQuotes := flag.Bool("q", false, "Print the path with quotes")
+	pathQuotes := flag.String("quotes", "", "Print the path with quotes: --quotes=\"[Path/Short]\"")
+
+	//pathQuotes := flag.Bool("q", false, "Print the path with quotes")
 
 	addPath := flag.String("add", "", "Add a new path use: --add=\"[New Path],[New Short]\"")
 
@@ -118,6 +114,7 @@ func main() {
 		return
 	}
 
+	//If the list argument is passed, print the list of the config file
 	if *list {
 		var directoriesToList []directory
 		if err := loadConfigFile(&directoriesToList); err != nil {
@@ -131,16 +128,35 @@ func main() {
 		return
 	}
 
-	if *pathQuotes {
-		fmt.Print("\"")
-		ArgIsShortOrNumber(flag.Arg(0))
-		fmt.Printf("\"")
-		return
+	if len(*pathQuotes) != 0 {
+
+		//If exists like a Directory
+		dir, err := ArgIsDir(*pathQuotes)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		} else if len(dir) != 0 {
+			fmt.Println("\"" + dir + "\"")
+			return
+		}
+
+		//Check if "arg" is an abbreviation or a number index
+		path, err := ArgIsShortOrNumber(*pathQuotes)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+
+		} else if len(path) != 0 {
+			fmt.Println("\"" + path + "\"")
+			return
+		}
+
 	}
 
+	//If the add argument is passed, use func add
 	if len(*addPath) != 0 {
 
-		args := strings.Split(*addPath, ",")
+		args := strings.Split(*addPath, "")
 
 		if len(args) != 2 {
 			fmt.Println("Error: bad format of --add")
@@ -165,6 +181,7 @@ func main() {
 		return
 	}
 
+	//If the del argument is passed, use func del
 	if len(*delPath) != 0 {
 
 		if len(*delPath) == 0 {
@@ -182,6 +199,7 @@ func main() {
 		return
 	}
 
+	//If the modify argument is passed, use func modify
 	if len(*modifyPath) != 0 {
 
 		args := strings.Split(*modifyPath, ",")
@@ -205,19 +223,29 @@ func main() {
 
 		fmt.Println("The changes were applied successfully")
 		return
-
 	}
 
 	//Where the first argument will be stored
 	var arg string = flag.Arg(0)
 
 	//If exists like a Directory
-	if ArgIsDir(arg) {
+	dir, err := ArgIsDir(arg)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	} else if len(dir) != 0 {
+		fmt.Println(dir)
 		return
 	}
 
 	//Check if "arg" is an abbreviation or a number index
-	if ArgIsShortOrNumber(arg) {
+	path, err := ArgIsShortOrNumber(arg)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+
+	} else if len(path) != 0 {
+		fmt.Println(path)
 		return
 	}
 

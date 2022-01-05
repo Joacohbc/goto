@@ -74,21 +74,9 @@ of your config file, you only need add/remove the block between "{}" in the .jso
 ```
 And you need to add a "," after the "}" if it not the last of the list
 
-**Note:** *You can do this with ```goto --add```*
+**Note:** *You can do this with ```goto -add```*
 
 # Usage:
-
-## Help and version information
-In the alias.sh there are more options besides the goto to move:
-```bash
-#Only return the path for the directory with quotes
-goto -q /home/joaco
-
-Output: "/home/joaco"
-```
-
-Also have ```goto -help``` to print help message and ```goto -v``` to print version   
-
 ## Move
 To use the main function of goto:
 ```bash  
@@ -115,7 +103,7 @@ Output: Go to: /home/joaco/.config/goto
 To add a new path:
 ```bash
 #The new path will be ~/Wallpaper/ and "w" is the abreviation 
-goto --add="~/Wallpaper/,w" 
+goto -add=~/Wallpaper/ w 
 
 Output: The changes were applied successfully
 
@@ -141,7 +129,7 @@ Output:
 To delete a path:
 ```bash
 #I want to delete the path /home/joaco/Wallpaper
-goto --del="/home/joaco/Wallpaper"  
+goto -del=/home/joaco/Wallpaper  
 
 Output: The changes were applied successfully
 ```
@@ -151,11 +139,22 @@ To modify the abreviation of the path:
 ```bash
 #I want to modify the path /home/joaco/.config/goto/
 #The new abreviation will be "conf"
-goto --modify="/home/joaco/.config/goto/,conf"  
+goto -modify=/home/joaco/.config/goto/ conf  
 
 Output: The changes were applied successfully
 ```
 **Note:** *The path will be exactly the same taht the path in the config file, so you should use the same path* ```goto -l```
+
+## Extras:
+In the alias.sh there are more options besides the goto to move:
+```bash
+#Only return the path for the directory with quotes
+#You can use abreviation and index if you 
+goto -quotes=/home/joaco
+
+Output: "/home/joaco"
+```
+Also have ```goto -help``` to print help message and ```goto -v``` to print version  
 
 # IMPORTANT:
 **If you want to use only cd, not the alias of he goto function, you should use:**
