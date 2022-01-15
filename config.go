@@ -65,7 +65,10 @@ func createConfigFile() error {
 
 	//If not exists, create it
 	if os.IsNotExist(err) {
-		os.Mkdir(configDirPath, 0755)
+		err := os.Mkdir(configDirPath, 0755)
+		if err != nil {
+			return err
+		}
 
 		//If os.Stat return other error apart of IsNotExist(), return it
 	} else if err != nil {
