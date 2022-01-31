@@ -228,16 +228,6 @@ func main() {
 	//Where the first argument will be stored
 	var arg string = flag.Arg(0)
 
-	//If exists like a Directory
-	dir, err := ArgIsDir(arg)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	} else if len(dir) != 0 {
-		fmt.Println(dir)
-		return
-	}
-
 	//Check if "arg" is an abbreviation or a number index
 	path, err := ArgIsShortOrNumber(arg)
 	if err != nil {
@@ -246,6 +236,16 @@ func main() {
 
 	} else if len(path) != 0 {
 		fmt.Println(path)
+		return
+	}
+
+	//If exists like a Directory
+	dir, err := ArgIsDir(arg)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	} else if len(dir) != 0 {
+		fmt.Println(dir)
 		return
 	}
 
