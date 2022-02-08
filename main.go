@@ -29,7 +29,7 @@ func ArgIsDir(arg string) (string, error) {
 func ArgIsShortOrNumber(arg string) (string, error) {
 
 	//Load the config file in memory
-	var directories []directory
+	var directories []Directory
 	err := loadConfigFile(&directories)
 
 	if err != nil {
@@ -60,7 +60,7 @@ func ArgIsShortOrNumber(arg string) (string, error) {
 	return "", nil //In case of args is not a number or a valid abbreviation, continue
 }
 
-const versionMessage string = "1.3" //Version
+const versionMessage string = "1.4" //Version
 
 func helpMessage() string {
 	helpMessage := `Three ways to use it, with abbreviations(config file), numbers(index of config file) and paths:
@@ -71,7 +71,7 @@ func helpMessage() string {
 
 Path of config file: 
 `
-	return helpMessage + configPath()[1]
+	return helpMessage + ConfigFile
 }
 
 func main() {
@@ -90,8 +90,6 @@ func main() {
 	list := flag.Bool("l", false, "Print all path with abbreviations")
 
 	pathQuotes := flag.String("quotes", "", "Print the path with quotes: -quotes=[Path/Short/Dir]")
-
-	//pathQuotes := flag.Bool("q", false, "Print the path with quotes")
 
 	addPath := flag.String("add", "", "Add a new path use: -add=[New Path],[New Short]")
 
@@ -116,7 +114,7 @@ func main() {
 
 	//If the list argument is passed, print the list of the config file
 	if *list {
-		var directoriesToList []directory
+		var directoriesToList []Directory
 		if err := loadConfigFile(&directoriesToList); err != nil {
 			fmt.Println("Error:", err)
 			return
@@ -169,7 +167,7 @@ func main() {
 			return
 		}
 
-		dir := directory{Path: args[0], Short: args[1]}
+		dir := Directory{Path: args[0], Short: args[1]}
 
 		if err := addNewPaths(dir); err != nil {
 			fmt.Println("Error:", err)
