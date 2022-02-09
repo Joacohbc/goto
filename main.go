@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const versionMessage string = "1.5" //Version
+
 func ArgIsDir(arg string) (string, error) {
 
 	fileInfo, err := os.Stat(arg)
@@ -59,8 +61,6 @@ func ArgIsShortOrNumber(arg string) (string, error) {
 
 	return "", nil //In case of args is not a number or a valid abbreviation, continue
 }
-
-const versionMessage string = "1.4" //Version
 
 func helpMessage() string {
 	helpMessage := `Three ways to use it, with abbreviations(config file), numbers(index of config file) and paths:
@@ -248,5 +248,5 @@ func main() {
 	}
 
 	//If the code is here, it means that the arg is invalid
-	fmt.Println("Error: Invalid argument/s")
+	fmt.Println("Error: invalid argument/s")
 }
