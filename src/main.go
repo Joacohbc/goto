@@ -8,7 +8,17 @@ import (
 	"strings"
 )
 
-const versionMessage string = "1.5" //Version
+const versionMessage string = "1.6" //Version
+
+var (
+	help       bool
+	version    bool
+	list       bool
+	pathQuotes bool
+	addPath    string
+	delPath    string
+	modifyPath string
+)
 
 func ArgIsDir(arg string) (string, error) {
 
@@ -74,7 +84,30 @@ Path of config file:
 	return helpMessage + ConfigFile
 }
 
-var ()
+func init() {
+	flag.BoolVar(&help, "h", false, "Print help message")
+	flag.BoolVar(&help, "help", false, "Print help message")
+
+	flag.BoolVar(&version, "v", false, "Print version")
+	flag.BoolVar(&version, "version", false, "Print version")
+
+	flag.BoolVar(&list, "l", false, "Print all path with abbreviations")
+	flag.BoolVar(&list, "list", false, "Print all path with abbreviations")
+
+	flag.BoolVar(&pathQuotes, "q", false, "Print the path with quotes: -quotes=[Path/Short/Dir]")
+	flag.BoolVar(&pathQuotes, "quotes", false, "Print the path with quotes: -quotes=[Path/Short/Dir]")
+
+	flag.StringVar(&addPath, "a", "", "Add a new path use: -add=[New Path],[New Short]")
+	flag.StringVar(&addPath, "add", "", "Add a new path use: -add=[New Path],[New Short]")
+
+	flag.StringVar(&delPath, "d", "", "Delete a path use: --del=[Path to Del]")
+	flag.StringVar(&delPath, "del", "", "Delete a path use: --del=[Path to Del]")
+
+	flag.StringVar(&modifyPath, "m", "", "Modify a path: -modif=[Path],[New Short]")
+	flag.StringVar(&modifyPath, "modify", "", "Modify a path: -modif=[Path],[New Short]")
+
+	flag.Parse()
+}
 
 func main() {
 
@@ -84,38 +117,20 @@ func main() {
 		return
 	}
 
-	//Check if goto have argument
-	help := flag.Bool("help", false, "Help message")
-
-	version := flag.Bool("v", false, "Print version")
-
-	list := flag.Bool("l", false, "Print all path with abbreviations")
-
-	pathQuotes := flag.String("quotes", "", "Print the path with quotes: -quotes=[Path/Short/Dir]")
-
-	addPath := flag.String("add", "", "Add a new path use: -add=[New Path],[New Short]")
-
-	delPath := flag.String("del", "", "Delete a path use: --del=[Path to Del]")
-
-	modifyPath := flag.String("modify", "", "Modify a path: -modif=[Path],[New Short]")
-
-	//Parse the flags
-	flag.Parse()
-
 	//If the help argument is passed, print help message
-	if *help {
+	if help {
 		fmt.Println(helpMessage())
 		return
 	}
 
 	//If the version argument is passed, print version message
-	if *version {
+	if version {
 		fmt.Printf("Version of goto: %v", versionMessage)
 		return
 	}
 
 	//If the list argument is passed, print the list of the config file
-	if *list {
+	if list {
 		var directoriesToList []Directory
 		if err := loadConfigFile(&directoriesToList); err != nil {
 			fmt.Println("Error:", err)
@@ -129,10 +144,10 @@ func main() {
 	}
 
 	//If the quotes argument is passed, print the dir with quotes
-	if len(*pathQuotes) != 0 {
+	if pathQuotes {
 
 		//If exists like a Directory
-		dir, err := ArgIsDir(*pathQuotes)
+		dir, err := ArgIsDir(flag.Arg(0))
 		if err != nil {
 			fmt.Println("Error:", err)
 			return
@@ -142,7 +157,7 @@ func main() {
 		}
 
 		//Check if "arg" is an abbreviation or a number index
-		path, err := ArgIsShortOrNumber(*pathQuotes)
+		path, err := ArgIsShortOrNumber(flag.Arg(0))
 		if err != nil {
 			fmt.Println("Error:", err)
 			return
@@ -154,9 +169,9 @@ func main() {
 	}
 
 	//If the add argument is passed, use func add
-	if len(*addPath) != 0 {
+	if len(addPath) != 0 {
 
-		args := strings.Split(*addPath, ",")
+		args := strings.Split(addPath, ",")
 
 		if len(args) != 2 {
 			fmt.Println("Error: bad format of --add")
@@ -182,14 +197,14 @@ func main() {
 	}
 
 	//If the del argument is passed, use func del
-	if len(*delPath) != 0 {
+	if len(delPath) != 0 {
 
-		if len(*delPath) == 0 {
+		if len(delPath) == 0 {
 			fmt.Println("Error: path can't be blank spaces")
 			return
 		}
 
-		if err := delPaths(*delPath); err != nil {
+		if err := delPaths(delPath); err != nil {
 			fmt.Println("Error:", err)
 			fmt.Println("The changes were not applied")
 			return
@@ -200,9 +215,9 @@ func main() {
 	}
 
 	//If the modify argument is passed, use func modify
-	if len(*modifyPath) != 0 {
+	if len(modifyPath) != 0 {
 
-		args := strings.Split(*modifyPath, ",")
+		args := strings.Split(modifyPath, ",")
 
 		if len(args) != 2 {
 			fmt.Println("Error: bad format of --modify")

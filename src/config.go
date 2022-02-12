@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 var (
@@ -26,8 +27,8 @@ func init() {
 	//ConfigDir = "<Path-of-the-directory>"
 	//ConfigFile = "<Name-of-the-file>"
 
-	ConfigDir = config + "/goto/"
-	ConfigFile = ConfigDir + "config.json"
+	ConfigDir = filepath.Join(config, "/goto/")
+	ConfigFile = filepath.Join(ConfigDir, "config.json")
 }
 
 //Create the config file if not already exists

@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 //
 // Directory Type
 //
@@ -12,6 +8,8 @@ type Directory struct {
 	Short string `json:"Short"`
 }
 
+/*
+
 //
 // Temporal Directory Type
 //
@@ -19,6 +17,8 @@ type DirectoryTemp struct {
 	Directory
 	CreateAt time.Time `json:"CreateAt"`
 }
+
+*/
 
 /*
 
