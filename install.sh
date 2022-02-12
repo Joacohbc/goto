@@ -26,7 +26,7 @@ if [ "$op" = "y" ]; then
     rm -f $GOTO_BIN
 
     #Build the code
-    go build -o $GOTO_BIN ./main.go ./config.go 
+    go build -o $GOTO_BIN ./*.go
 
     if [ $? -eq 0 ]; then
         exito "Compaling successfully"

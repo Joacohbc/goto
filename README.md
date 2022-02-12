@@ -28,7 +28,7 @@ It works by means of a compiled Go file (goto.bin) that returns the correspondin
     ```
 2. **Compile** the code: <br />
     ```bash
-    go build -o goto.bin ./main.go ./config.go 
+    go build -o goto.bin ./*.go 
     ```
 3. **Create** the config dir: <br />
     ```bash

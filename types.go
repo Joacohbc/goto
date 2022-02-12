@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"time"
 )
 
@@ -20,17 +18,6 @@ type Directory struct {
 type DirectoryTemp struct {
 	Directory
 	CreateAt time.Time `json:"CreateAt"`
-}
-
-//Print a Error message
-func PrintError(e error, previousMessage ...string) {
-	fmt.Println("Error: ", e.Error())
-
-	for _, s := range previousMessage {
-		fmt.Println(s)
-	}
-
-	os.Exit(1)
 }
 
 /*

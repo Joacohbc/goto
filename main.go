@@ -74,6 +74,8 @@ Path of config file:
 	return helpMessage + ConfigFile
 }
 
+var ()
+
 func main() {
 
 	//Create the config file
