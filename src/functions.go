@@ -31,12 +31,13 @@ func delPaths(pathToDel string) error {
 	}
 
 	for i, dir := range directories {
+
 		if dir.Path == pathToDel {
 			directories = append(directories[:i], directories[i+1:]...)
 			break
 		}
 
-		if i == len(directories) {
+		if i == len(directories)-1 {
 			return fmt.Errorf("path \"%v\" doesn't exist", pathToDel)
 		}
 	}
@@ -66,7 +67,7 @@ func modPaths(pathToModif string, newShort string) error {
 			break
 		}
 
-		if i == len(directories) {
+		if i == len(directories)-1 {
 			return fmt.Errorf("the path that you are trying to modify is not exists")
 		}
 	}

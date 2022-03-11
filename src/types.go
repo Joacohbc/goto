@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -11,7 +12,7 @@ import (
 // Directory Type
 //
 
-const DirectoryTypeSeparator string = ","
+//const DirectoryTypeSeparator string = ","
 
 type Directory struct {
 	Path         string `json:"path"`
@@ -25,15 +26,17 @@ func (d *Directory) String() string {
 
 // This function valid:
 // - The Path and the Abbreviation don't be empty
+// - Clean the Path
 // - That Abbreviation is not a number letter
 // - That Path exist and is a Directory
 func (d *Directory) ValidDirectory() error {
 
 	d.Path = strings.TrimSpace(d.Path)
+	d.Path = filepath.Clean(d.Path)
 	d.Abbreviation = strings.TrimSpace(d.Abbreviation)
 
 	if len(d.Path) < 1 || len(d.Abbreviation) < 1 {
-		return fmt.Errorf("path and abbreviation can't be empty or blank space")
+		return fmt.Errorf("path and abbreviation can't be empty or be blank space")
 	}
 
 	if _, err := strconv.Atoi(d.Abbreviation); err == nil {
@@ -58,27 +61,27 @@ func (d *Directory) ValidDirectory() error {
 }
 
 //Parse a string to Directory (using the DirectoryTypeSeparator to split)
-func ToDirectory(s string) (Directory, error) {
-
-	s = strings.TrimSpace(s)
-	//Use Trim to avoid blank spaces Abbreviations
-	if len(s) < 3 {
-		return Directory{}, fmt.Errorf("need at least 3 characters for create a path")
-	}
-
-	args := strings.Split(s, DirectoryTypeSeparator)
-
-	if len(args) != 2 {
-		return Directory{}, fmt.Errorf("need 2 args to make a create a new path")
-	}
-
-	dir := Directory{Path: args[0], Abbreviation: args[1]}
-	if err := dir.ValidDirectory(); err != nil {
-		return Directory{}, err
-	}
-
-	return dir, nil
-}
+//func ToDirectory(s string) (Directory, error) {
+//
+//	s = strings.TrimSpace(s)
+//	//Use Trim to avoid blank spaces Abbreviations
+//	if len(s) < 3 {
+//		return Directory{}, fmt.Errorf("need at least 3 characters for create a path")
+//	}
+//
+//	args := strings.Split(s, DirectoryTypeSeparator)
+//
+//	if len(args) != 2 {
+//		return Directory{}, fmt.Errorf("need 2 args to make a create a new path")
+//	}
+//
+//	dir := Directory{Path: args[0], Abbreviation: args[1]}
+//	if err := dir.ValidDirectory(); err != nil {
+//		return Directory{}, err
+//	}
+//
+//	return dir, nil
+//}
 
 //Check that the any directory has the same Path or same Abbreviation that other
 func ValidArray(dirs []Directory) error {

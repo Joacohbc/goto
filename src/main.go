@@ -7,17 +7,19 @@ import (
 	"strconv"
 )
 
-const versionMessage string = "1.7" //Version
+const versionMessage string = "1.8" //Version
 
 var (
-	Help         bool
-	Version      bool
-	List         bool
-	PathQuotes   bool
-	ConfFilePath bool
-	AddPath      string
-	DelPath      string
-	ModifyPath   string
+	Help             bool
+	Version          bool
+	List             bool
+	PathQuotes       bool
+	ConfFilePath     bool
+	AddPath          bool
+	DelPath          bool
+	ModifyPath       bool
+	PathFlag         string
+	AbbreviationFlag string
 )
 
 func ArgIsShortOrNumber(arg string) (string, error) {
@@ -53,28 +55,26 @@ func ArgIsShortOrNumber(arg string) (string, error) {
 
 func init() {
 
-	flag.BoolVar(&ConfFilePath, "path", false, "Print path of the config.json")
-
+	//Info flags
+	flag.BoolVar(&ConfFilePath, "config-path", false, "Print path of the config.json")
 	flag.BoolVar(&Help, "h", false, "Print help message")
 	flag.BoolVar(&Help, "help", false, "Print help message")
-
 	flag.BoolVar(&Version, "v", false, "Print version")
 	flag.BoolVar(&Version, "version", false, "Print version")
 
-	flag.BoolVar(&List, "l", false, "Print all path with abbreviations")
+	//Path and Abbreviations flags
+	flag.StringVar(&PathFlag, "path", "", "The Path to add, delete or modify actions")
+	flag.StringVar(&AbbreviationFlag, "abbv", "", "The Abbreviation to add, delete or modify actions")
+
+	//Add, Delete, Modify and List Directory flags
+	flag.BoolVar(&AddPath, "add", false, "Add a new Path with a Abbreviation")
+	flag.BoolVar(&DelPath, "del", false, "Delete a the path")
+	flag.BoolVar(&ModifyPath, "modify", false, "Modify a Abbreviation from the Path")
 	flag.BoolVar(&List, "list", false, "Print all path with abbreviations")
 
+	//Other funcs flags
 	flag.BoolVar(&PathQuotes, "q", false, "Print the path with quotes: -q")
 	flag.BoolVar(&PathQuotes, "quotes", false, "Print the path with quotes: -quotes")
-
-	flag.StringVar(&AddPath, "a", "", "Add a new path use: -a=[New Path],[New Short]")
-	flag.StringVar(&AddPath, "add", "", "Add a new path use: -add=[New Path],[New Short]")
-
-	flag.StringVar(&DelPath, "d", "", "Delete a path use: --d=[Path to Del]")
-	flag.StringVar(&DelPath, "del", "", "Delete a path use: --del=[Path to Del]")
-
-	flag.StringVar(&ModifyPath, "m", "", "Modify a path: -m=[Path],[New Short]")
-	flag.StringVar(&ModifyPath, "modify", "", "Modify a path: -modif=[Path],[New Short]")
 
 	flag.Parse()
 }
@@ -134,10 +134,10 @@ func main() {
 	}
 
 	//If the add argument is passed, use func add
-	if len(AddPath) != 0 {
+	if AddPath {
 
-		dir, err := ToDirectory(AddPath)
-		if err != nil {
+		dir := Directory{Path: PathFlag, Abbreviation: AbbreviationFlag}
+		if err := dir.ValidDirectory(); err != nil {
 			fmt.Println("Error:", err)
 			fmt.Println("The changes were not applied")
 			return
@@ -154,14 +154,16 @@ func main() {
 	}
 
 	//If the del argument is passed, use func del
-	if len(DelPath) != 0 {
+	if DelPath {
 
-		if len(DelPath) == 0 {
-			fmt.Println("Error: path can't be blank spaces")
+		dir := Directory{Path: PathFlag, Abbreviation: "not-necessary"}
+		if err := dir.ValidDirectory(); err != nil {
+			fmt.Println("Error: ", err)
+			fmt.Println("The changes were not applied")
 			return
 		}
 
-		if err := delPaths(DelPath); err != nil {
+		if err := delPaths(PathFlag); err != nil {
 			fmt.Println("Error:", err)
 			fmt.Println("The changes were not applied")
 			return
@@ -172,10 +174,10 @@ func main() {
 	}
 
 	//If the modify argument is passed, use func modify
-	if len(ModifyPath) != 0 {
+	if ModifyPath {
 
-		dir, err := ToDirectory(ModifyPath)
-		if err != nil {
+		dir := Directory{Path: PathFlag, Abbreviation: AbbreviationFlag}
+		if err := dir.ValidDirectory(); err != nil {
 			fmt.Println("Error:", err)
 			fmt.Println("The changes were not applied")
 			return
