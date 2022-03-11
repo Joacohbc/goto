@@ -1,22 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func addNewPaths(newDir Directory) error {
 
 	var directories []Directory
-	loadConfigFile(&directories)
-
-	for _, dir := range directories {
-		if newDir.Path == dir.Path {
-			return fmt.Errorf("the path: \"%v\" already exists", newDir.Path)
-		}
+	if err := loadConfigFile(&directories); err != nil {
+		return err
 	}
 
 	directories = append(directories, newDir)
-
-	if err := validConfiguredPaths(directories); err != nil {
-		return fmt.Errorf("invalid new config file,\n%v", err)
+	if err := ValidArray(directories); err != nil {
+		return err
 	}
 
 	if err := createJsonFile(directories); err != nil {
@@ -29,23 +26,23 @@ func addNewPaths(newDir Directory) error {
 func delPaths(pathToDel string) error {
 
 	var directories []Directory
-	loadConfigFile(&directories)
+	if err := loadConfigFile(&directories); err != nil {
+		return err
+	}
 
-	var find bool = false
 	for i, dir := range directories {
 		if dir.Path == pathToDel {
 			directories = append(directories[:i], directories[i+1:]...)
-			find = true
 			break
+		}
+
+		if i == len(directories) {
+			return fmt.Errorf("path \"%v\" doesn't exist", pathToDel)
 		}
 	}
 
-	if !find {
-		return fmt.Errorf("path \"%v\" doesn't exist", pathToDel)
-	}
-
-	if err := validConfiguredPaths(directories); err != nil {
-		return fmt.Errorf("invalid new config file,\n%v", err)
+	if err := ValidArray(directories); err != nil {
+		return err
 	}
 
 	if err := createJsonFile(directories); err != nil {
@@ -58,25 +55,23 @@ func delPaths(pathToDel string) error {
 func modPaths(pathToModif string, newShort string) error {
 
 	var directories []Directory
-	err := loadConfigFile(&directories)
-	if err != nil {
+
+	if err := loadConfigFile(&directories); err != nil {
 		return err
 	}
 
-	var exist bool = false
 	for i, dir := range directories {
-
 		if dir.Path == pathToModif {
-			directories[i].Short = newShort
-			exist = true
+			directories[i].Abbreviation = newShort
+			break
+		}
+
+		if i == len(directories) {
+			return fmt.Errorf("the path that you are trying to modify is not exists")
 		}
 	}
 
-	if !exist {
-		return fmt.Errorf("the path that you are trying to modify is not exists")
-	}
-
-	if err := validConfiguredPaths(directories); err != nil {
+	if err := ValidArray(directories); err != nil {
 		return fmt.Errorf("invalid new config file,\n%v", err)
 	}
 

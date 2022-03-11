@@ -5,46 +5,26 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 )
 
-const versionMessage string = "1.6" //Version
+const versionMessage string = "1.7" //Version
 
 var (
-	help       bool
-	version    bool
-	list       bool
-	pathQuotes bool
-	addPath    string
-	delPath    string
-	modifyPath string
+	Help         bool
+	Version      bool
+	List         bool
+	PathQuotes   bool
+	ConfFilePath bool
+	AddPath      string
+	DelPath      string
+	ModifyPath   string
 )
-
-func ArgIsDir(arg string) (string, error) {
-
-	fileInfo, err := os.Stat(arg)
-
-	if err == nil {
-		//If it's a directory
-		if fileInfo.IsDir() {
-			return arg, nil //If a file and is a directory, print and exit
-
-		} else {
-			return arg, fmt.Errorf("the path is not a directory") //If the file is a directory, print error and exit
-		}
-
-	} else {
-		return "", nil //If not a file return nil(because is not a dir), continue
-	}
-}
 
 func ArgIsShortOrNumber(arg string) (string, error) {
 
 	//Load the config file in memory
 	var directories []Directory
-	err := loadConfigFile(&directories)
-
-	if err != nil {
+	if err := loadConfigFile(&directories); err != nil {
 		return "", err //In case of error, print the error and exit
 	}
 
@@ -52,7 +32,6 @@ func ArgIsShortOrNumber(arg string) (string, error) {
 	if pathNumber, err := strconv.Atoi(arg); err == nil {
 
 		for i, dir := range directories {
-
 			if pathNumber == i {
 				return dir.Path, nil //In case of correct pathNumber, print and exit
 			}
@@ -63,7 +42,7 @@ func ArgIsShortOrNumber(arg string) (string, error) {
 
 	} else { //If it isn't a number
 		for _, dir := range directories {
-			if arg == dir.Short {
+			if arg == dir.Abbreviation {
 				return dir.Path, nil //In case of correct abbreviation, print and exit
 			}
 		}
@@ -72,39 +51,30 @@ func ArgIsShortOrNumber(arg string) (string, error) {
 	return "", nil //In case of args is not a number or a valid abbreviation, continue
 }
 
-func helpMessage() string {
-	helpMessage := `Three ways to use it, with abbreviations(config file), numbers(index of config file) and paths:
-
--Abbreviations= "goto <abbreviation>"
--Number="goto <number-of-the-index>"
--Path="goto <path>"
-
-Path of config file: 
-`
-	return helpMessage + ConfigFile
-}
-
 func init() {
-	flag.BoolVar(&help, "h", false, "Print help message")
-	flag.BoolVar(&help, "help", false, "Print help message")
 
-	flag.BoolVar(&version, "v", false, "Print version")
-	flag.BoolVar(&version, "version", false, "Print version")
+	flag.BoolVar(&ConfFilePath, "path", false, "Print path of the config.json")
 
-	flag.BoolVar(&list, "l", false, "Print all path with abbreviations")
-	flag.BoolVar(&list, "list", false, "Print all path with abbreviations")
+	flag.BoolVar(&Help, "h", false, "Print help message")
+	flag.BoolVar(&Help, "help", false, "Print help message")
 
-	flag.BoolVar(&pathQuotes, "q", false, "Print the path with quotes: -quotes=[Path/Short/Dir]")
-	flag.BoolVar(&pathQuotes, "quotes", false, "Print the path with quotes: -quotes=[Path/Short/Dir]")
+	flag.BoolVar(&Version, "v", false, "Print version")
+	flag.BoolVar(&Version, "version", false, "Print version")
 
-	flag.StringVar(&addPath, "a", "", "Add a new path use: -add=[New Path],[New Short]")
-	flag.StringVar(&addPath, "add", "", "Add a new path use: -add=[New Path],[New Short]")
+	flag.BoolVar(&List, "l", false, "Print all path with abbreviations")
+	flag.BoolVar(&List, "list", false, "Print all path with abbreviations")
 
-	flag.StringVar(&delPath, "d", "", "Delete a path use: --del=[Path to Del]")
-	flag.StringVar(&delPath, "del", "", "Delete a path use: --del=[Path to Del]")
+	flag.BoolVar(&PathQuotes, "q", false, "Print the path with quotes: -q")
+	flag.BoolVar(&PathQuotes, "quotes", false, "Print the path with quotes: -quotes")
 
-	flag.StringVar(&modifyPath, "m", "", "Modify a path: -modif=[Path],[New Short]")
-	flag.StringVar(&modifyPath, "modify", "", "Modify a path: -modif=[Path],[New Short]")
+	flag.StringVar(&AddPath, "a", "", "Add a new path use: -a=[New Path],[New Short]")
+	flag.StringVar(&AddPath, "add", "", "Add a new path use: -add=[New Path],[New Short]")
+
+	flag.StringVar(&DelPath, "d", "", "Delete a path use: --d=[Path to Del]")
+	flag.StringVar(&DelPath, "del", "", "Delete a path use: --del=[Path to Del]")
+
+	flag.StringVar(&ModifyPath, "m", "", "Modify a path: -m=[Path],[New Short]")
+	flag.StringVar(&ModifyPath, "modify", "", "Modify a path: -modif=[Path],[New Short]")
 
 	flag.Parse()
 }
@@ -118,19 +88,24 @@ func main() {
 	}
 
 	//If the help argument is passed, print help message
-	if help {
-		fmt.Println(helpMessage())
+	if Help {
+		flag.Usage()
 		return
 	}
 
 	//If the version argument is passed, print version message
-	if version {
+	if Version {
 		fmt.Printf("Version of goto: %v", versionMessage)
 		return
 	}
 
+	if ConfFilePath {
+		fmt.Println(ConfigFile)
+		return
+	}
+
 	//If the list argument is passed, print the list of the config file
-	if list {
+	if List {
 		var directoriesToList []Directory
 		if err := loadConfigFile(&directoriesToList); err != nil {
 			fmt.Println("Error:", err)
@@ -138,23 +113,13 @@ func main() {
 		}
 
 		for i, dir := range directoriesToList {
-			fmt.Printf("%v- Path: \"%v\", Short: \"%v\" \n", i, dir.Path, dir.Short)
+			fmt.Printf("%v - %s\n", i, dir.String())
 		}
 		return
 	}
 
 	//If the quotes argument is passed, print the dir with quotes
-	if pathQuotes {
-
-		//If exists like a Directory
-		dir, err := ArgIsDir(flag.Arg(0))
-		if err != nil {
-			fmt.Println("Error:", err)
-			return
-		} else if len(dir) != 0 {
-			fmt.Println("\"" + dir + "\"")
-			return
-		}
+	if PathQuotes {
 
 		//Check if "arg" is an abbreviation or a number index
 		path, err := ArgIsShortOrNumber(flag.Arg(0))
@@ -169,22 +134,14 @@ func main() {
 	}
 
 	//If the add argument is passed, use func add
-	if len(addPath) != 0 {
+	if len(AddPath) != 0 {
 
-		args := strings.Split(addPath, ",")
-
-		if len(args) != 2 {
-			fmt.Println("Error: bad format of --add")
-			fmt.Println(helpMessage())
+		dir, err := ToDirectory(AddPath)
+		if err != nil {
+			fmt.Println("Error:", err)
+			fmt.Println("The changes were not applied")
 			return
 		}
-
-		if len(args[0]) == 0 || len(args[1]) == 0 {
-			fmt.Println("Error: path and abbreviation can't be blank spaces")
-			return
-		}
-
-		dir := Directory{Path: args[0], Short: args[1]}
 
 		if err := addNewPaths(dir); err != nil {
 			fmt.Println("Error:", err)
@@ -197,14 +154,14 @@ func main() {
 	}
 
 	//If the del argument is passed, use func del
-	if len(delPath) != 0 {
+	if len(DelPath) != 0 {
 
-		if len(delPath) == 0 {
+		if len(DelPath) == 0 {
 			fmt.Println("Error: path can't be blank spaces")
 			return
 		}
 
-		if err := delPaths(delPath); err != nil {
+		if err := delPaths(DelPath); err != nil {
 			fmt.Println("Error:", err)
 			fmt.Println("The changes were not applied")
 			return
@@ -215,22 +172,16 @@ func main() {
 	}
 
 	//If the modify argument is passed, use func modify
-	if len(modifyPath) != 0 {
+	if len(ModifyPath) != 0 {
 
-		args := strings.Split(modifyPath, ",")
-
-		if len(args) != 2 {
-			fmt.Println("Error: bad format of --modify")
-			fmt.Println(helpMessage())
+		dir, err := ToDirectory(ModifyPath)
+		if err != nil {
+			fmt.Println("Error:", err)
+			fmt.Println("The changes were not applied")
 			return
 		}
 
-		if len(args[0]) == 0 || len(args[1]) == 0 {
-			fmt.Println("Error: path and abbreviation can't be blank spaces")
-			return
-		}
-
-		if err := modPaths(args[0], args[1]); err != nil {
+		if err := modPaths(dir.Path, dir.Abbreviation); err != nil {
 			fmt.Println("Error:", err)
 			fmt.Println("The changes were not applied")
 			return
@@ -254,14 +205,17 @@ func main() {
 		return
 	}
 
-	//If exists like a Directory
-	dir, err := ArgIsDir(arg)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	} else if len(dir) != 0 {
-		fmt.Println(dir)
-		return
+	//If exists like afile
+	if fileInfo, err := os.Stat(arg); err == nil {
+		//If it's a directory
+		if fileInfo.IsDir() {
+			fmt.Println(arg)
+			return
+
+		} else {
+			fmt.Println("Error: the path is not a directory")
+			return
+		}
 	}
 
 	//If the code is here, it means that the arg is invalid
