@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	ConfigDir  string
-	ConfigFile string
+	ConfigDir        string
+	ConfigFile       string
+	ConfigFileBackup string
 )
 
 func init() {
@@ -29,6 +30,7 @@ func init() {
 
 	ConfigDir = filepath.Join(config, "/goto/")
 	ConfigFile = filepath.Join(ConfigDir, "config.json")
+	ConfigFileBackup = filepath.Clean(ConfigFile + ".backup")
 }
 
 //Create a Json file from directory array

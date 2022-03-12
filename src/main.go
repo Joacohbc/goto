@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-const versionMessage string = "1.8" //Version
+const versionMessage string = "1.9" //Version
 
 var (
 	Help             bool
@@ -18,6 +18,8 @@ var (
 	AddPath          bool
 	DelPath          bool
 	ModifyPath       bool
+	DoBackup         bool
+	DoRestore        bool
 	PathFlag         string
 	AbbreviationFlag string
 )
@@ -72,6 +74,10 @@ func init() {
 	flag.BoolVar(&ModifyPath, "modify", false, "Modify a Abbreviation from the Path")
 	flag.BoolVar(&List, "list", false, "Print all path with abbreviations")
 
+	//Backup and Restore
+	flag.BoolVar(&DoBackup, "backup", false, "Do backup of the config file")
+	flag.BoolVar(&DoRestore, "restore", false, "Do restore of the config file")
+
 	//Other funcs flags
 	flag.BoolVar(&PathQuotes, "q", false, "Print the path with quotes: -q")
 	flag.BoolVar(&PathQuotes, "quotes", false, "Print the path with quotes: -quotes")
@@ -99,8 +105,29 @@ func main() {
 		return
 	}
 
+	//Print the path of the config file
 	if ConfFilePath {
 		fmt.Println(ConfigFile)
+		return
+	}
+
+	//Do a backup of the config file
+	if DoBackup {
+		if err := doBackup(); err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		fmt.Println("Backup complete")
+		return
+	}
+
+	//Do a restore of the backup of config file
+	if DoRestore {
+		if err := doRestore(); err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		fmt.Println("Restore complete")
 		return
 	}
 
