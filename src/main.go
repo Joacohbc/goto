@@ -4,27 +4,33 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 )
 
-const versionMessage string = "1.9" //Version
+const versionMessage string = "1.10" //Version
 
 var (
-	Help             bool
-	Version          bool
-	List             bool
-	PathQuotes       bool
-	ConfFilePath     bool
-	AddPath          bool
-	DelPath          bool
-	ModifyPath       bool
-	DoBackup         bool
-	DoRestore        bool
-	PathFlag         string
-	AbbreviationFlag string
+	Help             bool   // -h -help
+	Version          bool   // -v -version
+	List             bool   // -list
+	ConfFilePath     bool   // config-path
+	PathQuotes       bool   // -q
+	AddPath          bool   // -add
+	DelPath          bool   // -del
+	ModifyPath       bool   // -modify
+	DoBackup         bool   // -backup
+	DoRestore        bool   // -restore
+	PathFlag         string // -path
+	AbbreviationFlag string // -abbv
 )
 
-func ArgIsShortOrNumber(arg string) (string, error) {
+// Check if the arg is a valid abbreviation, and if a
+// number check that is valid index in the config file.
+//
+// If the arg is not a number or abbreviation, check if
+// it is a directory, if not return error
+func ArgIsAbbvOrNumberOrDir(arg string) (string, error) {
 
 	//Load the config file in memory
 	var directories []Directory
@@ -35,34 +41,54 @@ func ArgIsShortOrNumber(arg string) (string, error) {
 	//Check if path is number
 	if pathNumber, err := strconv.Atoi(arg); err == nil {
 
+		//If the path is over the max index return error
+		if pathNumber < 0 || pathNumber > len(directories)-1 {
+			//In case of error, print the error and exit
+			return "", fmt.Errorf("the number is invalid(should be: 0-" + strconv.Itoa(len(directories)-1) + "), check config file")
+		}
+
 		for i, dir := range directories {
 			if pathNumber == i {
 				return dir.Path, nil //In case of correct pathNumber, print and exit
 			}
 		}
+	}
 
-		//In case of error, print the error and exit
-		return "", fmt.Errorf("the number is invalid(should be: 0-" + strconv.Itoa(len(directories)-1) + "), check config file")
-
-	} else { //If it isn't a number
-		for _, dir := range directories {
-			if arg == dir.Abbreviation {
-				return dir.Path, nil //In case of correct abbreviation, print and exit
-			}
+	//If not a number, check if is an abbreviation
+	for _, dir := range directories {
+		if arg == dir.Abbreviation {
+			return dir.Path, nil //In case of correct abbreviation, print and exit
 		}
 	}
 
-	return "", nil //In case of args is not a number or a valid abbreviation, continue
+	//If it is neither a number nor an abbreviation, check if is exists file
+	fileInfo, err := os.Stat(arg)
+	if err == nil {
+		//If exists, check if it's a directory
+		if fileInfo.IsDir() {
+			return filepath.Clean(arg), nil
+		}
+
+		//If not a directory
+		return "", fmt.Errorf("the path \"%s\" is not a directory", arg)
+	}
+
+	//If the path not exists
+	if os.IsNotExist(err) {
+		return "", fmt.Errorf("the path \"%s\" is not exists", arg)
+	}
+
+	return "", err
 }
 
 func init() {
 
 	//Info flags
-	flag.BoolVar(&ConfFilePath, "config-path", false, "Print path of the config.json")
 	flag.BoolVar(&Help, "h", false, "Print help message")
 	flag.BoolVar(&Help, "help", false, "Print help message")
 	flag.BoolVar(&Version, "v", false, "Print version")
 	flag.BoolVar(&Version, "version", false, "Print version")
+	flag.BoolVar(&ConfFilePath, "config-path", false, "Print path of the config.json")
 
 	//Path and Abbreviations flags
 	flag.StringVar(&PathFlag, "path", "", "The Path to add, delete or modify actions")
@@ -79,8 +105,7 @@ func init() {
 	flag.BoolVar(&DoRestore, "restore", false, "Do restore of the config file")
 
 	//Other funcs flags
-	flag.BoolVar(&PathQuotes, "q", false, "Print the path with quotes: -q")
-	flag.BoolVar(&PathQuotes, "quotes", false, "Print the path with quotes: -quotes")
+	flag.BoolVar(&PathQuotes, "q", false, "Print the path (abbreviation or index) or directory with quotes")
 
 	flag.Parse()
 }
@@ -147,17 +172,15 @@ func main() {
 
 	//If the quotes argument is passed, print the dir with quotes
 	if PathQuotes {
-
 		//Check if "arg" is an abbreviation or a number index
-		path, err := ArgIsShortOrNumber(flag.Arg(0))
+		path, err := ArgIsAbbvOrNumberOrDir(flag.Arg(0))
 		if err != nil {
 			fmt.Println("Error:", err)
 			return
 
-		} else if len(path) != 0 {
-			fmt.Println("\"" + path + "\"")
-			return
 		}
+		fmt.Println("\"" + path + "\"")
+		return
 	}
 
 	//If the add argument is passed, use func add
@@ -223,30 +246,15 @@ func main() {
 	//Where the first argument will be stored
 	var arg string = flag.Arg(0)
 
-	//Check if "arg" is an abbreviation or a number index
-	path, err := ArgIsShortOrNumber(arg)
+	//Check if "arg" is an abbreviation, a number index or directory
+	path, err := ArgIsAbbvOrNumberOrDir(arg)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 
-	} else if len(path) != 0 {
-		fmt.Println(path)
-		return
 	}
-
-	//If exists like afile
-	if fileInfo, err := os.Stat(arg); err == nil {
-		//If it's a directory
-		if fileInfo.IsDir() {
-			fmt.Println(arg)
-			return
-
-		} else {
-			fmt.Println("Error: the path is not a directory")
-			return
-		}
-	}
+	fmt.Println(path)
 
 	//If the code is here, it means that the arg is invalid
-	fmt.Println("Error: invalid argument/s")
+	//fmt.Println("invalid argument/s")
 }

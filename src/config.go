@@ -62,10 +62,10 @@ func createConfigFile() error {
 	var directories []Directory
 
 	//Functions to add directories to the config file
-	add := func(path string, short string) {
+	add := func(path string, abbv string) {
 		directories = append(directories, Directory{
 			Path:         path,
-			Abbreviation: short,
+			Abbreviation: abbv,
 		})
 	}
 

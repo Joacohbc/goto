@@ -7,18 +7,22 @@ import (
 	"os"
 )
 
+//Add a new directory to the config file
 func addNewPaths(newDir Directory) error {
 
+	//Load the directories in the array
 	var directories []Directory
 	if err := loadConfigFile(&directories); err != nil {
 		return err
 	}
 
+	//Add the new directory to the array and valid
 	directories = append(directories, newDir)
 	if err := ValidArray(directories); err != nil {
 		return err
 	}
 
+	//If the array is valid, apply the changes
 	if err := createJsonFile(directories); err != nil {
 		return err
 	}
@@ -26,13 +30,16 @@ func addNewPaths(newDir Directory) error {
 	return nil
 }
 
+//Delete a directory from the config file
 func delPaths(pathToDel string) error {
 
+	//Load the directories in the array
 	var directories []Directory
 	if err := loadConfigFile(&directories); err != nil {
 		return err
 	}
 
+	//Delete the directory from the array
 	for i, dir := range directories {
 
 		if dir.Path == pathToDel {
@@ -45,10 +52,12 @@ func delPaths(pathToDel string) error {
 		}
 	}
 
+	//Valid the array
 	if err := ValidArray(directories); err != nil {
 		return err
 	}
 
+	//If the array is valid, apply the changes
 	if err := createJsonFile(directories); err != nil {
 		return err
 	}
@@ -56,17 +65,19 @@ func delPaths(pathToDel string) error {
 	return nil
 }
 
-func modPaths(pathToModif string, newShort string) error {
+//Modify a abbreviation from config file
+func modPaths(pathToModif string, newAbbv string) error {
 
+	//Load the directories in the array
 	var directories []Directory
-
 	if err := loadConfigFile(&directories); err != nil {
 		return err
 	}
 
+	//Delete the directory from the array
 	for i, dir := range directories {
 		if dir.Path == pathToModif {
-			directories[i].Abbreviation = newShort
+			directories[i].Abbreviation = newAbbv
 			break
 		}
 
@@ -75,10 +86,12 @@ func modPaths(pathToModif string, newShort string) error {
 		}
 	}
 
+	//Valid the array
 	if err := ValidArray(directories); err != nil {
 		return fmt.Errorf("invalid new config file,\n%v", err)
 	}
 
+	//If the array is valid, apply the changes
 	if err := createJsonFile(directories); err != nil {
 		return err
 	}
@@ -87,12 +100,18 @@ func modPaths(pathToModif string, newShort string) error {
 }
 
 func doBackup() error {
-	config, err := os.ReadFile(ConfigFile)
-	if err != nil {
-		return fmt.Errorf("cant read the config file")
+	//Read the config file
+	var directories []Directory
+	if err := loadConfigFile(&directories); err != nil {
+		return err
 	}
 
-	if err := ioutil.WriteFile(ConfigFileBackup, config, 0600); err != nil {
+	json, err := json.Marshal(directories)
+	if err != nil {
+		return fmt.Errorf("cant parse the config file: %v", err)
+	}
+	//And write the config backup
+	if err := ioutil.WriteFile(ConfigFileBackup, json, 0600); err != nil {
 		return fmt.Errorf("cant create the backup of config file")
 	}
 
@@ -100,6 +119,7 @@ func doBackup() error {
 }
 
 func doRestore() error {
+	//If exists a config backup
 	if _, err := os.Stat(ConfigFile); os.IsNotExist(err) {
 		return fmt.Errorf("dont have a backup of config file")
 
@@ -107,16 +127,19 @@ func doRestore() error {
 		return err
 	}
 
+	//Read the config backup
 	backup, err := os.ReadFile(ConfigFileBackup)
 	if err != nil {
 		return fmt.Errorf("cant read the backup of config file")
 	}
 
+	//Do the unmarshaling of the config backup
 	var directories []Directory
 	if err := json.Unmarshal(backup, &directories); err != nil {
 		return fmt.Errorf("cant parse the backup of config file")
 	}
 
+	//And re-write the config file with the backup
 	if err := createJsonFile(directories); err != nil {
 		return err
 	}

@@ -86,6 +86,10 @@ func (d *Directory) ValidDirectory() error {
 //Check that the any directory has the same Path or same Abbreviation that other
 func ValidArray(dirs []Directory) error {
 
+	if len(dirs) == 0 {
+		return fmt.Errorf("the config file is empty")
+	}
+
 	for i, dir := range dirs {
 
 		//Check that 2 Path don't have the same abbreviation, where the indexs are diferents
