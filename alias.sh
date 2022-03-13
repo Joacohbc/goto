@@ -1,20 +1,20 @@
 ##ADD THIS FILE TO .bashrc OR .zshrc WITH "SOURCE <PATH-OF-THIS-FILE>"   
-GOTO_FILE="$XDG_CONFIG_HOME/goto/goto64.bin"
+GOTO_FILE="$XDG_CONFIG_HOME/goto/goto.bin"
 
 #GOTO FUNC
 goto() {
-    DESTINATION=$("$GOTO_FILE" $@)
+    OUTPUT=$("$GOTO_FILE" $@)
 
-    #If the return isn't an error, put a bad argument, or the args have argument don't use the cd
-    if [[ "$DESTINATION" != *"Error:"* ]] && [[ "$DESTINATION" != *"flag provided but not defined:"* ]] && [[ "$@" != "-"* ]]; then
+    #If the return "3", the program return a gpath successfully
+    if [[ "$?" == "3" ]]; then
 
-        cd "$DESTINATION"   
+        cd "$OUTPUT"   
 
-        echo "Go to:" $DESTINATION 
+        echo "Go to:" $OUTPUT
         
     else 
-        #If it is an error, print it
-        echo "$DESTINATION"
+        #If not a "3", can be 0 or 1
+        echo "$OUTPUT"
     fi  
 }
 

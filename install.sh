@@ -35,15 +35,7 @@ if [ "$op" = "y" ]; then
     fi
 
 else
-    #Chek the ARCHITECTURE of the system, 32 bit or 64 bit
-    ARCHITECTURE=`uname -m`
-    
-    if [ "$ARCHITECTURE" = "x86_64" ]; then
-        GOTO_BIN="bin/goto64.bin"
-    else
-        GOTO_BIN="bin/goto32.bin"
-    fi
-
+    GOTO_BIN="bin/goto.bin"
 fi
 
 #if $XDG_CONFIG_HOME is empty
