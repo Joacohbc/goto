@@ -71,6 +71,7 @@ func ValidPath(path *string) error {
 // This function valid:
 // - The Abbreviation don't be empty
 // - That Abbreviation is not a number letter
+// - Check that the Abbreviation don't contain any
 func ValidAbbreviation(abbv *string) error {
 
 	//Delete start and ends spacesn an clean the path
@@ -80,11 +81,33 @@ func ValidAbbreviation(abbv *string) error {
 		return fmt.Errorf("the Abbreviation can't be empty or be blank space")
 	}
 
+	if strings.Contains(*abbv, " ") {
+		return fmt.Errorf("the Abbreviation can't contain any space")
+	}
+
 	if _, err := strconv.Atoi(validAbbv); err == nil {
 		return fmt.Errorf("the Abbreviation can't be a number'")
 	}
 
 	*abbv = validAbbv
+	return nil
+}
+
+// This function check if a index is valid the "indx"
+// must be a number beetween 0 and the length of the
+// GotoPath array
+func IsValidIndex(gpaths []GotoPath, index string) error {
+
+	indx, err := strconv.Atoi(index)
+	if err != nil {
+		return fmt.Errorf("the Index must be a number")
+	}
+
+	//If the path is over the max index return error
+	if indx < 0 || indx > len(gpaths)-1 {
+		return fmt.Errorf("the Index is invalid (should be: 0-" + strconv.Itoa(len(gpaths)-1) + "), check config file")
+	}
+
 	return nil
 }
 

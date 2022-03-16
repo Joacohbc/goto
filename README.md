@@ -1,10 +1,10 @@
 # goto-command
 
- The ultimate way to move between folders in the command line
+Goto is a path manager that allows you to add a specific path with an identifier to move faster, this path can be used as an abbreviation or an index number. If you use Goto with cd (e.g. with aliases) you have the ultimate way to move between folders on the command line.
 
-Goto is a command that can be used like cd, and also allows you to add specific path to move faster, this path can be used like abbreviation or a index number
+Quick and easy to use and install
 
-It works by means of a compiled Go file (goto.bin) that returns the corresponding path based on the arguments passed as input. And passes it as an argument to an alias that uses cd on the command line to move to the specified path
+It works via a compiled Go file (goto.bin) that returns the corresponding path based on the arguments passed as input. And passes it as an argument to an alias that uses cd on the command line to move to the specified path.
 
 ## How to install?
 

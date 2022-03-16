@@ -16,6 +16,10 @@ var (
 // NEED INITIALIZE THE VARIABLE "GotoPathsFile"
 func CreateJsonFile(gpaths []GotoPath) error {
 
+	if err := ValidArray(gpaths); err != nil {
+		return err
+	}
+
 	//Make the json config file
 	jsonFile, err := json.MarshalIndent(gpaths, "", "\t")
 	if err != nil {

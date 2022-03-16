@@ -32,73 +32,96 @@ var (
 	GotoPathsFileBackup string
 )
 
+// Return the path of
+func CheckIndexOrAbbvOrDir(arg string) (string, error) {
+	//Initial the variables to use config package
+	config.GotoPathsFile = GotoPathsFile
+	config.ConfigDir = ConfigDir
+
+	//Load the config file in memory
+	var gpaths []config.GotoPath
+	if err := config.LoadConfigFile(&gpaths); err != nil {
+		return "", err
+	}
+
+	//Check if path is number
+	if err := config.IsValidIndex(gpaths, arg); err == nil {
+
+		//I already kwow that "arg" is a number
+		pathNumber, _ := strconv.Atoi(arg)
+
+		for i, gpath := range gpaths {
+			if pathNumber == i {
+				return gpath.Path, nil
+			}
+		}
+	}
+
+	//If not a number, check if is an abbreviation
+	for _, gpath := range gpaths {
+		if arg == gpath.Abbreviation {
+			return gpath.Path, nil
+		}
+	}
+
+	//If it is neither a number nor an abbreviation, check if is exists file
+	fileInfo, err := os.Stat(arg)
+	if err == nil {
+		//If exists, check if it's a directory
+		if fileInfo.IsDir() {
+
+			//If the path is already a absolute path return it
+			if filepath.IsAbs(arg) {
+				return filepath.Clean(arg), nil
+			}
+
+			//If not search for it
+			if absPath, err := filepath.Abs(arg); err == nil {
+				return filepath.Clean(absPath), nil
+			} else {
+				return "", fmt.Errorf("can't get the absolute path: %v", err)
+			}
+
+		}
+
+		//If not a directory
+		return "", fmt.Errorf("the path \"%s\" is not a directory", arg)
+	}
+
+	//If the path not exists
+	if os.IsNotExist(err) {
+		return "", fmt.Errorf("the path \"%s\" is not a directory", arg)
+	}
+
+	return "", fmt.Errorf("invalid argument/s")
+}
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "goto",
-	Short: "The ultimate way to move between folders in the command line",
+	Short: "The ultimate way path manager in the command line",
 	Long: `
-Goto is a command that can be used like cd, and also allows you to 
-add specific path to move faster, this path can be used like abbreviation or 
-a index number`,
+Goto is a command that you can use it like a Path Manger you are allow to 
+add specific path with a identifier to move faster, this path can be used like 
+abbreviation or a index number.
+
+If you use Goto with cd (for example, with aliases) you have the ultimate way 
+to move between folders in the command line.
+
+Fast and Easy to use and install`,
 
 	//If don't have args, return a error
 	Args: cobra.MinimumNArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
+		if path, err := CheckIndexOrAbbvOrDir(args[0]); err == nil {
+			fmt.Println(path)
 
-		//Initial the variables to use config package
-		config.GotoPathsFile = GotoPathsFile
-		config.ConfigDir = ConfigDir
-
-		printAndExit := func(args ...interface{}) {
-			fmt.Println(args...)
-
-			//Return 3 because is easier for the alias.sh
-			//only need if [[ "$?" == "3"]]
-			os.Exit(3)
-		}
-
-		//Load the config file in memory
-		var gpaths []config.GotoPath
-		cobra.CheckErr(config.LoadConfigFile(&gpaths))
-
-		//Check if path is number
-		if pathNumber, err := strconv.Atoi(args[0]); err == nil {
-
-			//If the path is over the max index return error
-			if pathNumber < 0 || pathNumber > len(gpaths)-1 {
-				cobra.CheckErr(fmt.Errorf("the number is invalid(should be: 0-" + strconv.Itoa(len(gpaths)-1) + "), check config file"))
-			}
-
-			for i, gpath := range gpaths {
-				if pathNumber == i {
-					printAndExit(gpath.Path)
-				}
-			}
-		}
-
-		//If not a number, check if is an abbreviation
-		for _, gpath := range gpaths {
-			if args[0] == gpath.Abbreviation {
-				printAndExit(gpath.Path)
-			}
-		}
-
-		//If it is neither a number nor an abbreviation, check if is exists file
-		fileInfo, err := os.Stat(args[0])
-		if err == nil {
-			//If exists, check if it's a directory
-			if fileInfo.IsDir() {
-				printAndExit(filepath.Clean(args[0]))
-			}
-
-			//If not a directory
-			cobra.CheckErr(fmt.Errorf("the path \"%s\" is not a directory", args[0]))
-		}
-
-		//If the path not exists
-		if os.IsNotExist(err) {
-			cobra.CheckErr(fmt.Errorf("the path \"%s\" is not a directory", args[0]))
+			//Return 2 because is easier for the alias.sh
+			//only need if [[ "$?" == "2"]]
+			os.Exit(2)
+		} else {
+			cobra.CheckErr(err)
 		}
 	},
 }
