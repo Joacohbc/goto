@@ -25,8 +25,8 @@ import (
 // quotesCmd represents the quotes command
 var quotesCmd = &cobra.Command{
 	Use:     "quotes",
-	Short:   "Return the path between quotes",
 	Aliases: []string{"qut"},
+	Short:   "Return the path between quotes",
 
 	Run: func(cmd *cobra.Command, args []string) {
 

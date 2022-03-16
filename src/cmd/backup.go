@@ -75,5 +75,6 @@ var backupCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(backupCmd)
 
+	//Flags
 	backupCmd.Flags().StringP("output", "o", GotoPathsFileBackup, "The backup destination path")
 }

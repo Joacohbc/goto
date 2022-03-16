@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"goto/src/config"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -65,13 +64,15 @@ goto add --path ~/Documentos -abbv docs
 
 			//If CurrentPath is passed, the path to add is current directory
 			if currentPath {
+				//Get the current path
 				currentDir, err := os.Getwd()
 				cobra.CheckErr(err)
 
-				absoluteDir, err := filepath.Abs(currentDir)
-				cobra.CheckErr(err)
+				//Valid the path
+				cobra.CheckErr(config.ValidPath(&currentDir))
 
-				pathToAdd = absoluteDir
+				//If all ok, overwrite "pathToAdd" variable
+				pathToAdd = currentDir
 			}
 
 			//Create and valid the GPath
@@ -100,5 +101,5 @@ func init() {
 	//Flags
 	addCmd.Flags().StringP("path", "p", "", "The Path to add")
 	addCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
-	addCmd.Flags().BoolP("current", "c", false, "The Path to add will be the current directory")
+	addCmd.Flags().BoolP("current", "c", false, "The Path to add will be the current directory (\"path\" flag will be overwrite)")
 }

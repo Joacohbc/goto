@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"goto/src/config"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -27,7 +26,7 @@ import (
 // deleteCmd represents the addGPath command
 var deleteCmd = &cobra.Command{
 	Use:     "delete-path",
-	Aliases: []string{"del", "remove-path", "rem"},
+	Aliases: []string{"del", "delete", "remove-path", "rem", "remove"},
 	Short:   "Delete a path from goto-path file",
 	Long: `
 To use the delete-path command you need to pass two args: a "Path" and an "Abbreviation" to 
@@ -47,6 +46,7 @@ goto add --path ~/Documentos -abbv docs
 		var gpathToDel config.GotoPath
 		var gpaths []config.GotoPath
 		{
+			//Parse Flags//
 			currentPath, err := cmd.Flags().GetBool("current")
 			cobra.CheckErr(err)
 
@@ -65,13 +65,15 @@ goto add --path ~/Documentos -abbv docs
 
 			//If CurrentPath is passed, the path to add is current directory
 			if currentPath {
+				//Get the current path
 				currentDir, err := os.Getwd()
 				cobra.CheckErr(err)
 
-				absoluteDir, err := filepath.Abs(currentDir)
-				cobra.CheckErr(err)
+				//Valid the path
+				cobra.CheckErr(config.ValidPath(&currentDir))
 
-				pathToDel = absoluteDir
+				//If all ok, overwrite "pathToDel" variable
+				pathToDel = currentDir
 			}
 
 			//Create and valid the GPath
@@ -110,5 +112,5 @@ func init() {
 	//Flags
 	deleteCmd.Flags().StringP("path", "p", "", "The Path to delete")
 	deleteCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
-	deleteCmd.Flags().BoolP("current", "c", false, "The Path to remove will be the current directory")
+	deleteCmd.Flags().BoolP("current", "c", false, "The Path to remove will be the current directory (\"path\" flag will be overwrite)")
 }

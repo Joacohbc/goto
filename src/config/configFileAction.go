@@ -12,7 +12,7 @@ var (
 	ConfigDir     string
 )
 
-// Create a Json file from directory array
+// Valid the Array (ValidArray) and create a Json file from directory array
 // NEED INITIALIZE THE VARIABLE "GotoPathsFile"
 func CreateJsonFile(gpaths []GotoPath) error {
 

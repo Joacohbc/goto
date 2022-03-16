@@ -40,14 +40,25 @@ func (d *GotoPath) Valid() error {
 // This function valid:
 // - The Abbreviation don't be empty
 // - Clean the Path
+// - Get absolute path
 // - That Path exist and is a directory
 func ValidPath(path *string) error {
 
 	//Delete start and ends spacesn an clean the path
 	validPath := filepath.Clean(strings.TrimSpace(*path))
 
+	//Check that the path is not empty
 	if len(validPath) < 1 {
 		return fmt.Errorf("the Path can't be empty or be blank space")
+	}
+
+	//If not absolute path, try to get it
+	if !filepath.IsAbs(validPath) {
+		if absPath, err := filepath.Abs(*path); err == nil {
+			*path = filepath.Clean(absPath)
+		} else {
+			return fmt.Errorf("can't get the absolute path: %v", err)
+		}
 	}
 
 	info, err := os.Stat(validPath)

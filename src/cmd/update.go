@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"goto/src/config"
 	"os"
-	"path/filepath"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -40,7 +39,7 @@ var modesToUpdate []string = []string{
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:     "update-path",
-	Aliases: []string{"upd", "modify-path", "mod"},
+	Aliases: []string{"upd", "update", "modify-path", "mod"},
 	Short:   "Modify a path from goto-path file",
 	Long: `
 To use the update-path command you need have 9 modes to update: 
@@ -76,7 +75,7 @@ goto update-path --mode abbv-abbv --abbv h --new home
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		//"Parse" all Flags
+		//"Parse" all Flags//
 		currentPath, err := cmd.Flags().GetBool("current")
 		cobra.CheckErr(err)
 
@@ -100,24 +99,28 @@ goto update-path --mode abbv-abbv --abbv h --new home
 
 		//If CurrentPath is passed, overwrite the path to current directory
 		if currentPath {
+			//Get the current path
 			currentDir, err := os.Getwd()
 			cobra.CheckErr(err)
 
-			absoluteDir, err := filepath.Abs(currentDir)
-			cobra.CheckErr(err)
+			//Valid the path
+			cobra.CheckErr(config.ValidPath(&currentDir))
 
-			pathToUpd = absoluteDir
+			//If all ok, overwrite "pathToUpd" variable
+			pathToUpd = currentDir
 		}
 
 		//If newCurrentPath is passed, overwrite the "new" to current directory
 		if newCurrentPath {
+			//Get the current path
 			currentDir, err := os.Getwd()
 			cobra.CheckErr(err)
 
-			absoluteDir, err := filepath.Abs(currentDir)
-			cobra.CheckErr(err)
+			//Valid the path
+			cobra.CheckErr(config.ValidPath(&currentDir))
 
-			new = absoluteDir
+			//If all ok, overwrite "new" variable
+			new = currentDir
 		}
 
 		//Initial the variables to use config package
@@ -301,13 +304,18 @@ goto update-path --mode abbv-abbv --abbv h --new home
 func init() {
 	rootCmd.AddCommand(updateCmd)
 
+	//Flags//
+
+	//Flags "To Update"
 	updateCmd.Flags().StringP("path", "p", "", "The Path to delete")
+	updateCmd.Flags().BoolP("current", "c", false, "The Path to update will be the current directory (\"path\" flag will be overwrite)")
 	updateCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
 	updateCmd.Flags().IntP("indx", "i", -1, "The Index of the Path")
 
+	//Flahs "Update To"
 	updateCmd.Flags().StringP("new", "n", "", "The Path or Abbreviation new")
 	updateCmd.Flags().BoolP("new-current", "C", false, "The new Path will be the current directory (\"new\" flag will be overwrite)")
 
+	//Flag of mode
 	updateCmd.Flags().StringP("mode", "m", "", "Indicate that update in the format")
-	updateCmd.Flags().BoolP("current", "c", false, "The Path to update will be the current directory (\"path\" parameter will be overwrite)")
 }

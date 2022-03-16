@@ -69,19 +69,11 @@ func CheckIndexOrAbbvOrDir(arg string) (string, error) {
 	if err == nil {
 		//If exists, check if it's a directory
 		if fileInfo.IsDir() {
-
-			//If the path is already a absolute path return it
-			if filepath.IsAbs(arg) {
-				return filepath.Clean(arg), nil
-			}
-
-			//If not search for it
-			if absPath, err := filepath.Abs(arg); err == nil {
-				return filepath.Clean(absPath), nil
-			} else {
-				return "", fmt.Errorf("can't get the absolute path: %v", err)
-			}
-
+			////Valid the path
+			//if err := config.ValidPath(&arg); err != nil {
+			//	return "", err
+			//}
+			return arg, nil
 		}
 
 		//If not a directory

@@ -31,6 +31,7 @@ var restoreCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 
+		//Parse all flags
 		input, err := cmd.Flags().GetString("input")
 		cobra.CheckErr(err)
 
@@ -72,5 +73,6 @@ var restoreCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(restoreCmd)
 
+	//Flags
 	restoreCmd.Flags().StringP("input", "i", GotoPathsFileBackup, "The ubication of the backup file")
 }
