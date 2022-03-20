@@ -30,15 +30,22 @@ var deleteCmd = &cobra.Command{
 	Aliases: []string{"del", "delete", "remove-path", "rem", "remove"},
 	Short:   "Delete a path from goto-path file",
 	Long: `
-To use the delete-path command you need to pass two args: a "Path" and an "Abbreviation" to 
-create a new goto-path`,
+To use the delete-path command you need to Path, Abbreviation or Index from a goto-path`,
 
 	Example: `
-# This command del the current directory(the "Path") to the gpaths file
-goto del -p ~/Documents
+# This command delete-path the current directory(the "Path") to the gpaths file
+goto delete-path --current
 
-# To specify the "Path" and "Abbreviation" use:
-goto del --path ~/Documentos -abbv docs
+# To specify the "Path", "Abbreviation" or Index. use:
+
+# Delete the gpath with the path "/home/user/Documents"
+goto delete-path --path ~/Documents
+
+# Delete the gpath with the abbreviation "docs"
+goto delete-path --abbv docs
+
+# Delete the gpath in the index "2"
+goto delete-path --indx 2
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
@@ -65,7 +72,7 @@ goto del --path ~/Documentos -abbv docs
 
 		//Parse all Flags
 
-		var pathToDel string
+		var pathToDel string = ""
 		//If the path flag is passed, load the pathToDel
 		if passed("path") {
 			pathToDel, err = cmd.Flags().GetString("path")
@@ -91,7 +98,7 @@ goto del --path ~/Documentos -abbv docs
 			config.ValidAbbreviation(&abbvToDel)
 		}
 
-		var indxToDel int
+		var indxToDel int = -1
 		//If the indx flag is passed, load the indxToDel
 		if passed("indx") {
 			indxToDel, err = cmd.Flags().GetInt("indx")

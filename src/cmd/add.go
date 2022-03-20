@@ -35,10 +35,10 @@ create a new goto-path`,
 	Example: `
 # This command add the current directory(the "Path") to the gpaths file with
 # the abbreviation "currentDir"	
-goto add --current -abbv currentDir
+goto add-path --current -abbv currentDir
 
 # To specify the "Path" and "Abbreviation" use:
-goto add --path ~/Documents -abbv docs
+goto add-path --path ~/Documents -abbv docs
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {

@@ -171,32 +171,66 @@ Output:
 To delete a *gpath* requiere a Path or a Abbreviation:
 
 ```bash
-#I want to delete the path /home/user/Wallpaper
-goto -del -path /home/user/Wallpaper  
+#I want to delete the path /home/user/Documents
+goto delete --path /home/user/Documents
+
+Output: The changes were applied successfully
+
+#You also can use the Abbreviation or the Index
+goto delete --abbv docs
+
+#Or to delete the gpath in the index 2
+goto delete --indx 2
 
 Output: The changes were applied successfully
 ```
 
 ### Modify paths
 
-To modify the abreviation of the path:
+To update a *gpath* you can use 9 modes to update, each mode needs two args, the first to identify the goto-path and the second specific to what is to be updated.
+
+The 9 modes are:
+
+- A "Path" and a new "Path" (path-path)
+- A "Path" and a new "Abbreviation" (path-abbv)
+- A "Path" and a new "Indx" (path-indx)
+- A "Abbreviation" and a new "Path" (abbv-path)
+- A "Abbreviation" and a new "Abbreviation" (abbv-path)
+- A "Abbreviation" and a new "Indx" (abbv-indx)
+- A "Index" and a new "Path" (indx-path)
+- A "Index" and a new "Abbreviation" (indx-abbv)
+- A "Index" and a new "Index" (indx-indx)
 
 ```bash
-#I want to modify the path /home/user/.config/goto/
-#The new abreviation will be "conf"
-goto -modify -path /home/user/.config/goto/ -abbv conf  
+# Update the home of the user using the path to identify the gpath
+goto update path-path --path /home/myuser --new /home/mynewuser
+
+# Or "h" the default abbreviation to home directory 
+goto update abbv-path --abbv h --new /home/mynewuser
+
+Output: The changes were applied successfully
+
+# Change the abbreviation of the home
+goto update path-abbv --path /home/mynewuser --new home
+
+# Or if you want to update the abbreviation of the home
+goto update abbv-abbv --abbv h --new home
 
 Output: The changes were applied successfully
 ```
-
-**Note:** *The path will be exactly the same taht the path in the config file, so you should use the same path* ```goto -list```
 
 ### Backup and Restore
 
 To make a backup of the configuration file
 
 ```bash
-goto -backup
+# Made a backup of goto-paths in the config directory
+goto backup
+
+Output: Backup complete
+
+# If you want to specify the output path
+goto backup -o /the/path/file.json.backup
 
 Output: Backup complete
 ```
@@ -204,7 +238,12 @@ Output: Backup complete
 To make a restore of the configuration file from a backup
 
 ```bash
-goto -restore
+goto restore
+
+Output: Restore complete
+
+# If you want to specify the input path
+goto restore -i /the/path/file.json.backup
 
 Output: Restore complete
 ```
@@ -215,12 +254,10 @@ More options besides the goto to move:
 
 ```bash
 #Return a path with quotes, you need to specify a abreviation, a number of index or a directory 
-goto -q 
+goto -q home
 
 Output: "/home/user"
 ```
-
-Also have ```goto -help``` to print help message and ```goto -v``` to print version  
 
 ## IMPORTANT
 

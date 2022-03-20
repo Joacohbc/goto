@@ -29,10 +29,13 @@ var updateCmd = &cobra.Command{
 	Use:     "update-path",
 	Aliases: []string{"upd", "update", "modify-path", "mod"},
 	Args:    cobra.MaximumNArgs(1),
-	Short:   "Modify a path from goto-path file",
+	Short:   "Update a path from goto-path file",
 	Long: `
-To use the update-path command you need have 9 modes to update: 
-- A "Path" and a new "Path"(path-path)
+To use the update-path command you have 9 modes to update, each mode needs two args, 
+the first to identify the goto-path and the second specific to what is to be updated. 
+
+Modes:
+- A "Path" and a new "Path" (path-path)
 - A "Path" and a new "Abbreviation" (path-abbv)
 - A "Path" and a new "Indx" (path-indx)
 - A "Abbreviation" and a new "Path" (abbv-path)
@@ -41,14 +44,9 @@ To use the update-path command you need have 9 modes to update:
 - A "Index" and a new "Path" (indx-path)
 - A "Index" and a new "Abbreviation" (indx-abbv)
 - A "Index" and a new "Index" (indx-indx)
-
-To update a path from goto-path file
 `,
 
 	Example: `
-# If you wanto to update need to select a modes and pass
-# two args
-
 # Update the home of the user
 goto update-path path-path --path /home/myuser --new /home/mynewuser
 
