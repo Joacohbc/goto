@@ -1,16 +1,17 @@
-# goto-command
+# Goto 2.0
 
-Goto is a path manager that allows you to add a specific path with an identifier to move faster, this path can be used as an abbreviation or an index number. If you use Goto with cd (e.g. with aliases) you have the ultimate way to move between folders on the command line.
+Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an index number. Those path are automatically save in a json file, the goto-paths files. From this
+files can add, update, delete and list paths and abreviations.
 
-Quick and easy to use and install
+## Use Goto to move in the CLI
 
-It works via a compiled Go file (goto.bin) that returns the corresponding path based on the arguments passed as input. And passes it as an argument to an alias that uses cd on the command line to move to the specified path.
+If you use Goto with cd (e.g. with aliases) you have the ultimate way to move between folders on the command line. Its is quick and easy to use and install. It works via a compiled Go file that returns the corresponding path based on the arguments passed as input. And passes it as an argument to an alias that uses cd on the command line to move to the specified path.
 
 ## How to install?
 
 ### Use the automatically way
 
-**Note:** *The install.sh is only for linux 64 bits and 32 bits*
+**Note:** *The install.sh is only for Linux 64 bits and 32 bits*
 
 1. **Clone** repository:  
 
@@ -105,26 +106,26 @@ To use the main function of goto:
 
 ```bash  
 #Move to the destination directory
-#"home" is the abreviation of /home/joaco/ in the config.json
+#"home" is the abreviation of /home/user/ in the config.json
 goto home
 
-Output: Go to: /home/joaco
+Output: Go to: /home/user/
 
-#"0" is the number index of the /home/joaco/ in the config.json
+#"0" is the number index of the /home/user/ in the config.json
 goto 0
 
-Output: Go to: /home/joaco
+Output: Go to: /home/user/
 ```
 
 Or also you can use goto like cd, use a complete/relative path:
 
 ```bash  
-goto /home/joaco/.config/goto
+goto /home/user/.config/goto
 
-Output: Go to: /home/joaco/.config/goto
+Output: Go to: /home/user/.config/goto
 ```
 
-**Note**: *goto always give priority to the abbreviation and index over a path in the current directory. If in the current working directory exists a directory named "scripts" and you put "script" goto search first if "script" is abbreviation and after search if a valid path*
+**Note**: *goto always give priority to the abbreviation and index over a path in the current directory. If in the current working directory exists a directory named "scripts" and you put "scripts" goto search first if "scripts" is abbreviation and after search if a valid path*
 
 ### Add new path
 
@@ -139,7 +140,7 @@ Output: The changes were applied successfully
 #And try the new path 
 goto w
 
-Output: Go to: /home/joaco/Wallpaper/
+Output: Go to: /home/user/Wallpaper/
 ```
 
 ### List paths
@@ -150,9 +151,9 @@ To list the path of the config file:
 goto -list
 
 Output: 
-0- Path: "/home/joaco", Abbreviation: "h"
-1- Path: "/home/joaco/.config/goto/", Abbreviation: "config"
-2- Path: "/home/joaco/Wallpaper", Abbreviation: "w"
+0- Path: "/home/user", Abbreviation: "h"
+1- Path: "/home/user/.config/goto/", Abbreviation: "config"
+2- Path: "/home/user/Wallpaper", Abbreviation: "w"
 ...
 ```
 
@@ -161,8 +162,8 @@ Output:
 To delete a path:
 
 ```bash
-#I want to delete the path /home/joaco/Wallpaper
-goto -del -path /home/joaco/Wallpaper  
+#I want to delete the path /home/user/Wallpaper
+goto -del -path /home/user/Wallpaper  
 
 Output: The changes were applied successfully
 ```
@@ -172,9 +173,9 @@ Output: The changes were applied successfully
 To modify the abreviation of the path:
 
 ```bash
-#I want to modify the path /home/joaco/.config/goto/
+#I want to modify the path /home/user/.config/goto/
 #The new abreviation will be "conf"
-goto -modify -path /home/joaco/.config/goto/ -abbv conf  
+goto -modify -path /home/user/.config/goto/ -abbv conf  
 
 Output: The changes were applied successfully
 ```
@@ -207,7 +208,7 @@ More options besides the goto to move:
 #Return a path with quotes, you need to specify a abreviation, a number of index or a directory 
 goto -q 
 
-Output: "/home/joaco"
+Output: "/home/user"
 ```
 
 Also have ```goto -help``` to print help message and ```goto -v``` to print version  

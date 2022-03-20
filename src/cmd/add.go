@@ -55,9 +55,8 @@ goto add --path ~/Documentos -abbv docs
 			abbvToAdd, err := cmd.Flags().GetString("abbv")
 			cobra.CheckErr(err)
 
-			//Initial the variables to use config package
+			//Initialze the variables to use config package
 			config.GotoPathsFile = GotoPathsFile
-			config.ConfigDir = ConfigDir
 
 			//Load the goto-paths file to array
 			cobra.CheckErr(config.LoadConfigFile(&gpaths))

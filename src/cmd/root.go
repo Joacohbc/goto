@@ -36,7 +36,6 @@ var (
 func CheckIndexOrAbbvOrDir(arg string) (string, error) {
 	//Initial the variables to use config package
 	config.GotoPathsFile = GotoPathsFile
-	config.ConfigDir = ConfigDir
 
 	//Load the config file in memory
 	var gpaths []config.GotoPath
@@ -64,28 +63,13 @@ func CheckIndexOrAbbvOrDir(arg string) (string, error) {
 		}
 	}
 
-	//If it is neither a number nor an abbreviation, check if is exists file
-	fileInfo, err := os.Stat(arg)
-	if err == nil {
-		//If exists, check if it's a directory
-		if fileInfo.IsDir() {
-			////Valid the path
-			//if err := config.ValidPath(&arg); err != nil {
-			//	return "", err
-			//}
-			return arg, nil
-		}
-
-		//If not a directory
-		return "", fmt.Errorf("the path \"%s\" is not a directory", arg)
+	//Valid the path
+	if err := config.ValidPath(&arg); err != nil {
+		return "", err
 	}
 
-	//If the path not exists
-	if os.IsNotExist(err) {
-		return "", fmt.Errorf("the path \"%s\" is not a directory", arg)
-	}
-
-	return "", fmt.Errorf("invalid argument/s")
+	//If the Path is valid, return it
+	return arg, nil
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -96,17 +80,24 @@ var rootCmd = &cobra.Command{
 Goto is a command that you can use it like a Path Manger you are allow to 
 add specific path with a identifier to move faster, this path can be used like 
 abbreviation or a index number.
-
-If you use Goto with cd (for example, with aliases) you have the ultimate way 
-to move between folders in the command line.
-
-Fast and Easy to use and install`,
-
+`,
 	//If don't have args, return a error
 	Args: cobra.MinimumNArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
+
 		if path, err := CheckIndexOrAbbvOrDir(args[0]); err == nil {
+
+			quotes, err := cmd.Flags().GetBool("quotes")
+			cobra.CheckErr(err)
+
+			//If quote flag is passed
+			if quotes {
+				fmt.Println("\"" + path + "\"")
+				os.Exit(0)
+			}
+
+			//If quote flag is not passed
 			fmt.Println(path)
 
 			//Return 2 because is easier for the alias.sh
@@ -148,4 +139,5 @@ func initOfConfigVars() {
 
 func init() {
 	cobra.OnInitialize(initOfConfigVars)
+	rootCmd.Flags().BoolP("quotes", "q", false, "Return the path between quotes")
 }

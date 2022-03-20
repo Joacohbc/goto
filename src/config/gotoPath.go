@@ -52,27 +52,30 @@ func ValidPath(path *string) error {
 		return fmt.Errorf("the Path can't be empty or be blank space")
 	}
 
-	//If not absolute path, try to get it
-	if !filepath.IsAbs(validPath) {
-		if absPath, err := filepath.Abs(*path); err == nil {
-			*path = filepath.Clean(absPath)
-		} else {
-			return fmt.Errorf("can't get the absolute path: %v", err)
-		}
-	}
-
 	info, err := os.Stat(validPath)
 
+	//If not exists, return it
 	if os.IsNotExist(err) {
 		return fmt.Errorf("the Path \"%s\" don't exist", validPath)
 	}
 
+	//If other error happen, return it
 	if err != nil {
 		return fmt.Errorf("error to get info of \"%s\": %s", validPath, err.Error())
 	}
 
+	//If the path is not Directory
 	if !info.IsDir() {
 		return fmt.Errorf("the Path \"%s\" is not a directory", validPath)
+	}
+
+	//If not absolute path, try to get it
+	if !filepath.IsAbs(validPath) {
+		if absPath, err := filepath.Abs(validPath); err == nil {
+			validPath = filepath.Clean(absPath)
+		} else {
+			return fmt.Errorf("can't get the absolute path: %v", err)
+		}
 	}
 
 	*path = validPath

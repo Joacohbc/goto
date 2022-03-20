@@ -27,7 +27,7 @@ import (
 // restoreCmd represents the restore command
 var restoreCmd = &cobra.Command{
 	Use:   "restore",
-	Short: "Do a restoreCmd of the goto-paths file",
+	Short: "Do a restore of the goto-paths file",
 
 	Run: func(cmd *cobra.Command, args []string) {
 

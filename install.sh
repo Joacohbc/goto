@@ -32,6 +32,7 @@ if [ "$op" = "y" ]; then
         exito "Compaling successfully"
     else
         error "Compaling failed"
+        exit 1
     fi
 
 else
@@ -41,6 +42,7 @@ fi
 #if $XDG_CONFIG_HOME is empty
 if [ -z "$XDG_CONFIG_HOME" ]; then
     XDG_CONFIG_HOME="$HOME/.config"
+    echo "The variable \$XDG_CONFIG_HOME was created with \"\$HOME/.config\""
 fi
 
 #Define the config dir
@@ -53,6 +55,7 @@ if [ $? -eq 0 ]; then
     exito "Config dir created successfully"
 else
     error "Config dir couldn't be created"
+    exit 1
 fi
 
 #Copy all of the repository to CONFIG_DIR
@@ -62,6 +65,7 @@ if [ $? -eq 0 ]; then
     exito "All files copied successfully"
 else
     error "Files couldn't be copied"
+    exit 1
 fi
 
 #Absolute path line /home/username/.bashrc, not ~/.bashrc
@@ -106,7 +110,7 @@ echo "#GOTO_FILE=\"<ABSOLUTE-PATH-OF-THIS-FILE>\"" >> $aliasFile
 echo "GOTO_FILE=\""$CONFIG_DIR"$GOTO_BIN\"" >> $aliasFile
 echo "" >> $aliasFile
 
-#Number of linees of the text
+#Number of lines of the text
 num=$(wc -l alias.sh | cut -d " " -f 1)
 
 #Remainder of 3 first lines of orginal text(the lines of GOTO_FILE variable)
@@ -123,4 +127,3 @@ mv $aliasFile ""$CONFIG_DIR"alias.sh"
 
 #Some advises:
 echo "This almost complete, please restart the terminal and check if all work correctly"
-echo "If you want to add paths, use goto 1 to go the config dir and edit the config.json"
