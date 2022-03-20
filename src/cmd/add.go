@@ -33,22 +33,23 @@ To use the add-path command you need to pass two args: a "Path" and an "Abbrevia
 create a new goto-path`,
 
 	Example: `
-# This command add the current directory(the "Path") to the config file with
+# This command add the current directory(the "Path") to the gpaths file with
 # the abbreviation "currentDir"	
 goto add --current -abbv currentDir
 
 # To specify the "Path" and "Abbreviation" use:
-goto add --path ~/Documentos -abbv docs
+goto add --path ~/Documents -abbv docs
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
 
+		//Where load all gpaths
 		var gpaths []config.GotoPath
+
+		//The gpath to add
 		var gpathToAdd config.GotoPath
 		{
-			currentPath, err := cmd.Flags().GetBool("current")
-			cobra.CheckErr(err)
-
+			//Create the GPath to add
 			pathToAdd, err := cmd.Flags().GetString("path")
 			cobra.CheckErr(err)
 
@@ -62,7 +63,7 @@ goto add --path ~/Documentos -abbv docs
 			cobra.CheckErr(config.LoadConfigFile(&gpaths))
 
 			//If CurrentPath is passed, the path to add is current directory
-			if currentPath {
+			if cmd.Flags().Changed("current") {
 				//Get the current path
 				currentDir, err := os.Getwd()
 				cobra.CheckErr(err)
@@ -84,7 +85,6 @@ goto add --path ~/Documentos -abbv docs
 
 		//Add the new directory to the array and valid it
 		gpaths = append(gpaths, gpathToAdd)
-		cobra.CheckErr(config.ValidArray(gpaths))
 
 		//If the array is valid, apply the changes
 		cobra.CheckErr(config.CreateJsonFile(gpaths))

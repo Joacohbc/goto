@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"goto/src/config"
 	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -33,70 +34,86 @@ To use the delete-path command you need to pass two args: a "Path" and an "Abbre
 create a new goto-path`,
 
 	Example: `
-# This command add the current directory(the "Path") to the config file with
-# the abbreviation "currentDir"	
-goto add --current -abbv currentDir
+# This command del the current directory(the "Path") to the gpaths file
+goto del -p ~/Documents
 
 # To specify the "Path" and "Abbreviation" use:
-goto add --path ~/Documentos -abbv docs
+goto del --path ~/Documentos -abbv docs
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var gpathToDel config.GotoPath
+		passed := func(flag string) bool { return cmd.Flags().Changed(flag) }
+
+		//Where any error is saved
+		var err error = nil
+
+		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
 		{
-			//Parse Flags//
-			currentPath, err := cmd.Flags().GetBool("current")
-			cobra.CheckErr(err)
-
-			pathToDel, err := cmd.Flags().GetString("path")
-			cobra.CheckErr(err)
-
-			abbvToDel, err := cmd.Flags().GetString("abbv")
-			cobra.CheckErr(err)
-
 			//Initial the variables to use config package
 			config.GotoPathsFile = GotoPathsFile
-			config.ConfigDir = ConfigDir
 
-			//Load the goto-paths file to array
 			cobra.CheckErr(config.LoadConfigFile(&gpaths))
+		}
 
-			//If CurrentPath is passed, the path to add is current directory
-			if currentPath {
-				//Get the current path
-				currentDir, err := os.Getwd()
-				cobra.CheckErr(err)
+		//Before load the flags into de vars check valid number of Flags
+		//If the any flag or more than 1 is passed return a error
+		if cmd.Flags().NFlag() == 0 || cmd.Flags().NFlag() > 1 {
+			cobra.CheckErr(fmt.Errorf("you must specify 1 (only one) flag (Or Path or Abbreviation or Index) to `delete a gpath"))
+		}
 
-				//Valid the path
-				cobra.CheckErr(config.ValidPath(&currentDir))
+		//Parse all Flags
 
-				//If all ok, overwrite "pathToDel" variable
-				pathToDel = currentDir
-			}
+		var pathToDel string
+		//If the path flag is passed, load the pathToDel
+		if passed("path") {
+			pathToDel, err = cmd.Flags().GetString("path")
+			cobra.CheckErr(err)
+			config.ValidPath(&pathToDel)
+		}
 
-			//Create and valid the GPath
-			gpathToDel = config.GotoPath{
-				Path:         pathToDel,
-				Abbreviation: abbvToDel,
-			}
-			cobra.CheckErr(gpathToDel.Valid())
+		//If current flag is passed, overwrite pathToDel with the current directory
+		if passed("current") {
+			//Get the current path
+			pathToDel, err = os.Getwd()
+			cobra.CheckErr(err)
+
+			//Valid the path
+			cobra.CheckErr(config.ValidPath(&pathToDel))
+		}
+
+		var abbvToDel string = ""
+		//If the abbv flag is passed, load the abbvToDel
+		if passed("abbv") {
+			abbvToDel, err = cmd.Flags().GetString("abbv")
+			cobra.CheckErr(err)
+			config.ValidAbbreviation(&abbvToDel)
+		}
+
+		var indxToDel int
+		//If the indx flag is passed, load the indxToDel
+		if passed("indx") {
+			indxToDel, err = cmd.Flags().GetInt("indx")
+			cobra.CheckErr(err)
+			config.IsValidIndex(gpaths, strconv.Itoa(indxToDel))
 		}
 
 		//Delete the directory from the array
 		for i, gpath := range gpaths {
 
 			//The gpath passes have the same Path or the same Abbreviation, delete it
-			if gpath.Path == gpathToDel.Path || gpath.Abbreviation == gpathToDel.Abbreviation {
+			if gpath.Path == pathToDel || gpath.Abbreviation == abbvToDel || i == indxToDel {
 				gpaths = append(gpaths[:i], gpaths[i+1:]...)
 				break
 			}
 
 			if i == len(gpaths)-1 {
-				cobra.CheckErr(fmt.Errorf("the path \"%v\" or abbreviation \"%s\" doesn't exist in the goto-paths file", gpathToDel.Path, gpathToDel.Abbreviation))
+				cobra.CheckErr(fmt.Errorf("any gpath match with the flags you passed"))
 			}
 		}
+
+		//After the changes, valid it
 		cobra.CheckErr(config.ValidArray(gpaths))
 
 		//If the array is valid, apply the changes
@@ -112,5 +129,6 @@ func init() {
 	//Flags
 	deleteCmd.Flags().StringP("path", "p", "", "The Path to delete")
 	deleteCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
+	deleteCmd.Flags().IntP("indx", "i", -1, "The Index of the Path")
 	deleteCmd.Flags().BoolP("current", "c", false, "The Path to remove will be the current directory (\"path\" flag will be overwrite)")
 }

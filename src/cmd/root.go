@@ -75,11 +75,11 @@ func CheckIndexOrAbbvOrDir(arg string) (string, error) {
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "goto",
-	Short: "The ultimate way path manager in the command line",
+	Short: "Goto is a \"Path Manager\" that allows you to add a specific path with an identifier and after get it with that identifier",
 	Long: `
-Goto is a command that you can use it like a Path Manger you are allow to 
-add specific path with a identifier to move faster, this path can be used like 
-abbreviation or a index number.
+Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an 
+index number. Those path are automatically save in a json file, the goto-paths files. From this files can add, update, delete and list
+paths and abreviations.
 `,
 	//If don't have args, return a error
 	Args: cobra.MinimumNArgs(1),

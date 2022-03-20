@@ -1,17 +1,23 @@
 # Goto 2.0
 
-Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an index number. Those path are automatically save in a json file, the goto-paths files. From this
-files can add, update, delete and list paths and abreviations.
+Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an index number. Those path are automatically save in a json file, the goto-paths (*gpaths*) files. From this files can add, update, delete and list paths and abreviations. A *gpath* consists of a Path and an Abbreviation to identify the path. A example of a *gpath* in the goto-paths file:
+
+```json
+{
+    "path": "/home/user", 
+    "abbreviation": "home", 
+} 
+```
 
 ## Use Goto to move in the CLI
 
-If you use Goto with cd (e.g. with aliases) you have the ultimate way to move between folders on the command line. Its is quick and easy to use and install. It works via a compiled Go file that returns the corresponding path based on the arguments passed as input. And passes it as an argument to an alias that uses cd on the command line to move to the specified path.
+If you use Goto with cd (e.g. with aliases) you have the ultimate way to move between folders on the command line. Its is quick and easy to use and implement . It works via a compiled Go file that returns the corresponding path based on the arguments passed as input. And passes it as an argument to an alias that uses cd on the command line to move to the specified path.
 
 ## How to install?
 
 ### Use the automatically way
 
-**Note:** *The install.sh is only for Linux 64 bits and 32 bits*
+**Note:** *The install.sh is only for Linux x64 bits*
 
 1. **Clone** repository:  
 
@@ -82,25 +88,9 @@ If you use Goto with cd (e.g. with aliases) you have the ultimate way to move be
     GOTO_FILE="$XDG_CONFIG_HOME/goto/goto.bin" #<-- Here put the absolute path of the goto.bin ($HOME/.config/goto/goto.bin)
     ```
 
-## How to configure it?
-
-The configuration file is created automatically. To add or remove fav directories
-of your config file, you only need add/remove the block between "{}" in the .json
-
-```json
-{
-    "path": "{THE-PATH}", 
-    "abbreviation": "{THE-ABBREVIATION}", 
-} 
-```
-
-And you need to add a "," after the "}" if it not the last of the list
-
-**Note:** *You can do this with ```goto -add``` option*
-
 ## Usage
 
-### Move
+### Move (cd aliases)
 
 To use the main function of goto:
 
@@ -129,37 +119,56 @@ Output: Go to: /home/user/.config/goto
 
 ### Add new path
 
-To add a new path:
+To add a new *gpath* requiere a Path and a Abbreviation:
 
 ```bash
-#The new path will be ~/Wallpaper/ and "w" is the abreviation 
-goto -add -path ~/Wallpaper/ -abbv w 
+# This command add the current directory(the "Path") to the config file with
+# the abbreviation "currentDir"
+goto add --current -abbv currentDir
 
-Output: The changes were applied successfully
+#The same that 
+goto add -c -a currentDir
 
-#And try the new path 
-goto w
+# To specify the "Path" and "Abbreviation" use:
+goto add --path ~/Documents -abbv docs
 
-Output: Go to: /home/user/Wallpaper/
+#The same that 
+goto add -p ~/Documents -a docs
 ```
 
 ### List paths
 
-To list the path of the config file:
+To list all *gpath* of the gpaths file:
 
 ```bash
-goto -list
+goto list
 
 Output: 
 0- Path: "/home/user", Abbreviation: "h"
 1- Path: "/home/user/.config/goto/", Abbreviation: "config"
-2- Path: "/home/user/Wallpaper", Abbreviation: "w"
+2- Path: "/home/user/Documents", Abbreviation: "docs"
 ...
+```
+
+You also can get a specific line of the gpaths file using the following flags:
+
+```bash
+# -p to indicate the abbreviation (also you can use -c if you want to pass the current directory)
+goto list -p ~/Documents
+
+Output:
+2- Path: "/home/user/Documents", Abbreviation: "docs"
+
+# -a to indicate the abbreviation
+goto list -a docs
+
+Output:
+2- Path: "/home/user/Documents", Abbreviation: "docs"
 ```
 
 ### Delete paths
 
-To delete a path:
+To delete a *gpath* requiere a Path or a Abbreviation:
 
 ```bash
 #I want to delete the path /home/user/Wallpaper

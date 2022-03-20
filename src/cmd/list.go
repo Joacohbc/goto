@@ -28,44 +28,42 @@ var listCmd = &cobra.Command{
 	Use:     "list-path",
 	Aliases: []string{"list"},
 
-	Short: "List all goto-paths in the goto-paths file",
+	Short: "List all gpaths in the gpaths file",
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		//Parse "all" Flags
-		currentPath, err := cmd.Flags().GetBool("current")
-		cobra.CheckErr(err)
+		passed := func(flag string) bool { return cmd.Flags().Changed(flag) }
 
-		path, err := cmd.Flags().GetString("path")
-		cobra.CheckErr(err)
-
-		abbv, err := cmd.Flags().GetString("abbv")
-		cobra.CheckErr(err)
-
-		reverse, err := cmd.Flags().GetBool("reverse")
-		cobra.CheckErr(err)
-
-		//Initial the variables to use config
-		config.GotoPathsFile = GotoPathsFile
-
+		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
-		cobra.CheckErr(config.LoadConfigFile(&gpaths))
-
-		//If CurrentPath is passed, the path to add is current directory
-		if currentPath {
-			//Get the current path
-			currentDir, err := os.Getwd()
-			cobra.CheckErr(err)
-
-			//Valid the path
-			cobra.CheckErr(config.ValidPath(&currentDir))
-
-			//If all ok, overwrite "pathToAdd" variable
-			path = currentDir
+		{
+			//Initial the variables to use config
+			config.GotoPathsFile = GotoPathsFile
+			cobra.CheckErr(config.LoadConfigFile(&gpaths))
 		}
 
-		//If the flag "path" is passed
-		if path != "" {
+		//Where any error is saved
+		var err error = nil
+
+		//Parse all Flags
+
+		//If the flag "path" or "current" are passed
+		if passed("path") || passed("current") {
+
+			var path string = ""
+			//If the path flag is passed, load the path
+			if passed("path") {
+				path, err = cmd.Flags().GetString("path")
+				cobra.CheckErr(err)
+			}
+
+			//If current flag is passed, overwrite the path to current directory
+			if passed("current") {
+				//Get the current path, and overwrite "path" variable
+				path, err = os.Getwd()
+				cobra.CheckErr(err)
+			}
+
 			//Valid the path
 			cobra.CheckErr(config.ValidPath(&path))
 
@@ -76,14 +74,19 @@ var listCmd = &cobra.Command{
 				}
 
 				if i == len(gpaths)-1 {
-					fmt.Printf("The path \"%s\" doesn't exist in the gpaths-file\n", path)
+					cobra.CheckErr(fmt.Errorf("the path \"%s\" doesn't exist in the gpaths-file", path))
 				}
 			}
 			return
 		}
 
 		//If the flag "abbv" is passed
-		if abbv != "" {
+		if passed("abbv") {
+
+			var abbv string
+			abbv, err = cmd.Flags().GetString("abbv")
+			cobra.CheckErr(err)
+
 			cobra.CheckErr(config.ValidAbbreviation(&abbv))
 
 			for i, gpath := range gpaths {
@@ -93,14 +96,14 @@ var listCmd = &cobra.Command{
 				}
 
 				if i == len(gpaths)-1 {
-					fmt.Printf("The path \"%s\" doesn't exist in the gpaths-file\n", path)
+					cobra.CheckErr(fmt.Errorf("doesn't exist a path with that abbreviation \"%s\"", abbv))
 				}
 			}
 			return
 		}
 
 		//If the flag "reverse" is passed
-		if reverse {
+		if passed("reverse") {
 			for i := range gpaths {
 				fmt.Printf("%v - %s\n", len(gpaths)-i-1, gpaths[len(gpaths)-i-1].String())
 			}

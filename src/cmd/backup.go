@@ -16,10 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"goto/src/config"
-	"io/ioutil"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -44,29 +42,13 @@ var backupCmd = &cobra.Command{
 		cobra.CheckErr(err)
 
 		//Check if exists
-		info, err := os.Stat(output)
-		if os.IsNotExist(err) {
-			cobra.CheckErr(fmt.Errorf("dont have a backup of config file"))
-		} else if err != nil {
-			cobra.CheckErr(err)
+		if _, err := os.Stat(output); err == nil {
+			cobra.CheckErr(fmt.Errorf("the file \"%s\" already exists", output))
 		}
 
-		//And if not a file
-		if info.IsDir() {
-			cobra.CheckErr(fmt.Errorf("the output can't be a directory"))
-		}
-
-		//Do the Array to JSON Bytes
-		json, err := json.Marshal(gpaths)
-		if err != nil {
-			cobra.CheckErr(fmt.Errorf("cant parse the config file: %v", err))
-		}
-
-		//If the output is not empty
-		//And write the config backup
-		if err := ioutil.WriteFile(output, json, 0600); err != nil {
-			cobra.CheckErr(fmt.Errorf("cant create the backup of config file: %v", err))
-		}
+		//Create the GotoPath file in the output
+		config.GotoPathsFile = output
+		cobra.CheckErr(config.CreateJsonFile(gpaths))
 
 		fmt.Println("Backup complete")
 	},

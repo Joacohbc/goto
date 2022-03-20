@@ -24,22 +24,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var modesToUpdate []string = []string{
-	"path-path", // 0
-	"path-abbv", // 1
-	"path-indx", // 2
-	"abbv-path", // 3
-	"abbv-abbv", // 4
-	"abbv-indx", // 5
-	"indx-path", // 6
-	"indx-abbv", // 7
-	"indx-indx", // 8
-}
-
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:     "update-path",
 	Aliases: []string{"upd", "update", "modify-path", "mod"},
+	Args:    cobra.MaximumNArgs(1),
 	Short:   "Modify a path from goto-path file",
 	Long: `
 To use the update-path command you need have 9 modes to update: 
@@ -61,66 +50,86 @@ To update a path from goto-path file
 # two args
 
 # Update the home of the user
-goto update-path --mode path-path --path /home/myuser --new /home/mynewuser
+goto update-path path-path --path /home/myuser --new /home/mynewuser
 
 # "h" the default abbreviation to home directory
-goto update-path --mode abbv-path --abbv h --new /home/mynewuser
+goto update-path abbv-path --abbv h --new /home/mynewuser
 
 # Change the abbreviation of the come
-goto update-path --mode path-abbv --path /home/myuser --new home
+goto update-path path-abbv --path /home/myuser --new home
 
 # Or
-goto update-path --mode abbv-abbv --abbv h --new home
+goto update-path abbv-abbv --abbv h --new home
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		//"Parse" all Flags//
-		currentPath, err := cmd.Flags().GetBool("current")
-		cobra.CheckErr(err)
+		modesToUpdate := []string{
+			"path-path", // 0
+			"path-abbv", // 1
+			"path-indx", // 2
+			"abbv-path", // 3
+			"abbv-abbv", // 4
+			"abbv-indx", // 5
+			"indx-path", // 6
+			"indx-abbv", // 7
+			"indx-indx", // 8
+		}
 
-		newCurrentPath, err := cmd.Flags().GetBool("new-current")
-		cobra.CheckErr(err)
+		passed := func(flag string) bool { return cmd.Flags().Changed(flag) }
 
-		pathToUpd, err := cmd.Flags().GetString("path")
-		cobra.CheckErr(err)
+		//"Parse" all Flags
+		var err error = nil
 
-		abbvToUpd, err := cmd.Flags().GetString("abbv")
-		cobra.CheckErr(err)
+		var pathToUpd string
+		//If the flag path is need it
+		if passed("path") {
+			pathToUpd, err = cmd.Flags().GetString("path")
+			cobra.CheckErr(err)
+		}
 
-		indxToUpd, err := cmd.Flags().GetInt("indx")
-		cobra.CheckErr(err)
+		var abbvToUpd string
+		//If the flag abbv is need it
+		if passed("abbv") {
+			abbvToUpd, err = cmd.Flags().GetString("abbv")
+			cobra.CheckErr(err)
+		}
 
-		mode, err := cmd.Flags().GetString("mode")
-		cobra.CheckErr(err)
+		var indxToUpd int
+		if passed("indx") {
+			indxToUpd, err = cmd.Flags().GetInt("indx")
+			cobra.CheckErr(err)
+		}
 
 		new, err := cmd.Flags().GetString("new")
 		cobra.CheckErr(err)
 
-		//If CurrentPath is passed, overwrite the path to current directory
-		if currentPath {
-			//Get the current path
-			currentDir, err := os.Getwd()
-			cobra.CheckErr(err)
-
-			//Valid the path
-			cobra.CheckErr(config.ValidPath(&currentDir))
-
-			//If all ok, overwrite "pathToUpd" variable
-			pathToUpd = currentDir
+		//If modes is passed, show all modes
+		if passed("modes") {
+			for _, mode := range modesToUpdate {
+				fmt.Println(mode)
+			}
+			return
 		}
 
-		//If newCurrentPath is passed, overwrite the "new" to current directory
-		if newCurrentPath {
-			//Get the current path
-			currentDir, err := os.Getwd()
+		//If current is passed, overwrite the path to current directory
+		if passed("current") {
+			//Get the current path, and overwrite"pathToUpd" variable
+			pathToUpd, err = os.Getwd()
 			cobra.CheckErr(err)
 
-			//Valid the path
-			cobra.CheckErr(config.ValidPath(&currentDir))
+			//It is not necesary valid the path here, in the switch below do it
+			//cobra.CheckErr(config.ValidPath(&currentDir))
+		}
 
-			//If all ok, overwrite "new" variable
-			new = currentDir
+		//If new-current is passed, overwrite the "new" to current directory
+		if passed("new-current") {
+			//Get the current path, overwrite "new" variable
+			new, err = os.Getwd()
+			cobra.CheckErr(err)
+
+			//It is not necesary valid the path here, in the switch below do it
+			//cobra.CheckErr(config.ValidPath(&currentDir))
 		}
 
 		//Initial the variables to use config package
@@ -138,7 +147,8 @@ goto update-path --mode abbv-abbv --abbv h --new home
 			gpaths[inx2] = gpath1
 		}
 
-		switch mode {
+		//Arg 0 indicate the Mode of the update
+		switch args[0] {
 
 		//path-path
 		case modesToUpdate[0]:
@@ -291,7 +301,7 @@ goto update-path --mode abbv-abbv --abbv h --new home
 			}
 
 		default:
-			cobra.CheckErr(fmt.Errorf("the valid values to flag mode are: %v", modesToUpdate))
+			cobra.CheckErr(fmt.Errorf("invalid values of modes to update, use goto --modes"))
 		}
 
 		//If the array is valid, apply the changes
@@ -312,10 +322,10 @@ func init() {
 	updateCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
 	updateCmd.Flags().IntP("indx", "i", -1, "The Index of the Path")
 
-	//Flahs "Update To"
+	//Flags "Update To"
 	updateCmd.Flags().StringP("new", "n", "", "The Path or Abbreviation new")
 	updateCmd.Flags().BoolP("new-current", "C", false, "The new Path will be the current directory (\"new\" flag will be overwrite)")
 
-	//Flag of mode
-	updateCmd.Flags().StringP("mode", "m", "", "Indicate that update in the format")
+	//Flag info
+	updateCmd.Flags().BoolP("modes", "m", false, "Print all modes formats")
 }
