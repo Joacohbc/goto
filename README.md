@@ -95,13 +95,13 @@ If you use Goto with cd (e.g. with aliases) you have the ultimate way to move be
 To use the main function of goto:
 
 ```bash  
-#Move to the destination directory
-#"home" is the abreviation of /home/user/ in the config.json
+# Move to the destination directory
+# "home" is the abreviation of /home/user
 goto home
 
 Output: Go to: /home/user/
 
-#"0" is the number index of the /home/user/ in the config.json
+# You also can use "0" (that is the default index of the /home/user)
 goto 0
 
 Output: Go to: /home/user/
@@ -122,7 +122,7 @@ Output: Go to: /home/user/.config/goto
 To add a new *gpath* requiere a Path and a Abbreviation:
 
 ```bash
-# This command add the current directory(the "Path") to the config file with
+# This command add the current directory(the "Path") to the gpaths file with
 # the abbreviation "currentDir"
 goto add --current -abbv currentDir
 
@@ -138,7 +138,7 @@ goto add -p ~/Documents -a docs
 
 ### List paths
 
-To list all *gpath* of the gpaths file:
+To list all *gpath* of the *gpaths* file:
 
 ```bash
 goto list
@@ -238,6 +238,7 @@ Output: Backup complete
 To make a restore of the configuration file from a backup
 
 ```bash
+# Do a restore of goto-paths from a backup in the config directory
 goto restore
 
 Output: Restore complete
@@ -253,8 +254,13 @@ Output: Restore complete
 More options besides the goto to move:
 
 ```bash
-#Return a path with quotes, you need to specify a abreviation, a number of index or a directory 
+# Return a path with quotes, you need to specify a abreviation, a number of index or a directory 
 goto -q home
+
+Output: "/home/user"
+
+# You can use the Index
+goto -q 0
 
 Output: "/home/user"
 ```
@@ -264,6 +270,6 @@ Output: "/home/user"
 **If you want to use only cd, not the alias of he goto function, you should use:**
 
 ```bash
-    #This use the commnad cd and not the alias
-    \cd ~/home
+#This use the commnad cd and not the alias
+\cd ~/Documents
 ```

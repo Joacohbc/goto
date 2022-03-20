@@ -74,6 +74,18 @@ goto update-path abbv-abbv --abbv h --new home
 			"indx-indx", // 8
 		}
 
+		modesToUpdateShort := []string{
+			"pp", // 0
+			"pa", // 1
+			"pi", // 2
+			"ap", // 3
+			"aa", // 4
+			"ai", // 5
+			"ip", // 6
+			"ia", // 7
+			"ii", // 8
+		}
+
 		passed := func(flag string) bool { return cmd.Flags().Changed(flag) }
 
 		//"Parse" all Flags
@@ -104,8 +116,8 @@ goto update-path abbv-abbv --abbv h --new home
 
 		//If modes is passed, show all modes
 		if passed("modes") {
-			for _, mode := range modesToUpdate {
-				fmt.Println(mode)
+			for i := range modesToUpdate {
+				fmt.Println("Long form:", modesToUpdate[i], "|", "Short form:", modesToUpdateShort[i])
 			}
 			return
 		}
@@ -149,7 +161,7 @@ goto update-path abbv-abbv --abbv h --new home
 		switch args[0] {
 
 		//path-path
-		case modesToUpdate[0]:
+		case modesToUpdate[0], modesToUpdateShort[0]:
 			//Valid the Path and the new Path
 			cobra.CheckErr(config.ValidPath(&pathToUpd))
 			cobra.CheckErr(config.ValidPath(&new))
@@ -167,7 +179,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//path-abbv
-		case modesToUpdate[1]:
+		case modesToUpdate[1], modesToUpdateShort[1]:
 			//Valid the Path and the new Abbreviation
 			cobra.CheckErr(config.ValidPath(&pathToUpd))
 			cobra.CheckErr(config.ValidAbbreviation(&new))
@@ -185,7 +197,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//path-indx
-		case modesToUpdate[2]:
+		case modesToUpdate[2], modesToUpdateShort[2]:
 			//Valid the Path and the new Abbreviation
 			cobra.CheckErr(config.ValidPath(&pathToUpd))
 			cobra.CheckErr(config.IsValidIndex(gpaths, new))
@@ -205,7 +217,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//abbv-path
-		case modesToUpdate[3]:
+		case modesToUpdate[3], modesToUpdateShort[3]:
 			//Valid the Abbreviation and the new Path
 			cobra.CheckErr(config.ValidAbbreviation(&abbvToUpd))
 			cobra.CheckErr(config.ValidPath(&new))
@@ -223,7 +235,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//abbv-abbv
-		case modesToUpdate[4]:
+		case modesToUpdate[4], modesToUpdateShort[4]:
 			//Valid the Abbreviation and the new Path
 			cobra.CheckErr(config.ValidAbbreviation(&abbvToUpd))
 			cobra.CheckErr(config.ValidAbbreviation(&new))
@@ -241,7 +253,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//abbv-indx
-		case modesToUpdate[5]:
+		case modesToUpdate[5], modesToUpdateShort[5]:
 			//Valid the Path and the new Abbreviation
 			cobra.CheckErr(config.ValidAbbreviation(&abbvToUpd))
 			cobra.CheckErr(config.IsValidIndex(gpaths, new))
@@ -261,7 +273,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//indx-path
-		case modesToUpdate[6]:
+		case modesToUpdate[6], modesToUpdateShort[6]:
 			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(indxToUpd)))
 			cobra.CheckErr(config.ValidPath(&new))
 
@@ -273,7 +285,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//indx-abbv
-		case modesToUpdate[7]:
+		case modesToUpdate[7], modesToUpdateShort[7]:
 			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(indxToUpd)))
 			cobra.CheckErr(config.ValidAbbreviation(&new))
 
@@ -285,7 +297,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//indx-indx
-		case modesToUpdate[8]:
+		case modesToUpdate[8], modesToUpdateShort[8]:
 			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(indxToUpd)))
 			cobra.CheckErr(config.IsValidIndex(gpaths, new))
 
