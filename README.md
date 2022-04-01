@@ -1,6 +1,6 @@
 # Goto 2.0
 
-Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an index number. Those path are automatically save in a json file, the goto-paths (*gpaths*) files. From this files can add, update, delete and list paths and abreviations. A *gpath* consists of a Path and an Abbreviation to identify the path. A example of a *gpath* in the goto-paths file:
+Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an index number. Those path are automatically save in a json file, the goto-paths (*gpaths*) files. From this files can add, update, delete and list paths and abbreviations. A *gpath* consists of a Path and an Abbreviation to identify the path. A example of a *gpath* in the goto-paths file:
 
 ```json
 {
@@ -11,7 +11,7 @@ Goto is a "Path Manager" that allows you to add a specific path with an identifi
 
 ## Use Goto to move in the CLI
 
-If you use Goto with cd (e.g. with aliases) you have the ultimate way to move between folders on the command line. Its is quick and easy to use and implement . It works via a compiled Go file that returns the corresponding path based on the arguments passed as input. And passes it as an argument to an alias that uses cd on the command line to move to the specified path.
+If you use Goto with cd (e.g. with aliases) you have the ultimate way to move between folders on the command line. It is quick and easy to use and implement . It works via a compiled Go file that returns the corresponding path based on the arguments passed as input. And passes it as an argument to an alias that uses cd on the command line to move to the specified path.
 
 ## How to install?
 
@@ -72,8 +72,8 @@ If you use Goto with cd (e.g. with aliases) you have the ultimate way to move be
     chmod +x $HOME/.config/goto/bin/*
     ```
 
-    **Note:** *The step 7 only if the $GOTO_FILE (variable) is incorrect or the goto command doesn't work!*
-7. To finish the instalation you need to change the GOTO_FILE VARIABLE in alias.sh
+    **Note:** *Step 7 only if the $GOTO_FILE (variable) is incorrect or the goto command doesn't work!*
+7. To finish the installation you need to change the GOTO_FILE VARIABLE in alias.sh
 
     ```bash
     #Use your fav text editor: nano, vi, vim, nvim, etc
@@ -96,7 +96,7 @@ To use the main function of goto:
 
 ```bash  
 # Move to the destination directory
-# "home" is the abreviation of /home/user
+# "home" is the abbreviation of /home/user
 goto home
 
 Output: Go to: /home/user/
@@ -119,7 +119,7 @@ Output: Go to: /home/user/.config/goto
 
 ### Add new path
 
-To add a new *gpath* requiere a Path and a Abbreviation:
+To add a new *gpath* require a Path and a Abbreviation:
 
 ```bash
 # This command add the current directory(the "Path") to the gpaths file with
@@ -168,7 +168,7 @@ Output:
 
 ### Delete paths
 
-To delete a *gpath* requiere a Path or a Abbreviation:
+To delete a *gpath* require a Path or a Abbreviation:
 
 ```bash
 #I want to delete the path /home/user/Documents
@@ -254,7 +254,7 @@ Output: Restore complete
 More options besides the goto to move:
 
 ```bash
-# Return a path with quotes, you need to specify a abreviation, a number of index or a directory 
+# Return a path with quotes, you need to specify a abbreviation, a number of index or a directory 
 goto -q home
 
 Output: "/home/user"
