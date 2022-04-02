@@ -287,11 +287,21 @@ goto -s example
 Output: "/home/user/Dir\ with \ Spaces"
 ```
 
-## IMPORTANT
+## IMPORTANT TO KNOW
 
 **If you want to use only cd, not the alias of he goto function, you should use:**
 
 ```bash
 #This use the command cd and not the alias
 \cd ~/Documents
+```
+
+Other thing important is that **goto returns 2 in the exist ($? = 2)** when returning the path, this only happens to get the path (default use). This is because to detect in the alias when the user want to move:
+
+```bash
+# Without the alias (from the goto binary directly)
+goto h
+echo $?
+
+Output: 2
 ```
