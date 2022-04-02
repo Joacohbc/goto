@@ -56,7 +56,7 @@ func ValidPath(path *string) error {
 
 	//If not exists, return it
 	if os.IsNotExist(err) {
-		return fmt.Errorf("the Path \"%s\" don't exist", validPath)
+		return fmt.Errorf("the Path \"%s\" do not exist", validPath)
 	}
 
 	//If other error happen, return it

@@ -1,6 +1,6 @@
 # Goto 2.0
 
-Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an index number. Those path are automatically save in a json file, the goto-paths (*gpaths*) files. From this files can add, update, delete and list paths and abbreviations. A *gpath* consists of a Path and an Abbreviation to identify the path. A example of a *gpath* in the goto-paths file:
+Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an index number. Those path are automatically save in a json file, the goto-paths (*gpaths*) files. From these files can add, update, delete and list paths and abbreviations. A *gpath* consists of a Path and an Abbreviation to identify the path. A example of a *gpath* in the goto-paths file:
 
 ```json
 {
@@ -115,7 +115,7 @@ goto /home/user/.config/goto
 Output: Go to: /home/user/.config/goto
 ```
 
-**Note**: *goto always give priority to the abbreviation and index over a path in the current directory. If in the current working directory exists a directory named "scripts" and you put "scripts" goto search first if "scripts" is abbreviation and after search if a valid path*
+**Note**: *goto always gives priority to the abbreviation and index over a path in the current directory. If in the current working directory exists a directory named "scripts" and you put "scripts" goto search first if "scripts" is abbreviation and after search if a valid path*
 
 ### Add new path
 
@@ -249,7 +249,24 @@ goto restore -i /the/path/file.json.backup
 Output: Restore complete
 ```
 
-### Extras
+## Temporal gpaths
+
+If you want to add a gpath, but only for a while (until shutdown, for example) you can use the temporary flags (-t) which do the adding, deleting, updating and listing of gpaths in/from a temporary gpath file. The temporary gpath file is deleted on reboot.
+
+```bash
+# To add you can use exactly the same command to add a normal gpath, with the -t
+goto add -t --current -abbv currentDir
+
+# For a temporal gpaths you have to use temporal flag(-t / --temporal)
+goto currentDir
+
+Output: Error: the Path "currentDir" do not exist
+
+# You have to use -t to gpaths in the temporal gpath file
+goto -t currentDir
+```
+
+## Extras
 
 More options besides the goto to move:
 
@@ -263,6 +280,11 @@ Output: "/home/user"
 goto -q 0
 
 Output: "/home/user"
+
+# Return a path without spaces (" " -> "\ ") you need to specify a abbreviation, a number of index or a directory 
+goto -s example
+
+Output: "/home/user/Dir\ with \ Spaces"
 ```
 
 ## IMPORTANT
@@ -270,6 +292,6 @@ Output: "/home/user"
 **If you want to use only cd, not the alias of he goto function, you should use:**
 
 ```bash
-#This use the commnad cd and not the alias
+#This use the command cd and not the alias
 \cd ~/Documents
 ```

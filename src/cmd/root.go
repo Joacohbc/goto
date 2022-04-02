@@ -110,6 +110,21 @@ Goto is a "Path Manager" that allows you to add a specific path with an identifi
 index number. Those path are automatically save in a json file, the goto-paths files. From this files can add, update, delete and list
 paths and abreviations.
 `,
+
+	Example: `
+# Move to the destination directory
+# "home" is the abbreviation of /home/user
+goto home
+
+# You also can use "0" (that is the default index of the /home/user)
+goto 0
+
+# Or also you can use goto like cd, use a complete/relative path:
+goto /home/user/.config/goto
+
+# For a temporal gpaths you have to use temporal flag(-t / --temporal)
+goto -t home2
+`,
 	//If don't have args, return a error
 	Args: cobra.MinimumNArgs(1),
 
