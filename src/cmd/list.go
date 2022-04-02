@@ -46,9 +46,7 @@ goto list --abbv docs
 		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
 		{
-			//Initial the variables to use config
-			config.GotoPathsFile = GotoPathsFile
-			cobra.CheckErr(config.LoadConfigFile(&gpaths))
+			cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
 		}
 
 		//Where any error is saved

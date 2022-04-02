@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -29,17 +30,16 @@ var (
 	ConfigDir           string
 	ConfigFile          string
 	GotoPathsFile       string
+	TempGotoPathsFile   string
 	GotoPathsFileBackup string
 )
 
 // Return the path of
 func CheckIndexOrAbbvOrDir(arg string) (string, error) {
-	//Initial the variables to use config package
-	config.GotoPathsFile = GotoPathsFile
 
 	//Load the config file in memory
 	var gpaths []config.GotoPath
-	if err := config.LoadConfigFile(&gpaths); err != nil {
+	if err := config.LoadConfigFile(&gpaths, GotoPathsFile); err != nil {
 		return "", err
 	}
 
@@ -88,12 +88,15 @@ paths and abreviations.
 
 		if path, err := CheckIndexOrAbbvOrDir(args[0]); err == nil {
 
-			quotes, err := cmd.Flags().GetBool("quotes")
-			cobra.CheckErr(err)
-
 			//If quote flag is passed
-			if quotes {
+			if cmd.Flags().Changed("quotes") {
 				fmt.Println("\"" + path + "\"")
+				os.Exit(0)
+			}
+
+			//If spaces flag is passed
+			if cmd.Flags().Changed("spaces") {
+				fmt.Println(strings.ReplaceAll(path, " ", "\\ "))
 				os.Exit(0)
 			}
 
@@ -127,17 +130,13 @@ func initOfConfigVars() {
 	GotoPathsFile = filepath.Join(ConfigDir, "config.json")
 	GotoPathsFile = filepath.Join(ConfigDir, "goto-paths.json")
 	GotoPathsFileBackup = filepath.Clean(GotoPathsFile + ".backup")
+	TempGotoPathsFile = filepath.Join(os.TempDir(), "goto-paths-temp.json")
 
-	//Create the json file
-
-	//Initial the variables to use config package
-	config.GotoPathsFile = GotoPathsFile
-	config.ConfigDir = ConfigDir
-
-	cobra.CheckErr(config.CreateConfigFile())
+	cobra.CheckErr(config.CreateGotoPathFile(GotoPathsFile))
 }
 
 func init() {
 	cobra.OnInitialize(initOfConfigVars)
 	rootCmd.Flags().BoolP("quotes", "q", false, "Return the path between quotes")
+	rootCmd.Flags().BoolP("spaces", "s", false, "Return the path with substituted spaces")
 }

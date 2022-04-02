@@ -28,7 +28,7 @@ import (
 var updateCmd = &cobra.Command{
 	Use:     "update-path",
 	Aliases: []string{"upd", "update", "modify-path", "mod"},
-	Args:    cobra.MaximumNArgs(1),
+	Args:    cobra.ExactArgs(1),
 	Short:   "Update a path from goto-path file",
 	Long: `
 To use the update-path command you have 9 modes to update, each mode needs two args, 
@@ -142,12 +142,9 @@ goto update-path abbv-abbv --abbv h --new home
 			//cobra.CheckErr(config.ValidPath(&currentDir))
 		}
 
-		//Initial the variables to use config package
-		config.GotoPathsFile = GotoPathsFile
-
 		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
-		cobra.CheckErr(config.LoadConfigFile(&gpaths))
+		cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
 
 		// Change the GPath Index 1 for GPath in Index 2 and vice-versa
 		changeIndex := func(inx1, inx2 int) {
@@ -315,7 +312,7 @@ goto update-path abbv-abbv --abbv h --new home
 		}
 
 		//If the array is valid, apply the changes
-		cobra.CheckErr(config.CreateJsonFile(gpaths))
+		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
 
 		fmt.Println("Changes applied successfully")
 	},

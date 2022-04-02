@@ -5,16 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-)
-
-var (
-	GotoPathsFile string
-	ConfigDir     string
+	"path/filepath"
 )
 
 // Valid the Array (ValidArray) and create a Json file from directory array
-// NEED INITIALIZE THE VARIABLE "GotoPathsFile"
-func CreateJsonFile(gpaths []GotoPath) error {
+func CreateJsonFile(gpaths []GotoPath, gotoPathsFile string) error {
 
 	if err := ValidArray(gpaths); err != nil {
 		return err
@@ -27,7 +22,7 @@ func CreateJsonFile(gpaths []GotoPath) error {
 	}
 
 	//Create the config file
-	err = ioutil.WriteFile(GotoPathsFile, jsonFile, 0600)
+	err = ioutil.WriteFile(gotoPathsFile, jsonFile, 0600)
 	if err != nil {
 		return err
 	}
@@ -36,10 +31,9 @@ func CreateJsonFile(gpaths []GotoPath) error {
 }
 
 // Create the config file if not already exists
-// NEED INITIALIZE THE VARIABLE "GotoPathsFile" AND "ConfigDir"
-func CreateConfigFile() error {
+func CreateGotoPathFile(gotoPathsFile string) error {
 
-	if _, err := os.Stat(GotoPathsFile); err == nil {
+	if _, err := os.Stat(gotoPathsFile); err == nil {
 		return nil
 	}
 
@@ -48,6 +42,8 @@ func CreateConfigFile() error {
 
 	//Functions to add directories to the config file
 	add := func(path string, abbv string) {
+		//Your directories as Default:
+		//add("<path>", "<name>")
 		gpaths = append(gpaths, GotoPath{
 			Path:         path,
 			Abbreviation: abbv,
@@ -62,12 +58,11 @@ func CreateConfigFile() error {
 	//Default Path:
 	add(home, "h") //If you write only goto, this will the resulting directory
 
-	//Your directories as Default:
-	//add("<path>", "<name>")
-	add(ConfigDir, "config")
+	//ConfigDir -> filepath.Dir(gotoPathsFile)
+	add(filepath.Dir(gotoPathsFile), "config")
 
 	//Make the json config file
-	if err := CreateJsonFile(gpaths); err != nil {
+	if err := CreateJsonFile(gpaths, gotoPathsFile); err != nil {
 		return err
 	}
 
@@ -76,11 +71,10 @@ func CreateConfigFile() error {
 }
 
 //Load config files in an array
-// NEED INITIALIZE THE VARIABLE "GotoPathsFile"
-func LoadConfigFile(gpaths *[]GotoPath) error {
+func LoadConfigFile(gpaths *[]GotoPath, gotoPathsFile string) error {
 
 	//Read the File
-	file, err := ioutil.ReadFile(GotoPathsFile)
+	file, err := ioutil.ReadFile(gotoPathsFile)
 	if err != nil {
 		return fmt.Errorf("error reading config file")
 	}

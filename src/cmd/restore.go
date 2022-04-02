@@ -60,11 +60,8 @@ var restoreCmd = &cobra.Command{
 			cobra.CheckErr(fmt.Errorf("cant parse the backup of config file"))
 		}
 
-		//Initial the variables to use config
-		config.GotoPathsFile = GotoPathsFile
-
 		//And re-write the config file with the backup
-		cobra.CheckErr(config.CreateJsonFile(gpaths))
+		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
 
 		fmt.Println("Restore complete")
 	},

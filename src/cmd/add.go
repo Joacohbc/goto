@@ -56,11 +56,8 @@ goto add-path --path ~/Documents -abbv docs
 			abbvToAdd, err := cmd.Flags().GetString("abbv")
 			cobra.CheckErr(err)
 
-			//Initialze the variables to use config package
-			config.GotoPathsFile = GotoPathsFile
-
 			//Load the goto-paths file to array
-			cobra.CheckErr(config.LoadConfigFile(&gpaths))
+			cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
 
 			//If CurrentPath is passed, the path to add is current directory
 			if cmd.Flags().Changed("current") {
@@ -87,7 +84,7 @@ goto add-path --path ~/Documents -abbv docs
 		gpaths = append(gpaths, gpathToAdd)
 
 		//If the array is valid, apply the changes
-		cobra.CheckErr(config.CreateJsonFile(gpaths))
+		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
 
 		fmt.Println("Changes applied successfully")
 	},

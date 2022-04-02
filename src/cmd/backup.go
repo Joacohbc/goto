@@ -30,12 +30,9 @@ var backupCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		//Initial the variables to use config
-		config.GotoPathsFile = GotoPathsFile
-
 		//Read the config file
 		var gpaths []config.GotoPath
-		cobra.CheckErr(config.LoadConfigFile(&gpaths))
+		cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
 
 		//Get output flag
 		output, err := cmd.Flags().GetString("output")
@@ -46,10 +43,7 @@ var backupCmd = &cobra.Command{
 			cobra.CheckErr(fmt.Errorf("the file \"%s\" already exists", output))
 		}
 
-		//Create the GotoPath file in the output
-		config.GotoPathsFile = output
-		cobra.CheckErr(config.CreateJsonFile(gpaths))
-
+		cobra.CheckErr(config.CreateJsonFile(gpaths, output))
 		fmt.Println("Backup complete")
 	},
 }

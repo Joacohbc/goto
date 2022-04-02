@@ -58,10 +58,7 @@ goto delete-path --indx 2
 		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
 		{
-			//Initial the variables to use config package
-			config.GotoPathsFile = GotoPathsFile
-
-			cobra.CheckErr(config.LoadConfigFile(&gpaths))
+			cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
 		}
 
 		//Before load the flags into de vars check valid number of Flags
@@ -124,7 +121,7 @@ goto delete-path --indx 2
 		cobra.CheckErr(config.ValidArray(gpaths))
 
 		//If the array is valid, apply the changes
-		cobra.CheckErr(config.CreateJsonFile(gpaths))
+		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
 
 		fmt.Println("Changes applied successfully")
 	},
