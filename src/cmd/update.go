@@ -144,7 +144,7 @@ goto update-path abbv-abbv --abbv h --new home
 
 		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
-		cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
+		LoadGPath(cmd, &gpaths)
 
 		// Change the GPath Index 1 for GPath in Index 2 and vice-versa
 		changeIndex := func(inx1, inx2 int) {
@@ -311,10 +311,7 @@ goto update-path abbv-abbv --abbv h --new home
 			cobra.CheckErr(fmt.Errorf("invalid values of modes to update, use goto --modes"))
 		}
 
-		//If the array is valid, apply the changes
-		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
-
-		fmt.Println("Changes applied successfully")
+		CreateGPath(cmd, gpaths)
 	},
 }
 

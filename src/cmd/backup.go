@@ -27,7 +27,7 @@ import (
 var backupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Do a backup of the goto-paths file",
-
+	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Read the config file

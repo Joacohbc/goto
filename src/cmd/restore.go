@@ -28,7 +28,7 @@ import (
 var restoreCmd = &cobra.Command{
 	Use:   "restore",
 	Short: "Do a restore of the goto-paths file",
-
+	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Parse all flags

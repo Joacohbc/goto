@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"goto/src/config"
 	"os"
 
@@ -27,6 +26,7 @@ import (
 var addCmd = &cobra.Command{
 	Use:     "add-path",
 	Aliases: []string{"add", "create-path", "create"},
+	Args:    cobra.ExactArgs(0),
 	Short:   "Add a new path to goto-paths file",
 	Long: `
 To use the add-path command you need to pass two args: a "Path" and an "Abbreviation" to 
@@ -83,10 +83,7 @@ goto add-path --path ~/Documents -abbv docs
 		//Add the new directory to the array and valid it
 		gpaths = append(gpaths, gpathToAdd)
 
-		//If the array is valid, apply the changes
-		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
-
-		fmt.Println("Changes applied successfully")
+		CreateGPath(cmd, gpaths)
 	},
 }
 

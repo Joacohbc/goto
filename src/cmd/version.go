@@ -21,14 +21,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const VersionGoto = "2.1.1"
+const VersionGoto = "2.1.2"
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version of goto",
-	Long:  "Print the version of goto",
-
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Goto version is: " + VersionGoto)
 	},

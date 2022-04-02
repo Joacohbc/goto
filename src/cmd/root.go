@@ -27,21 +27,28 @@ import (
 )
 
 var (
-	ConfigDir           string
-	ConfigFile          string
-	GotoPathsFile       string
-	TempGotoPathsFile   string
+	//Config dir of the goto-paths
+	ConfigDir string
+
+	//A posible config file
+	//ConfigFile        string
+
+	//Path of the gpaths file
+	GotoPathsFile string
+
+	//Path of the temporal gpaths file
+	TempGotoPathsFile string
+
+	//Path of backup the gpaths file
 	GotoPathsFileBackup string
 )
 
-// Return the path of
-func CheckIndexOrAbbvOrDir(arg string) (string, error) {
+// Return the path of Index (number), of a Abbreviation or return the path validated
+func CheckIndexOrAbbvOrDir(cmd *cobra.Command, arg string) (string, error) {
 
 	//Load the config file in memory
 	var gpaths []config.GotoPath
-	if err := config.LoadConfigFile(&gpaths, GotoPathsFile); err != nil {
-		return "", err
-	}
+	LoadGPath(cmd, &gpaths)
 
 	//Check if path is number
 	if err := config.IsValidIndex(gpaths, arg); err == nil {
@@ -72,6 +79,28 @@ func CheckIndexOrAbbvOrDir(arg string) (string, error) {
 	return arg, nil
 }
 
+//Overwrite the gpaths file (or the temporal gpath file if the flag passed) with the gpaths array
+func CreateGPath(cmd *cobra.Command, gpaths []config.GotoPath) {
+	if cmd.Flags().Changed("temporal") {
+		//If the array is valid, apply the changes
+		cobra.CheckErr(config.CreateJsonFile(gpaths, TempGotoPathsFile))
+	} else {
+		//If the array is valid, apply the changes
+		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
+	}
+
+	fmt.Println("Changes applied successfully")
+}
+
+//Load the gpaths file (or the temporal gpath file if the flag passed) in the gpaths array
+func LoadGPath(cmd *cobra.Command, gpaths *[]config.GotoPath) {
+	if cmd.Flags().Changed("temporal") {
+		cobra.CheckErr(config.LoadConfigFile(gpaths, TempGotoPathsFile))
+	} else {
+		cobra.CheckErr(config.LoadConfigFile(gpaths, GotoPathsFile))
+	}
+}
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "goto",
@@ -85,30 +114,27 @@ paths and abreviations.
 	Args: cobra.MinimumNArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
+		path, err := CheckIndexOrAbbvOrDir(cmd, args[0])
+		cobra.CheckErr(err)
 
-		if path, err := CheckIndexOrAbbvOrDir(args[0]); err == nil {
-
-			//If quote flag is passed
-			if cmd.Flags().Changed("quotes") {
-				fmt.Println("\"" + path + "\"")
-				os.Exit(0)
-			}
-
-			//If spaces flag is passed
-			if cmd.Flags().Changed("spaces") {
-				fmt.Println(strings.ReplaceAll(path, " ", "\\ "))
-				os.Exit(0)
-			}
-
-			//If quote flag is not passed
-			fmt.Println(path)
-
-			//Return 2 because is easier for the alias.sh
-			//only need if [[ "$?" == "2"]]
-			os.Exit(2)
-		} else {
-			cobra.CheckErr(err)
+		//If quote flag is passed
+		if cmd.Flags().Changed("quotes") {
+			fmt.Println("\"" + path + "\"")
+			os.Exit(0)
 		}
+
+		//If spaces flag is passed
+		if cmd.Flags().Changed("spaces") {
+			fmt.Println(strings.ReplaceAll(path, " ", "\\ "))
+			os.Exit(0)
+		}
+
+		//If quote flag is not passed
+		fmt.Println(path)
+
+		//Return 2 because is easier for the alias.sh
+		//only need if [[ "$?" == "2"]]
+		os.Exit(2)
 	},
 }
 
@@ -133,10 +159,12 @@ func initOfConfigVars() {
 	TempGotoPathsFile = filepath.Join(os.TempDir(), "goto-paths-temp.json")
 
 	cobra.CheckErr(config.CreateGotoPathFile(GotoPathsFile))
+	cobra.CheckErr(config.CreateGotoPathFile(TempGotoPathsFile))
 }
 
 func init() {
 	cobra.OnInitialize(initOfConfigVars)
 	rootCmd.Flags().BoolP("quotes", "q", false, "Return the path between quotes")
 	rootCmd.Flags().BoolP("spaces", "s", false, "Return the path with substituted spaces")
+	rootCmd.PersistentFlags().BoolP("temporal", "t", false, "Do the action in the temporal gpath file")
 }

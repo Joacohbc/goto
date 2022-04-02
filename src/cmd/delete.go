@@ -29,6 +29,7 @@ var deleteCmd = &cobra.Command{
 	Use:     "delete-path",
 	Aliases: []string{"del", "delete", "remove-path", "rem", "remove"},
 	Short:   "Delete a path from goto-path file",
+	Args:    cobra.ExactArgs(0),
 	Long: `
 To use the delete-path command you need to Path, Abbreviation or Index from a goto-path`,
 
@@ -57,14 +58,17 @@ goto delete-path --indx 2
 
 		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
-		{
-			cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
-		}
+		LoadGPath(cmd, &gpaths)
 
 		//Before load the flags into de vars check valid number of Flags
-		//If the any flag or more than 1 is passed return a error
-		if cmd.Flags().NFlag() == 0 || cmd.Flags().NFlag() > 1 {
-			cobra.CheckErr(fmt.Errorf("you must specify 1 (only one) flag (Or Path or Abbreviation or Index) to `delete a gpath"))
+		if cmd.Flags().NFlag() == 2 {
+			//If 2 flags are passed and the temporary flag is not
+			//passed it means that two flags were passed to identify the gpath.
+			if !passed("temporal") {
+				cobra.CheckErr(fmt.Errorf("you must specify 1 (only one) flag (Or Path or Abbreviation or Index) to delete a gpath"))
+			}
+		} else {
+			cobra.CheckErr(fmt.Errorf("you must specify 1 (only one) flag (Or Path or Abbreviation or Index) to delete a gpath"))
 		}
 
 		//Parse all Flags
@@ -120,10 +124,7 @@ goto delete-path --indx 2
 		//After the changes, valid it
 		cobra.CheckErr(config.ValidArray(gpaths))
 
-		//If the array is valid, apply the changes
-		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
-
-		fmt.Println("Changes applied successfully")
+		CreateGPath(cmd, gpaths)
 	},
 }
 
@@ -134,5 +135,4 @@ func init() {
 	deleteCmd.Flags().StringP("path", "p", "", "The Path to delete")
 	deleteCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
 	deleteCmd.Flags().IntP("indx", "i", -1, "The Index of the Path")
-	deleteCmd.Flags().BoolP("current", "c", false, "The Path to remove will be the current directory (\"path\" flag will be overwrite)")
 }

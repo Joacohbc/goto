@@ -27,9 +27,8 @@ import (
 var listCmd = &cobra.Command{
 	Use:     "list-path",
 	Aliases: []string{"list"},
-
-	Short: "List goto-paths in the goto-paths file",
-
+	Args:    cobra.ExactArgs(0),
+	Short:   "List goto-paths in the goto-paths file",
 	Example: `
 #To list all goto-paths
 goto list
@@ -45,9 +44,7 @@ goto list --abbv docs
 
 		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
-		{
-			cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
-		}
+		LoadGPath(cmd, &gpaths)
 
 		//Where any error is saved
 		var err error = nil
