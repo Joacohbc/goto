@@ -18,10 +18,10 @@ package cmd
 import (
 	"fmt"
 	"goto/src/config"
-	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // deleteCmd represents the addGPath command
@@ -49,62 +49,62 @@ goto delete-path --abbv docs
 goto delete-path --indx 2
 `,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	PreRun: func(cmd *cobra.Command, args []string) {
 
 		passed := func(flag string) bool { return cmd.Flags().Changed(flag) }
 
-		//Where any error is saved
-		var err error = nil
+		//If any flags is passed or more than 2, return an error
+		if cmd.Flags().NFlag() == 0 || cmd.Flags().NFlag() > 2 {
+			cobra.CheckErr(fmt.Errorf("you must specify one flag to delete a gpath (Or Path or Abbreviation or Index)"))
+		}
+
+		//If one flags is passed and it is the temporary flags, return an error
+		if cmd.Flags().NFlag() == 1 && passed("temporal") {
+			cobra.CheckErr(fmt.Errorf("you must specify one flag to delete a gpath (Or Path or Abbreviation or Index)"))
+		}
+
+		//If 2 flags are passed and the temporary flag is not
+		//passed it means that two flags were passed to identify the gpath
+		/*
+			2 flags to identify the gpath may cause an error to delete the path.
+			For example, -p /home/user -i 2
+			the index not match with the gpath, so delete one of the paths
+		*/
+		if cmd.Flags().NFlag() == 2 && !passed("temporal") {
+			cobra.CheckErr(fmt.Errorf("you must specify one flag to delete a gpath (Or Path or Abbreviation or Index)"))
+		}
+	},
+
+	Run: func(cmd *cobra.Command, args []string) {
+
+		passed := func(flag string) bool { return cmd.Flags().Changed(flag) }
 
 		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
 		LoadGPath(cmd, &gpaths)
 
-		//Before load the flags into de vars check valid number of Flags
-		if cmd.Flags().NFlag() == 2 {
-			//If 2 flags are passed and the temporary flag is not
-			//passed it means that two flags were passed to identify the gpath.
-			if !passed("temporal") {
-				cobra.CheckErr(fmt.Errorf("you must specify 1 (only one) flag (Or Path or Abbreviation or Index) to delete a gpath"))
-			}
-		} else {
-			cobra.CheckErr(fmt.Errorf("you must specify 1 (only one) flag (Or Path or Abbreviation or Index) to delete a gpath"))
-		}
-
+		//
 		//Parse all Flags
+		//
 
-		var pathToDel string = ""
-		//If the path flag is passed, load the pathToDel
+		var pathToDel string = viper.GetString("path")
 		if passed("path") {
-			pathToDel, err = cmd.Flags().GetString("path")
-			cobra.CheckErr(err)
-			config.ValidPath(&pathToDel)
+			cobra.CheckErr(config.ValidPathVar(&pathToDel))
 		}
 
 		//If current flag is passed, overwrite pathToDel with the current directory
 		if passed("current") {
-			//Get the current path
-			pathToDel, err = os.Getwd()
-			cobra.CheckErr(err)
-
-			//Valid the path
-			cobra.CheckErr(config.ValidPath(&pathToDel))
+			pathToDel = GetCurrentDirectory()
 		}
 
-		var abbvToDel string = ""
-		//If the abbv flag is passed, load the abbvToDel
+		var abbvToDel string = viper.GetString("abbv")
 		if passed("abbv") {
-			abbvToDel, err = cmd.Flags().GetString("abbv")
-			cobra.CheckErr(err)
-			config.ValidAbbreviation(&abbvToDel)
+			cobra.CheckErr(config.ValidAbbreviationVar(&abbvToDel))
 		}
 
-		var indxToDel int = -1
-		//If the indx flag is passed, load the indxToDel
+		var indxToDel int = viper.GetInt("indx")
 		if passed("indx") {
-			indxToDel, err = cmd.Flags().GetInt("indx")
-			cobra.CheckErr(err)
-			config.IsValidIndex(gpaths, strconv.Itoa(indxToDel))
+			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(indxToDel)))
 		}
 
 		//Delete the directory from the array
@@ -113,6 +113,7 @@ goto delete-path --indx 2
 			//The gpath passes have the same Path or the same Abbreviation, delete it
 			if gpath.Path == pathToDel || gpath.Abbreviation == abbvToDel || i == indxToDel {
 				gpaths = append(gpaths[:i], gpaths[i+1:]...)
+				fmt.Printf("The path %s (Index %v - Abbreviation %s) was deleted\n", gpath.Path, i, gpath.Abbreviation)
 				break
 			}
 
@@ -132,7 +133,14 @@ func init() {
 	rootCmd.AddCommand(deleteCmd)
 
 	//Flags
-	deleteCmd.Flags().StringP("path", "p", "", "The Path to delete")
-	deleteCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
-	deleteCmd.Flags().IntP("indx", "i", -1, "The Index of the Path")
+	deleteCmd.Flags().StringP("path", "p", "", "The Path to delete") // A intial value that can't match with any gpath
+	viper.BindPFlag("path", deleteCmd.Flags().Lookup("path"))
+
+	deleteCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path") // A intial value that can't match with any gpath
+	viper.BindPFlag("abbv", deleteCmd.Flags().Lookup("abbv"))
+
+	deleteCmd.Flags().IntP("indx", "i", -1, "The Index of the Path") // A intial value that can't match with any gpath
+	viper.BindPFlag("indx", deleteCmd.Flags().Lookup("indx"))
+
+	deleteCmd.Flags().BoolP("current", "c", false, "The Path to add will be the current directory (\"path\" flag will be overwrite)")
 }

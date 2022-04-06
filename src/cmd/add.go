@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // addCmd represents the addGPath command
@@ -50,14 +51,11 @@ goto add-path --path ~/Documents -abbv docs
 		var gpathToAdd config.GotoPath
 		{
 			//Create the GPath to add
-			pathToAdd, err := cmd.Flags().GetString("path")
-			cobra.CheckErr(err)
-
-			abbvToAdd, err := cmd.Flags().GetString("abbv")
-			cobra.CheckErr(err)
+			pathToAdd := viper.GetString("path")
+			abbvToAdd := viper.GetString("abbv")
 
 			//Load the goto-paths file to array
-			cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
+			LoadGPath(cmd, &gpaths)
 
 			//If CurrentPath is passed, the path to add is current directory
 			if cmd.Flags().Changed("current") {
@@ -66,7 +64,7 @@ goto add-path --path ~/Documents -abbv docs
 				cobra.CheckErr(err)
 
 				//Valid the path
-				cobra.CheckErr(config.ValidPath(&currentDir))
+				cobra.CheckErr(config.ValidPathVar(&currentDir))
 
 				//If all ok, overwrite "pathToAdd" variable
 				pathToAdd = currentDir
@@ -93,6 +91,10 @@ func init() {
 
 	//Flags
 	addCmd.Flags().StringP("path", "p", "", "The Path to add")
+	viper.BindPFlag("path", addCmd.Flags().Lookup("path"))
+
 	addCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
+	viper.BindPFlag("abbv", addCmd.Flags().Lookup("abbv"))
+
 	addCmd.Flags().BoolP("current", "c", false, "The Path to add will be the current directory (\"path\" flag will be overwrite)")
 }
