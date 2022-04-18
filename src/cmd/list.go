@@ -18,9 +18,9 @@ package cmd
 import (
 	"fmt"
 	"goto/src/config"
+	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // listGPathCmd represents the listGPath command
@@ -46,18 +46,30 @@ goto list --abbv docs
 		var gpaths []config.GotoPath
 		LoadGPath(cmd, &gpaths)
 
+		//Where any error is saved
+		var err error = nil
+
+		//Parse all Flags
+
 		//If the flag "path" or "current" are passed
 		if passed("path") || passed("current") {
 
-			path := viper.GetString("path")
+			var path string = ""
+			//If the path flag is passed, load the path
+			if passed("path") {
+				path, err = cmd.Flags().GetString("path")
+				cobra.CheckErr(err)
+			}
 
 			//If current flag is passed, overwrite the path to current directory
 			if passed("current") {
-				path = GetCurrentDirectory()
+				//Get the current path, and overwrite "path" variable
+				path, err = os.Getwd()
+				cobra.CheckErr(err)
 			}
 
 			//Valid the path
-			cobra.CheckErr(config.ValidPathVar(&path))
+			cobra.CheckErr(config.ValidPath(&path))
 
 			for i, gpath := range gpaths {
 				if gpath.Path == path {
@@ -75,8 +87,11 @@ goto list --abbv docs
 		//If the flag "abbv" is passed
 		if passed("abbv") {
 
-			abbv := viper.GetString("abbv")
-			cobra.CheckErr(config.ValidAbbreviationVar(&abbv))
+			var abbv string
+			abbv, err = cmd.Flags().GetString("abbv")
+			cobra.CheckErr(err)
+
+			cobra.CheckErr(config.ValidAbbreviation(&abbv))
 
 			for i, gpath := range gpaths {
 				if gpath.Abbreviation == abbv {

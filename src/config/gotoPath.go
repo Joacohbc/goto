@@ -24,12 +24,12 @@ func (d *GotoPath) String() string {
 // This function valid a directory with ValidPath() and ValidAbbreviation()
 func (d *GotoPath) Valid() error {
 
-	err := ValidPathVar(&d.Path)
+	err := ValidPath(&d.Path)
 	if err != nil {
 		return err
 	}
 
-	err = ValidAbbreviationVar(&d.Abbreviation)
+	err = ValidAbbreviation(&d.Abbreviation)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func (d *GotoPath) Valid() error {
 // - Clean the Path
 // - Get absolute path
 // - That Path exist and is a directory
-func ValidPathVar(path *string) error {
+func ValidPath(path *string) error {
 
 	//Delete start and ends spacesn an clean the path
 	validPath := filepath.Clean(strings.TrimSpace(*path))
@@ -82,17 +82,11 @@ func ValidPathVar(path *string) error {
 	return nil
 }
 
-//Return the same that use ValidPathVar
-func ValidPath(path string) (string, error) {
-	err := ValidPathVar(&path)
-	return path, err
-}
-
 // This function valid:
 // - The Abbreviation don't be empty
 // - That Abbreviation is not a number letter
 // - Check that the Abbreviation don't contain any
-func ValidAbbreviationVar(abbv *string) error {
+func ValidAbbreviation(abbv *string) error {
 
 	//Delete start and ends spacesn an clean the path
 	validAbbv := strings.TrimSpace(*abbv)
@@ -113,12 +107,6 @@ func ValidAbbreviationVar(abbv *string) error {
 	return nil
 }
 
-//Return the same that use ValidAbbreviationVar
-func ValidAbbreviation(abbv string) (string, error) {
-	err := ValidAbbreviationVar(&abbv)
-	return abbv, err
-}
-
 // This function check if a index is valid the "indx"
 // must be a number beetween 0 and the length of the
 // GotoPath array
@@ -131,7 +119,7 @@ func IsValidIndex(gpaths []GotoPath, index string) error {
 
 	//If the path is over the max index return error
 	if indx < 0 || indx > len(gpaths)-1 {
-		return fmt.Errorf("the Index %s is invalid (should be: 0-%v), check config file", index, strconv.Itoa(len(gpaths)-1))
+		return fmt.Errorf("the Index is invalid (should be: 0-" + strconv.Itoa(len(gpaths)-1) + "), check config file")
 	}
 
 	return nil

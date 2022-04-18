@@ -22,40 +22,13 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-)
-
-var (
-	ModesToUpdate []string = []string{
-		"path-path", // 0
-		"path-abbv", // 1
-		"path-indx", // 2
-		"abbv-path", // 3
-		"abbv-abbv", // 4
-		"abbv-indx", // 5
-		"indx-path", // 6
-		"indx-abbv", // 7
-		"indx-indx", // 8
-	}
-
-	ModesToUpdateShort []string = []string{
-		"pp", // 0
-		"pa", // 1
-		"pi", // 2
-		"ap", // 3
-		"aa", // 4
-		"ai", // 5
-		"ip", // 6
-		"ia", // 7
-		"ii", // 8
-	}
 )
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:     "update-path",
 	Aliases: []string{"upd", "update", "modify-path", "mod"},
-	Args:    cobra.MaximumNArgs(1),
+	Args:    cobra.ExactArgs(1),
 	Short:   "Update a path from goto-path file",
 	Long: `
 To use the update-path command you have 9 modes to update, each mode needs two args, 
@@ -87,17 +60,87 @@ goto update-path path-abbv --path /home/myuser --new home
 goto update-path abbv-abbv --abbv h --new home
 `,
 
-	PreRun: func(cmd *cobra.Command, args []string) {
-		//If modes is passed, show all modes and exit
-		if cmd.Flags().Changed("modes") {
-			for i := range ModesToUpdate {
-				fmt.Println("Long form:", ModesToUpdate[i], "|", "Short form:", ModesToUpdateShort[i])
-			}
-			os.Exit(0)
-		}
-	},
-
 	Run: func(cmd *cobra.Command, args []string) {
+
+		modesToUpdate := []string{
+			"path-path", // 0
+			"path-abbv", // 1
+			"path-indx", // 2
+			"abbv-path", // 3
+			"abbv-abbv", // 4
+			"abbv-indx", // 5
+			"indx-path", // 6
+			"indx-abbv", // 7
+			"indx-indx", // 8
+		}
+
+		modesToUpdateShort := []string{
+			"pp", // 0
+			"pa", // 1
+			"pi", // 2
+			"ap", // 3
+			"aa", // 4
+			"ai", // 5
+			"ip", // 6
+			"ia", // 7
+			"ii", // 8
+		}
+
+		passed := func(flag string) bool { return cmd.Flags().Changed(flag) }
+
+		//"Parse" all Flags
+		var err error = nil
+
+		var pathToUpd string
+		//If the flag path is need it
+		if passed("path") {
+			pathToUpd, err = cmd.Flags().GetString("path")
+			cobra.CheckErr(err)
+		}
+
+		var abbvToUpd string
+		//If the flag abbv is need it
+		if passed("abbv") {
+			abbvToUpd, err = cmd.Flags().GetString("abbv")
+			cobra.CheckErr(err)
+		}
+
+		var indxToUpd int
+		if passed("indx") {
+			indxToUpd, err = cmd.Flags().GetInt("indx")
+			cobra.CheckErr(err)
+		}
+
+		new, err := cmd.Flags().GetString("new")
+		cobra.CheckErr(err)
+
+		//If modes is passed, show all modes
+		if passed("modes") {
+			for i := range modesToUpdate {
+				fmt.Println("Long form:", modesToUpdate[i], "|", "Short form:", modesToUpdateShort[i])
+			}
+			return
+		}
+
+		//If current is passed, overwrite the path to current directory
+		if passed("current") {
+			//Get the current path, and overwrite"pathToUpd" variable
+			pathToUpd, err = os.Getwd()
+			cobra.CheckErr(err)
+
+			//It is not necesary valid the path here, in the switch below do it
+			//cobra.CheckErr(config.ValidPath(&currentDir))
+		}
+
+		//If new-current is passed, overwrite the "new" to current directory
+		if passed("new-current") {
+			//Get the current path, overwrite "new" variable
+			new, err = os.Getwd()
+			cobra.CheckErr(err)
+
+			//It is not necesary valid the path here, in the switch below do it
+			//cobra.CheckErr(config.ValidPath(&currentDir))
+		}
 
 		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
@@ -111,175 +154,155 @@ goto update-path abbv-abbv --abbv h --new home
 			gpaths[inx2] = gpath1
 		}
 
-		current := func(key, currentKey string) string {
-			if cmd.Flags().Changed(currentKey) {
-				return GetCurrentDirectory()
-			}
-
-			var path string = viper.GetString(key)
-			cobra.CheckErr(config.ValidPathVar(&path))
-			return path
-		}
-
 		//Arg 0 indicate the Mode of the update
 		switch args[0] {
 
 		//path-path
-		case ModesToUpdate[0], ModesToUpdateShort[0]:
-			path := current("path", "current")
-			new := current("new", "new-current")
+		case modesToUpdate[0], modesToUpdateShort[0]:
+			//Valid the Path and the new Path
+			cobra.CheckErr(config.ValidPath(&pathToUpd))
+			cobra.CheckErr(config.ValidPath(&new))
 
 			//And search in the array
 			for i := range gpaths {
-				if gpaths[i].Path == path {
+				if gpaths[i].Path == pathToUpd {
 					gpaths[i].Path = new
 					break
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Path \"%v\" doesn't exist in the goto-paths file", path))
+					cobra.CheckErr(fmt.Errorf("the Path \"%v\" doesn't exist in the goto-paths file", pathToUpd))
 				}
 			}
 
 		//path-abbv
-		case ModesToUpdate[1], ModesToUpdateShort[1]:
+		case modesToUpdate[1], modesToUpdateShort[1]:
 			//Valid the Path and the new Abbreviation
-			path := current("path", "current")
-
-			new := viper.GetString("new")
-			cobra.CheckErr(config.ValidAbbreviationVar(&new))
+			cobra.CheckErr(config.ValidPath(&pathToUpd))
+			cobra.CheckErr(config.ValidAbbreviation(&new))
 
 			//And search in the array
 			for i := range gpaths {
-				if gpaths[i].Path == path {
+				if gpaths[i].Path == pathToUpd {
 					gpaths[i].Abbreviation = new
 					break
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Path \"%v\" doesn't exist in the goto-paths file", path))
+					cobra.CheckErr(fmt.Errorf("the Path \"%v\" doesn't exist in the goto-paths file", pathToUpd))
 				}
 			}
 
 		//path-indx
-		case ModesToUpdate[2], ModesToUpdateShort[2]:
-			path := current("path", "current")
+		case modesToUpdate[2], modesToUpdateShort[2]:
+			//Valid the Path and the new Abbreviation
+			cobra.CheckErr(config.ValidPath(&pathToUpd))
+			cobra.CheckErr(config.IsValidIndex(gpaths, new))
 
-			new := viper.GetInt("new")
-			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(new)))
+			n, _ := strconv.Atoi(new)
 
 			//And search in the array
 			for i := range gpaths {
-				if gpaths[i].Path == path {
-					changeIndex(i, new)
+				if gpaths[i].Path == pathToUpd {
+					changeIndex(i, n)
 					break
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Path \"%v\" doesn't exist in the goto-paths file", path))
+					cobra.CheckErr(fmt.Errorf("the Path \"%v\" doesn't exist in the goto-paths file", pathToUpd))
 				}
 			}
 
 		//abbv-path
-		case ModesToUpdate[3], ModesToUpdateShort[3]:
-			abbv := viper.GetString("abbv")
-			cobra.CheckErr(config.ValidAbbreviationVar(&abbv))
-
-			new := current("new", "new-current")
+		case modesToUpdate[3], modesToUpdateShort[3]:
+			//Valid the Abbreviation and the new Path
+			cobra.CheckErr(config.ValidAbbreviation(&abbvToUpd))
+			cobra.CheckErr(config.ValidPath(&new))
 
 			//And search in the array
 			for i := range gpaths {
-				if gpaths[i].Abbreviation == abbv {
+				if gpaths[i].Abbreviation == abbvToUpd {
 					gpaths[i].Path = new
 					break
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Abbreviation \"%v\" doesn't exist in the goto-paths file", abbv))
+					cobra.CheckErr(fmt.Errorf("the Abbreviation \"%v\" doesn't exist in the goto-paths file", abbvToUpd))
 				}
 			}
 
 		//abbv-abbv
-		case ModesToUpdate[4], ModesToUpdateShort[4]:
-			abbv := viper.GetString("abbv")
-			cobra.CheckErr(config.ValidAbbreviationVar(&abbv))
-
-			new := viper.GetString("new")
-			cobra.CheckErr(config.ValidAbbreviationVar(&new))
+		case modesToUpdate[4], modesToUpdateShort[4]:
+			//Valid the Abbreviation and the new Path
+			cobra.CheckErr(config.ValidAbbreviation(&abbvToUpd))
+			cobra.CheckErr(config.ValidAbbreviation(&new))
 
 			//And search in the array
 			for i := range gpaths {
-				if gpaths[i].Abbreviation == abbv {
+				if gpaths[i].Abbreviation == abbvToUpd {
 					gpaths[i].Abbreviation = new
 					break
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Abbreviation \"%v\" doesn't exist in the goto-paths file", abbv))
+					cobra.CheckErr(fmt.Errorf("the Abbreviation \"%v\" doesn't exist in the goto-paths file", abbvToUpd))
 				}
 			}
 
 		//abbv-indx
-		case ModesToUpdate[5], ModesToUpdateShort[5]:
-			abbv := viper.GetString("abbv")
-			cobra.CheckErr(config.ValidAbbreviationVar(&abbv))
+		case modesToUpdate[5], modesToUpdateShort[5]:
+			//Valid the Path and the new Abbreviation
+			cobra.CheckErr(config.ValidAbbreviation(&abbvToUpd))
+			cobra.CheckErr(config.IsValidIndex(gpaths, new))
 
-			new := viper.GetInt("new")
-			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(new)))
+			n, _ := strconv.Atoi(new)
 
 			//And search in the array
 			for i := range gpaths {
-				if gpaths[i].Abbreviation == abbv {
-					changeIndex(i, new)
+				if gpaths[i].Abbreviation == abbvToUpd {
+					changeIndex(i, n)
 					break
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Abbreviation \"%v\" doesn't exist in the goto-paths file", abbv))
+					cobra.CheckErr(fmt.Errorf("the Path \"%v\" doesn't exist in the goto-paths file", pathToUpd))
 				}
 			}
 
 		//indx-path
-		case ModesToUpdate[6], ModesToUpdateShort[6]:
-			index := viper.GetInt("indx")
-			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(index)))
-
-			new := current("new", "new-current")
+		case modesToUpdate[6], modesToUpdateShort[6]:
+			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(indxToUpd)))
+			cobra.CheckErr(config.ValidPath(&new))
 
 			for i := range gpaths {
-				if i == index {
-					gpaths[index].Path = new
+				if i == indxToUpd {
+					gpaths[indxToUpd].Path = new
 					break
 				}
 			}
 
 		//indx-abbv
-		case ModesToUpdate[7], ModesToUpdateShort[7]:
-			index := viper.GetInt("indx")
-			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(index)))
-
-			new := viper.GetString("new")
-			cobra.CheckErr(config.ValidAbbreviationVar(&new))
+		case modesToUpdate[7], modesToUpdateShort[7]:
+			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(indxToUpd)))
+			cobra.CheckErr(config.ValidAbbreviation(&new))
 
 			for i := range gpaths {
-				if i == index {
-					gpaths[index].Abbreviation = new
+				if i == indxToUpd {
+					gpaths[indxToUpd].Abbreviation = new
 					break
 				}
 			}
 
 		//indx-indx
-		case ModesToUpdate[8], ModesToUpdateShort[8]:
+		case modesToUpdate[8], modesToUpdateShort[8]:
+			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(indxToUpd)))
+			cobra.CheckErr(config.IsValidIndex(gpaths, new))
 
-			index := viper.GetInt("indx")
-			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(index)))
-
-			new := viper.GetInt("new")
-			cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(new)))
+			n, _ := strconv.Atoi(new)
 
 			for i := range gpaths {
-				if i == index {
-					changeIndex(i, new)
+				if i == indxToUpd {
+					changeIndex(i, n)
 					break
 				}
 			}
@@ -299,23 +322,13 @@ func init() {
 
 	//Flags "To Update"
 	updateCmd.Flags().StringP("path", "p", "", "The Path to delete")
-	viper.BindPFlag("path", updateCmd.Flags().Lookup("path"))
-
 	updateCmd.Flags().BoolP("current", "c", false, "The Path to update will be the current directory (\"path\" flag will be overwrite)")
-	viper.BindPFlag("current", updateCmd.Flags().Lookup("current"))
-
 	updateCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
-	viper.BindPFlag("abbv", updateCmd.Flags().Lookup("abbv"))
-
 	updateCmd.Flags().IntP("indx", "i", -1, "The Index of the Path")
-	viper.BindPFlag("indx", updateCmd.Flags().Lookup("indx"))
 
 	//Flags "Update To"
 	updateCmd.Flags().StringP("new", "n", "", "The Path or Abbreviation new")
-	viper.BindPFlag("new", updateCmd.Flags().Lookup("new"))
-
 	updateCmd.Flags().BoolP("new-current", "C", false, "The new Path will be the current directory (\"new\" flag will be overwrite)")
-	viper.BindPFlag("new-current", updateCmd.Flags().Lookup("new-current"))
 
 	//Flag info
 	updateCmd.Flags().BoolP("modes", "m", false, "Print all modes formats")
