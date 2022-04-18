@@ -17,89 +17,11 @@ package cmd
 
 import (
 	"fmt"
-	"goto/src/config"
 	"os"
-	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
 )
-
-var (
-	//Config dir of the goto-paths
-	ConfigDir string
-
-	//A posible config file
-	//ConfigFile        string
-
-	//Path of the gpaths file
-	GotoPathsFile string
-
-	//Path of the temporal gpaths file
-	TempGotoPathsFile string
-
-	//Path of backup the gpaths file
-	GotoPathsFileBackup string
-)
-
-// Return the path of Index (number), of a Abbreviation or return the path validated
-func CheckIndexOrAbbvOrDir(cmd *cobra.Command, arg string) (string, error) {
-
-	//Load the config file in memory
-	var gpaths []config.GotoPath
-	LoadGPath(cmd, &gpaths)
-
-	//Check if path is number
-	if err := config.IsValidIndex(gpaths, arg); err == nil {
-
-		//I already kwow that "arg" is a number
-		pathNumber, _ := strconv.Atoi(arg)
-
-		for i, gpath := range gpaths {
-			if pathNumber == i {
-				return gpath.Path, nil
-			}
-		}
-	}
-
-	//If not a number, check if is an abbreviation
-	for _, gpath := range gpaths {
-		if arg == gpath.Abbreviation {
-			return gpath.Path, nil
-		}
-	}
-
-	//Valid the path
-	if err := config.ValidPath(&arg); err != nil {
-		return "", err
-	}
-
-	//If the Path is valid, return it
-	return arg, nil
-}
-
-//Overwrite the gpaths file (or the temporal gpath file if the flag passed) with the gpaths array
-func CreateGPath(cmd *cobra.Command, gpaths []config.GotoPath) {
-	if cmd.Flags().Changed("temporal") {
-		//If the array is valid, apply the changes
-		cobra.CheckErr(config.CreateJsonFile(gpaths, TempGotoPathsFile))
-	} else {
-		//If the array is valid, apply the changes
-		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
-	}
-
-	fmt.Println("Changes applied successfully")
-}
-
-//Load the gpaths file (or the temporal gpath file if the flag passed) in the gpaths array
-func LoadGPath(cmd *cobra.Command, gpaths *[]config.GotoPath) {
-	if cmd.Flags().Changed("temporal") {
-		cobra.CheckErr(config.LoadConfigFile(gpaths, TempGotoPathsFile))
-	} else {
-		cobra.CheckErr(config.LoadConfigFile(gpaths, GotoPathsFile))
-	}
-}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -113,8 +35,8 @@ paths and abreviations.
 
 	Example: `
 # Move to the destination directory
-# "home" is the abbreviation of /home/user
-goto home
+# "h" is the abbreviation of /home/user
+goto h
 
 # You also can use "0" (that is the default index of the /home/user)
 goto 0
@@ -123,13 +45,13 @@ goto 0
 goto /home/user/.config/goto
 
 # For a temporal gpaths you have to use temporal flag(-t / --temporal)
-goto -t home2
+goto -t home
 `,
 	//If don't have args, return a error
-	Args: cobra.MinimumNArgs(1),
+	Args: cobra.ExactArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		path, err := CheckIndexOrAbbvOrDir(cmd, args[0])
+		path, err := checkIndexOrAbbvOrDir(cmd, args[0])
 		cobra.CheckErr(err)
 
 		//If quote flag is passed
@@ -162,23 +84,8 @@ func Execute() {
 	}
 }
 
-func initOfConfigVars() {
-	//Get the directory
-	configPath, err := os.UserConfigDir()
-	cobra.CheckErr(err)
-
-	ConfigDir = filepath.Join(configPath, "/goto/")
-	GotoPathsFile = filepath.Join(ConfigDir, "config.json")
-	GotoPathsFile = filepath.Join(ConfigDir, "goto-paths.json")
-	GotoPathsFileBackup = filepath.Clean(GotoPathsFile + ".backup")
-	TempGotoPathsFile = filepath.Join(os.TempDir(), "goto-paths-temp.json")
-
-	cobra.CheckErr(config.CreateGotoPathFile(GotoPathsFile))
-	cobra.CheckErr(config.CreateGotoPathFile(TempGotoPathsFile))
-}
-
 func init() {
-	cobra.OnInitialize(initOfConfigVars)
+	cobra.OnInitialize(initVars)
 	rootCmd.Flags().BoolP("quotes", "q", false, "Return the path between quotes")
 	rootCmd.Flags().BoolP("spaces", "s", false, "Return the path with substituted spaces")
 	rootCmd.PersistentFlags().BoolP("temporal", "t", false, "Do the action in the temporal gpath file")

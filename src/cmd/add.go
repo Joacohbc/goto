@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"goto/src/config"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -45,45 +44,16 @@ goto add-path --path ~/Documents -abbv docs
 
 		//Where load all gpaths
 		var gpaths []config.GotoPath
+		cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
 
-		//The gpath to add
-		var gpathToAdd config.GotoPath
-		{
-			//Create the GPath to add
-			pathToAdd, err := cmd.Flags().GetString("path")
-			cobra.CheckErr(err)
+		//Add the new directory to the array
+		gpaths = append(gpaths, config.GotoPath{
+			Path:         getPath(cmd),
+			Abbreviation: getAbbreviation(cmd),
+		})
 
-			abbvToAdd, err := cmd.Flags().GetString("abbv")
-			cobra.CheckErr(err)
-
-			//Load the goto-paths file to array
-			cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
-
-			//If CurrentPath is passed, the path to add is current directory
-			if cmd.Flags().Changed("current") {
-				//Get the current path
-				currentDir, err := os.Getwd()
-				cobra.CheckErr(err)
-
-				//Valid the path
-				cobra.CheckErr(config.ValidPath(&currentDir))
-
-				//If all ok, overwrite "pathToAdd" variable
-				pathToAdd = currentDir
-			}
-
-			//Create and valid the GPath
-			gpathToAdd = config.GotoPath{
-				Path:         pathToAdd,
-				Abbreviation: abbvToAdd,
-			}
-			cobra.CheckErr(gpathToAdd.Valid())
-		}
-
-		//Add the new directory to the array and valid it
-		gpaths = append(gpaths, gpathToAdd)
-
-		CreateGPath(cmd, gpaths)
+		// And added to the file
+		createGPath(cmd, gpaths)
 	},
 }
 
@@ -92,7 +62,7 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 
 	//Flags
-	addCmd.Flags().StringP("path", "p", "", "The Path to add")
-	addCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
-	addCmd.Flags().BoolP("current", "c", false, "The Path to add will be the current directory (\"path\" flag will be overwrite)")
+	addCmd.Flags().StringP(FlagPath, "p", "", "The Path to add")
+	addCmd.Flags().StringP(FlagAbbreviation, "a", "", "The Abbreviation of the Path")
+	addCmd.Flags().BoolP(FlagCurretDir, "c", false, "The Path to add will be the current directory (\"path\" flag will be overwrite)")
 }

@@ -18,7 +18,6 @@ package cmd
 import (
 	"fmt"
 	"goto/src/config"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -40,36 +39,16 @@ goto list --abbv docs
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		passed := func(flag string) bool { return cmd.Flags().Changed(flag) }
-
 		//Load the goto-paths file to array
 		var gpaths []config.GotoPath
-		LoadGPath(cmd, &gpaths)
-
-		//Where any error is saved
-		var err error = nil
+		loadGPath(cmd, &gpaths)
 
 		//Parse all Flags
 
-		//If the flag "path" or "current" are passed
-		if passed("path") || passed("current") {
+		// If the any path flag is passed
+		if passed(cmd, FlagCurretDir) || passed(cmd, FlagPath) {
 
-			var path string = ""
-			//If the path flag is passed, load the path
-			if passed("path") {
-				path, err = cmd.Flags().GetString("path")
-				cobra.CheckErr(err)
-			}
-
-			//If current flag is passed, overwrite the path to current directory
-			if passed("current") {
-				//Get the current path, and overwrite "path" variable
-				path, err = os.Getwd()
-				cobra.CheckErr(err)
-			}
-
-			//Valid the path
-			cobra.CheckErr(config.ValidPath(&path))
+			path := getPath(cmd)
 
 			for i, gpath := range gpaths {
 				if gpath.Path == path {
@@ -84,15 +63,9 @@ goto list --abbv docs
 			return
 		}
 
-		//If the flag "abbv" is passed
-		if passed("abbv") {
-
-			var abbv string
-			abbv, err = cmd.Flags().GetString("abbv")
-			cobra.CheckErr(err)
-
-			cobra.CheckErr(config.ValidAbbreviation(&abbv))
-
+		// If the abbreviation flag is passed
+		if passed(cmd, FlagAbbreviation) {
+			abbv := getAbbreviation(cmd)
 			for i, gpath := range gpaths {
 				if gpath.Abbreviation == abbv {
 					fmt.Printf("%v - %s\n", i, gpath.String())
@@ -107,7 +80,7 @@ goto list --abbv docs
 		}
 
 		//If the flag "reverse" is passed
-		if passed("reverse") {
+		if passed(cmd, "reverse") {
 			for i := range gpaths {
 				fmt.Printf("%v - %s\n", len(gpaths)-i-1, gpaths[len(gpaths)-i-1].String())
 			}
@@ -126,8 +99,8 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 
 	//Flags
-	listCmd.Flags().StringP("path", "p", "", "The Path to delete")
-	listCmd.Flags().StringP("abbv", "a", "", "The Abbreviation of the Path")
-	listCmd.Flags().BoolP("current", "c", false, "The Path to update will be the current directory (\"path\" parameter will be overwrite)")
+	listCmd.Flags().StringP(FlagPath, "p", "", "The Path to delete")
+	listCmd.Flags().StringP(FlagAbbreviation, "a", "", "The Abbreviation of the Path")
+	listCmd.Flags().BoolP(FlagCurretDir, "c", false, "The Path to update will be the current directory (\"path\" parameter will be overwrite)")
 	listCmd.Flags().BoolP("reverse", "R", false, "List the goto-paths in reverse")
 }
