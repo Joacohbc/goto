@@ -16,7 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"goto/src/config"
+	"goto/src/gpath"
+	"goto/src/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -42,18 +43,16 @@ goto add-path --path ~/Documents -abbv docs
 
 	Run: func(cmd *cobra.Command, args []string) {
 
-		//Where load all gpaths
-		var gpaths []config.GotoPath
-		cobra.CheckErr(config.LoadPathsFile(&gpaths, GotoPathsFile))
+		gpaths := utils.LoadGPaths(cmd)
 
 		//Add the new directory to the array
-		gpaths = append(gpaths, config.GotoPath{
-			Path:         getPath(cmd),
-			Abbreviation: getAbbreviation(cmd),
+		gpaths = append(gpaths, gpath.GotoPath{
+			Path:         utils.GetPath(cmd),
+			Abbreviation: utils.GetAbbreviation(cmd),
 		})
 
 		// And added to the file
-		createGPath(cmd, gpaths)
+		utils.UpdateGPaths(cmd, gpaths)
 	},
 }
 
@@ -62,7 +61,7 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 
 	//Flags
-	addCmd.Flags().StringP(FlagPath, "p", "", "The Path to add")
-	addCmd.Flags().StringP(FlagAbbreviation, "a", "", "The Abbreviation of the Path")
-	addCmd.Flags().BoolP(FlagCurretDir, "c", false, "The Path to add will be the current directory (\"path\" flag will be overwrite)")
+	addCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to add")
+	addCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
+	addCmd.Flags().BoolP(utils.FlagCurretDir, "c", false, "The Path to add will be the current directory (\"path\" flag will be overwrite)")
 }

@@ -19,6 +19,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"goto/src/config"
+	"goto/src/gpath"
+	"goto/src/utils"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -55,15 +57,15 @@ var restoreCmd = &cobra.Command{
 		}
 
 		//Do the unmarshaling of the config backup
-		var gpaths []config.GotoPath
+		var gpaths []gpath.GotoPath
 		if err := json.Unmarshal(backup, &gpaths); err != nil {
 			cobra.CheckErr(fmt.Errorf("cant parse the backup of config file"))
 		}
 
 		//And re-write the config file with the backup
-		cobra.CheckErr(config.CreatePathsFile(gpaths, GotoPathsFile))
+		cobra.CheckErr(config.SaveGPathsFile(gpaths, utils.GetFilePath(cmd)))
 
-		fmt.Println("Restore complete")
+		fmt.Printf("Restore complete in %s\n", utils.GetFilePath(cmd))
 	},
 }
 
@@ -71,5 +73,5 @@ func init() {
 	rootCmd.AddCommand(restoreCmd)
 
 	//Flags
-	restoreCmd.Flags().StringP("input", "i", GotoPathsFileBackup, "The ubication of the backup file")
+	restoreCmd.Flags().StringP("input", "i", utils.GotoPathsFileBackup, "The ubication of the backup file")
 }

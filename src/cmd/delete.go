@@ -17,7 +17,8 @@ package cmd
 
 import (
 	"fmt"
-	"goto/src/config"
+	"goto/src/gpath"
+	"goto/src/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -74,10 +75,10 @@ goto delete-path --indx 2
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Load the goto-paths file to array
-		gpaths := loadGPath(cmd)
+		gpaths := utils.LoadGPaths(cmd)
 
-		if passed(cmd, FlagPath) {
-			path := getPath(cmd)
+		if utils.FlagPassed(cmd, utils.FlagPath) {
+			path := utils.GetPath(cmd)
 
 			//Delete the directory from the array
 			for i, gpath := range gpaths {
@@ -95,8 +96,8 @@ goto delete-path --indx 2
 			}
 		}
 
-		if passed(cmd, FlagAbbreviation) {
-			abbv := getAbbreviation(cmd)
+		if utils.FlagPassed(cmd, utils.FlagAbbreviation) {
+			abbv := utils.GetAbbreviation(cmd)
 
 			//Delete the directory from the array
 			for i, gpath := range gpaths {
@@ -114,8 +115,8 @@ goto delete-path --indx 2
 			}
 		}
 
-		if passed(cmd, FlagIndex) {
-			indx := getIndex(cmd)
+		if utils.FlagPassed(cmd, utils.FlagIndex) {
+			indx := utils.GetIndex(cmd)
 
 			//Delete the directory from the array
 			for i, gpath := range gpaths {
@@ -134,8 +135,8 @@ goto delete-path --indx 2
 		}
 
 		//After the changes, valid it
-		cobra.CheckErr(config.ValidArray(gpaths))
-		createGPath(cmd, gpaths)
+		cobra.CheckErr(gpath.ValidArray(gpaths))
+		utils.UpdateGPaths(cmd, gpaths)
 	},
 }
 
@@ -143,7 +144,7 @@ func init() {
 	rootCmd.AddCommand(deleteCmd)
 
 	//Flags
-	deleteCmd.Flags().StringP(FlagPath, "p", "", "The Path to delete")
-	deleteCmd.Flags().StringP(FlagAbbreviation, "a", "", "The Abbreviation of the Path")
-	deleteCmd.Flags().IntP(FlagIndex, "i", -1, "The Index of the Path")
+	deleteCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
+	deleteCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
+	deleteCmd.Flags().IntP(utils.FlagIndex, "i", -1, "The Index of the Path")
 }

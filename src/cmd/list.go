@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"goto/src/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -28,10 +29,10 @@ var listCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(0),
 	Short:   "List goto-paths in the goto-paths file",
 	Example: `
-#To list all goto-paths
+# To list all goto-paths
 goto list
 
-#To list a specific goto-path you can use the Path or the Abbreviation 
+# To list a specific goto-path you can use the Path or the Abbreviation 
 goto list --path ~/Documents
 goto list --abbv docs
 `,
@@ -39,12 +40,12 @@ goto list --abbv docs
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Load the goto-paths file to array
-		gpaths := loadGPath(cmd)
+		gpaths := utils.LoadGPaths(cmd)
 
 		// If the any path flag is passed
-		if passed(cmd, FlagCurretDir) || passed(cmd, FlagPath) {
+		if utils.CurrentDirFlagPassed(cmd) || utils.PathFlagPassed(cmd) {
 
-			path := getPath(cmd)
+			path := utils.GetPath(cmd)
 
 			for i, gpath := range gpaths {
 				if gpath.Path == path {
@@ -60,8 +61,8 @@ goto list --abbv docs
 		}
 
 		// If the abbreviation flag is passed
-		if passed(cmd, FlagAbbreviation) {
-			abbv := getAbbreviation(cmd)
+		if utils.AbbvFlagPassed(cmd) {
+			abbv := utils.GetAbbreviation(cmd)
 			for i, gpath := range gpaths {
 
 				if gpath.Abbreviation == abbv {
@@ -77,7 +78,7 @@ goto list --abbv docs
 		}
 
 		//If the flag "reverse" is passed
-		if passed(cmd, "reverse") {
+		if utils.FlagPassed(cmd, "reverse") {
 			for i := range gpaths {
 				fmt.Printf("%v - %s\n", len(gpaths)-i-1, gpaths[len(gpaths)-i-1].String())
 			}
@@ -96,8 +97,8 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 
 	//Flags
-	listCmd.Flags().StringP(FlagPath, "p", "", "The Path to delete")
-	listCmd.Flags().StringP(FlagAbbreviation, "a", "", "The Abbreviation of the Path")
-	listCmd.Flags().BoolP(FlagCurretDir, "c", false, "The Path to update will be the current directory (\"path\" parameter will be overwrite)")
+	listCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
+	listCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
+	listCmd.Flags().BoolP(utils.FlagCurretDir, "c", false, "The Path to update will be the current directory (\"path\" parameter will be overwrite)")
 	listCmd.Flags().BoolP("reverse", "R", false, "List the goto-paths in reverse")
 }

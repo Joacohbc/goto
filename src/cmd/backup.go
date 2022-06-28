@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"goto/src/config"
+	"goto/src/utils"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -31,8 +32,7 @@ var backupCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Read the config file
-		var gpaths []config.GotoPath
-		cobra.CheckErr(config.LoadPathsFile(&gpaths, GotoPathsFile))
+		gpaths := utils.LoadGPaths(cmd)
 
 		//Get output flag
 		output, err := cmd.Flags().GetString("output")
@@ -43,8 +43,8 @@ var backupCmd = &cobra.Command{
 			cobra.CheckErr(fmt.Errorf("the file \"%s\" already exists", output))
 		}
 
-		cobra.CheckErr(config.CreatePathsFile(gpaths, output))
-		fmt.Println("Backup complete")
+		cobra.CheckErr(config.SaveGPathsFile(gpaths, output))
+		fmt.Printf("Backup complete from %s\n", utils.GetFilePath(cmd))
 	},
 }
 
@@ -52,5 +52,5 @@ func init() {
 	rootCmd.AddCommand(backupCmd)
 
 	//Flags
-	backupCmd.Flags().StringP("output", "o", GotoPathsFileBackup, "The backup destination path")
+	backupCmd.Flags().StringP("output", "o", utils.GotoPathsFileBackup, "The backup destination path")
 }

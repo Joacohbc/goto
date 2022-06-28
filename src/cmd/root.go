@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"fmt"
+	"goto/src/utils"
 	"os"
 	"strings"
 
@@ -51,7 +52,7 @@ goto -t home
 	Args: cobra.ExactArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		path, err := checkIndexOrAbbvOrDir(cmd, args[0])
+		path, err := utils.CheckIndexOrAbbvOrDir(cmd, args[0])
 		cobra.CheckErr(err)
 
 		//If quote flag is passed
@@ -85,7 +86,6 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initVars)
 	rootCmd.Flags().BoolP("quotes", "q", false, "Return the path between quotes")
 	rootCmd.Flags().BoolP("spaces", "s", false, "Return the path with substituted spaces")
 	rootCmd.PersistentFlags().BoolP("temporal", "t", false, "Do the action in the temporal gpath file")
