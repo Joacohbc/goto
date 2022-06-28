@@ -17,21 +17,41 @@ package cmd
 
 import (
 	"fmt"
+	"goto/src/gpath"
+	"goto/src/utils"
 
 	"github.com/spf13/cobra"
 )
 
-const VersionGoto = "2.1.6"
+// addCmd represents the addGPath command
+var validCmd = &cobra.Command{
+	Use:     "valid-paths",
+	Aliases: []string{"valid", "check-paths"},
+	Args:    cobra.ExactArgs(0),
+	Short:   "Valid all path from goto-paths file",
 
-// versionCmd represents the version command
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print the version of goto",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Goto version is: " + VersionGoto)
+
+		gpaths := utils.LoadGPaths(cmd)
+
+		for _, g := range gpaths {
+
+			if err := g.Valid(); err != nil {
+				fmt.Println("Error in the file:", err)
+				return
+			}
+		}
+
+		if err := gpath.ValidArray(gpaths); err != nil {
+			fmt.Println("Error in the file:", err)
+			return
+		}
+
+		fmt.Println("All paths are valid <3")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	//Add this command to RootCmd
+	rootCmd.AddCommand(validCmd)
 }
