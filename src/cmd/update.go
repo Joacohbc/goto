@@ -103,8 +103,7 @@ goto update-path abbv-abbv --abbv h --new home
 		}
 
 		//Load the goto-paths file to array
-		var gpaths []config.GotoPath
-		loadGPath(cmd, &gpaths)
+		gpaths := loadGPath(cmd)
 
 		// Change the GPath Index 1 for GPath in Index 2 and vice-versa
 		changeIndex := func(inx1, inx2 int) {

@@ -61,7 +61,7 @@ var restoreCmd = &cobra.Command{
 		}
 
 		//And re-write the config file with the backup
-		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
+		cobra.CheckErr(config.CreatePathsFile(gpaths, GotoPathsFile))
 
 		fmt.Println("Restore complete")
 	},

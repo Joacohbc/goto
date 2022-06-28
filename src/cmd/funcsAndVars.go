@@ -46,16 +46,15 @@ func initVars() {
 	GotoPathsFileBackup = filepath.Clean(GotoPathsFile + ".backup")
 	TempGotoPathsFile = filepath.Join(os.TempDir(), "goto-paths-temp.json")
 
-	cobra.CheckErr(config.CreateGotoPathFile(GotoPathsFile))
-	cobra.CheckErr(config.CreateGotoPathFile(TempGotoPathsFile))
+	cobra.CheckErr(config.CreateGotoPathsFile(GotoPathsFile))
+	cobra.CheckErr(config.CreateGotoPathsFile(TempGotoPathsFile))
 }
 
 // Return the path of Index (number), of a Abbreviation or return the path validated
 func checkIndexOrAbbvOrDir(cmd *cobra.Command, arg string) (string, error) {
 
 	//Load the config file in memory
-	var gpaths []config.GotoPath
-	loadGPath(cmd, &gpaths)
+	gpaths := loadGPath(cmd)
 
 	//Check if path is number
 	if err := config.IsValidIndex(gpaths, arg); err == nil {
@@ -90,22 +89,24 @@ func checkIndexOrAbbvOrDir(cmd *cobra.Command, arg string) (string, error) {
 func createGPath(cmd *cobra.Command, gpaths []config.GotoPath) {
 	if cmd.Flags().Changed("temporal") {
 		//If the array is valid, apply the changes
-		cobra.CheckErr(config.CreateJsonFile(gpaths, TempGotoPathsFile))
+		cobra.CheckErr(config.CreatePathsFile(gpaths, TempGotoPathsFile))
 	} else {
 		//If the array is valid, apply the changes
-		cobra.CheckErr(config.CreateJsonFile(gpaths, GotoPathsFile))
+		cobra.CheckErr(config.CreatePathsFile(gpaths, GotoPathsFile))
 	}
 
 	fmt.Println("Changes applied successfully")
 }
 
 // Load the gpaths file (or the temporal gpath file if the flag passed) in the gpaths array. In case of error exit immediately
-func loadGPath(cmd *cobra.Command, gpaths *[]config.GotoPath) {
+func loadGPath(cmd *cobra.Command) []config.GotoPath {
+	gpaths := &[]config.GotoPath{}
 	if cmd.Flags().Changed("temporal") {
-		cobra.CheckErr(config.LoadConfigFile(gpaths, TempGotoPathsFile))
+		cobra.CheckErr(config.LoadPathsFile(gpaths, TempGotoPathsFile))
 	} else {
-		cobra.CheckErr(config.LoadConfigFile(gpaths, GotoPathsFile))
+		cobra.CheckErr(config.LoadPathsFile(gpaths, GotoPathsFile))
 	}
+	return *gpaths
 }
 
 // Return the current directory validated (with config.ValidPathVar()). In case of error exit immediately
@@ -118,6 +119,10 @@ func getCurrentDirectory() string {
 	cobra.CheckErr(config.ValidPathVar(&current))
 	return current
 }
+
+//
+// GET FLAGS VALUES FUNCTIOS
+//
 
 // Check if the flag (key) was passed
 func passed(cmd *cobra.Command, key string) bool {
@@ -154,8 +159,7 @@ func getIndex(cmd *cobra.Command) int {
 	index, err := cmd.Flags().GetInt(FlagIndex)
 	cobra.CheckErr(err)
 
-	var gpaths []config.GotoPath
-	loadGPath(cmd, &gpaths)
+	gpaths := loadGPath(cmd)
 
 	cobra.CheckErr(config.IsValidIndex(gpaths, strconv.Itoa(index)))
 	return index

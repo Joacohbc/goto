@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const VersionGoto = "2.1.3"
+const VersionGoto = "2.1.4"
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{

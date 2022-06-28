@@ -18,7 +18,7 @@ type GotoPath struct {
 
 //Return gpath in String format
 func (d *GotoPath) String() string {
-	return fmt.Sprintf("Path: \"%s\" - Abbreviation: \"%s\"", d.Path, d.Abbreviation)
+	return fmt.Sprintf("\"%s\" - %s", d.Path, d.Abbreviation)
 }
 
 // This function valid a directory with ValidPath() and ValidAbbreviation()

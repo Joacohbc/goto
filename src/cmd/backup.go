@@ -32,7 +32,7 @@ var backupCmd = &cobra.Command{
 
 		//Read the config file
 		var gpaths []config.GotoPath
-		cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
+		cobra.CheckErr(config.LoadPathsFile(&gpaths, GotoPathsFile))
 
 		//Get output flag
 		output, err := cmd.Flags().GetString("output")
@@ -43,7 +43,7 @@ var backupCmd = &cobra.Command{
 			cobra.CheckErr(fmt.Errorf("the file \"%s\" already exists", output))
 		}
 
-		cobra.CheckErr(config.CreateJsonFile(gpaths, output))
+		cobra.CheckErr(config.CreatePathsFile(gpaths, output))
 		fmt.Println("Backup complete")
 	},
 }

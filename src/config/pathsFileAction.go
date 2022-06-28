@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 )
 
-// Valid the Array (ValidArray) and create a Json file from directory array
-func CreateJsonFile(gpaths []GotoPath, gotoPathsFile string) error {
+// Valid the Array (ValidArray) and create a Paths file from directory array
+func CreatePathsFile(gpaths []GotoPath, gotoPathsFile string) error {
 
 	if err := ValidArray(gpaths); err != nil {
 		return err
@@ -31,7 +31,7 @@ func CreateJsonFile(gpaths []GotoPath, gotoPathsFile string) error {
 }
 
 // Create the config file if not already exists
-func CreateGotoPathFile(gotoPathsFile string) error {
+func CreateGotoPathsFile(gotoPathsFile string) error {
 
 	if _, err := os.Stat(gotoPathsFile); err == nil {
 		return nil
@@ -62,7 +62,7 @@ func CreateGotoPathFile(gotoPathsFile string) error {
 	add(filepath.Dir(gotoPathsFile), "config")
 
 	//Make the json config file
-	if err := CreateJsonFile(gpaths, gotoPathsFile); err != nil {
+	if err := CreatePathsFile(gpaths, gotoPathsFile); err != nil {
 		return err
 	}
 
@@ -71,7 +71,7 @@ func CreateGotoPathFile(gotoPathsFile string) error {
 }
 
 //Load config files in an array
-func LoadConfigFile(gpaths *[]GotoPath, gotoPathsFile string) error {
+func LoadPathsFile(gpaths *[]GotoPath, gotoPathsFile string) error {
 
 	//Read the File
 	file, err := ioutil.ReadFile(gotoPathsFile)

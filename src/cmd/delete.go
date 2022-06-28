@@ -74,8 +74,7 @@ goto delete-path --indx 2
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Load the goto-paths file to array
-		var gpaths []config.GotoPath
-		loadGPath(cmd, &gpaths)
+		gpaths := loadGPath(cmd)
 
 		if passed(cmd, FlagPath) {
 			path := getPath(cmd)

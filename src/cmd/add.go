@@ -44,7 +44,7 @@ goto add-path --path ~/Documents -abbv docs
 
 		//Where load all gpaths
 		var gpaths []config.GotoPath
-		cobra.CheckErr(config.LoadConfigFile(&gpaths, GotoPathsFile))
+		cobra.CheckErr(config.LoadPathsFile(&gpaths, GotoPathsFile))
 
 		//Add the new directory to the array
 		gpaths = append(gpaths, config.GotoPath{

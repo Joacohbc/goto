@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"fmt"
-	"goto/src/config"
 
 	"github.com/spf13/cobra"
 )
@@ -40,10 +39,7 @@ goto list --abbv docs
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Load the goto-paths file to array
-		var gpaths []config.GotoPath
-		loadGPath(cmd, &gpaths)
-
-		//Parse all Flags
+		gpaths := loadGPath(cmd)
 
 		// If the any path flag is passed
 		if passed(cmd, FlagCurretDir) || passed(cmd, FlagPath) {
@@ -67,6 +63,7 @@ goto list --abbv docs
 		if passed(cmd, FlagAbbreviation) {
 			abbv := getAbbreviation(cmd)
 			for i, gpath := range gpaths {
+
 				if gpath.Abbreviation == abbv {
 					fmt.Printf("%v - %s\n", i, gpath.String())
 					return
