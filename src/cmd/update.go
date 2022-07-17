@@ -1,18 +1,3 @@
-/*
-Copyright © 2022 Joacohbc <joacog48@gmail.com>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
@@ -279,7 +264,7 @@ func init() {
 
 	//Flags "To Update"
 	updateCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
-	updateCmd.Flags().BoolP(utils.FlagCurretDir, "c", false, "The Path to update will be the current directory (\"path\" flag will be overwrite)")
+	updateCmd.Flags().BoolP(utils.FlagCurrentDir, "c", false, "The Path to update will be the current directory (\"path\" flag will be overwrite)")
 	updateCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
 	updateCmd.Flags().IntP(utils.FlagIndex, "i", -1, "The Index of the Path")
 

@@ -1,18 +1,3 @@
-/*
-Copyright © 2022 Joacohbc <joacog48@gmail.com>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
@@ -41,7 +26,7 @@ goto add-path --current -abbv currentDir
 goto add-path --path ~/Documents -abbv docs
 `,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 
 		gpaths := utils.LoadGPaths(cmd)
 
@@ -63,5 +48,5 @@ func init() {
 	//Flags
 	addCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to add")
 	addCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
-	addCmd.Flags().BoolP(utils.FlagCurretDir, "c", false, "The Path to add will be the current directory (\"path\" flag will be overwrite)")
+	addCmd.Flags().BoolP(utils.FlagCurrentDir, "c", false, "The Path to add will be the current directory (\"path\" flag will be overwrite)")
 }

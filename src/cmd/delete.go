@@ -1,18 +1,3 @@
-/*
-Copyright © 2022 Joacohbc <joacog48@gmail.com>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
@@ -47,7 +32,7 @@ goto delete-path --abbv docs
 # Delete the gpath in the index "2"
 goto delete-path --indx 2
 `,
-	PreRun: func(cmd *cobra.Command, args []string) {
+	PreRun: func(cmd *cobra.Command, _ []string) {
 
 		passed := func(flag string) bool { return cmd.Flags().Changed(flag) }
 
@@ -72,7 +57,7 @@ goto delete-path --indx 2
 			cobra.CheckErr(fmt.Errorf("you must specify one flag to delete a gpath (Or Path or Abbreviation or Index)"))
 		}
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 
 		//Load the goto-paths file to array
 		gpaths := utils.LoadGPaths(cmd)

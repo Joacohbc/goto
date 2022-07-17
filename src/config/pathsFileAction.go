@@ -21,8 +21,6 @@ func CreateGotoPathsFile(gotoPathsFile string) error {
 
 	//Functions to add directories to the config file
 	add := func(path string, abbv string) {
-		//Your directories as Default:
-		//add("<path>", "<name>")
 		gpaths = append(gpaths, gpath.GotoPath{
 			Path:         path,
 			Abbreviation: abbv,
@@ -49,7 +47,7 @@ func CreateGotoPathsFile(gotoPathsFile string) error {
 	return nil
 }
 
-// Valid the Array (ValidArray) and create a Paths file from directory array
+// Valid the Array (using gpath.ValidArray) and create a Paths file from directory array
 func SaveGPathsFile(gpaths []gpath.GotoPath, gotoPathsFile string) error {
 
 	if err := gpath.ValidArray(gpaths); err != nil {

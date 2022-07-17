@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-// This function valid:
-// - The Abbreviation don't be empty
-// - Clean the Path
+// This function do:
+// - Clean the path
+// - Check that doesn't be empty
+// - Check that exists and it is a directory
 // - Get absolute path
-// - That Path exist and is a directory
 func ValidPathVar(path *string) error {
 
 	//Delete start and ends spaces and clean the path
@@ -61,10 +61,10 @@ func ValidPath(path string) (string, error) {
 	return path, err
 }
 
-// This function valid:
-// - The Abbreviation don't be empty
-// - That Abbreviation is not a number letter
+// This function do:
+// - Check that doesn't be empty
 // - Check that the Abbreviation don't contain any space
+// - Check that is not a number
 func ValidAbbreviationVar(abbv *string) error {
 
 	//Delete start and ends spacesn an clean the path
@@ -93,9 +93,8 @@ func ValidAbbreviation(abbv string) (string, error) {
 	return abbv, err
 }
 
-// This function check if a index is valid the "indx"
-// must be a number beetween 0 and the length of the
-// GotoPath array
+// This function check if a index is valid and also check that the index
+// is a number beetween 0 and the length of the GotoPath array
 func IsValidIndex(lenght int, index string) error {
 
 	indx, err := strconv.Atoi(index)

@@ -1,18 +1,3 @@
-/*
-Copyright © 2022 Joacohbc <joacog48@gmail.com>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
@@ -27,11 +12,11 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "goto",
-	Short: "Goto is a \"Path Manager\" that allows you to add a specific path with an identifier and after get it with that identifier",
+	Short: "Goto is a \"Path Manager\" that allows you to add a specific path with an identifier and after get it with that identifier (exit with status 2)",
 	Long: `
 Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an 
 index number. Those path are automatically save in a json file, the goto-paths files. From this files can add, update, delete and list
-paths and abreviations.
+paths and abbreviations.
 `,
 
 	Example: `

@@ -11,7 +11,7 @@ const (
 	FlagPath         string = "path"
 	FlagAbbreviation string = "abbv"
 	FlagIndex        string = "indx"
-	FlagCurretDir    string = "current"
+	FlagCurrentDir   string = "current"
 )
 
 // Check if the flag (key) was passed
@@ -19,34 +19,33 @@ func FlagPassed(cmd *cobra.Command, key string) bool {
 	return cmd.Flags().Changed(key)
 }
 
-// Check if the Path flag  was passed
+// Check if the FlagPath was passed
 func PathFlagPassed(cmd *cobra.Command) bool {
 	return cmd.Flags().Changed(FlagPath)
 }
 
-// Check if the Abbreviation flag  was passed
+// Check if the FlagAbbreviation was passed
 func AbbvFlagPassed(cmd *cobra.Command) bool {
 	return cmd.Flags().Changed(FlagAbbreviation)
 }
 
-// Check if the Index flag  was passed
+// Check if the FlagIndex was passed
 func IndexFlagPassed(cmd *cobra.Command) bool {
 	return cmd.Flags().Changed(FlagIndex)
 }
 
 // Check if the FlagCurretDir flag was passed
 func CurrentDirFlagPassed(cmd *cobra.Command) bool {
-	return cmd.Flags().Changed(FlagCurretDir)
+	return cmd.Flags().Changed(FlagCurrentDir)
 }
 
-// Returns the FlagPath flag already valided and checking the FlagCurretDir flag
-// In case of any error, the use cobra.CheckErr() to print and exit
+// Returns the value of the FlagPath already valided and checking the FlagCurretDir
 func GetPath(cmd *cobra.Command) string {
 	path, err := cmd.Flags().GetString(FlagPath)
 	cobra.CheckErr(err)
 
 	//If current is passed, overwrite the path to current directory
-	if FlagPassed(cmd, FlagCurretDir) {
+	if FlagPassed(cmd, FlagCurrentDir) {
 		path = GetCurrentDirectory()
 	}
 
@@ -54,7 +53,7 @@ func GetPath(cmd *cobra.Command) string {
 	return path
 }
 
-// Returns the FlagAbbreviation flag already valided
+// Returns the value of the FlagAbbreviation already valided
 func GetAbbreviation(cmd *cobra.Command) string {
 	abbv, err := cmd.Flags().GetString(FlagAbbreviation)
 	cobra.CheckErr(err)
@@ -64,7 +63,7 @@ func GetAbbreviation(cmd *cobra.Command) string {
 	return abbv
 }
 
-// Returns the FlagIndex flag already valided
+// Returns the valuef o the FlagIndex flag already valided
 func GetIndex(cmd *cobra.Command) int {
 	index, err := cmd.Flags().GetInt(FlagIndex)
 	cobra.CheckErr(err)

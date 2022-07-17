@@ -9,6 +9,34 @@ Goto is a "Path Manager" that allows you to add a specific path with an identifi
 } 
 ```
 
+Order of the code
+
+```bash
+src
+    ├── cmd
+    │   ├── add.go - Add a new gpath
+    │   ├── backup.go - Do a backup of the gpath file
+    │   ├── completion.go 
+    │   ├── delete.go - Delete a gpath
+    │   ├── list.go - List gpaths
+    │   ├── restore.go - Do a restore from the a gpath file
+    │   ├── root.go - Print the gpath 
+    │   ├── update.go - Update the gpath
+    │   ├── valid.go - Valid all gpath from the gpath file
+    │   └── version.go - Print the version of goto
+    ├── config
+    │   └── pathsFileAction.go - Create, Save, and Load (in a Array) the a JSON file 
+    ├── gpath
+    │   ├── gotoPath.go - GPath struct
+    │   └── gpathsFuncs.go - Function for GPath objects
+    ├── LICENSE
+    ├── main.go
+    └── utils
+        ├── flagsFuncs.go - Function to use flags (related to gpath), get values and check if they were passed
+        ├── funcsAndVars.go - Function and variables to Update and Load the GPath file (a JSON file). 
+        └── othersFuncs.go - Other functions
+```
+
 ## Use Goto to move in the CLI
 
 If you use Goto with cd (e.g. with aliases) you have the ultimate way to move between folders on the command line. It is quick and easy to use and implement . It works via a compiled Go file that returns the corresponding path based on the arguments passed as input. And passes it as an argument to an alias that uses cd on the command line to move to the specified path.
