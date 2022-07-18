@@ -14,6 +14,8 @@ var backupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Do a backup of the goto-paths file",
 	Example: `
+# Format: goto backup [ -o path ]
+
 # Made a backup of goto-paths in the config directory
 goto backup
 

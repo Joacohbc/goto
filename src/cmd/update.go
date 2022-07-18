@@ -31,6 +31,8 @@ Modes:
 `,
 
 	Example: `
+# Format: goto update-path [ -t ] mode { -p path | -a abbreviation | -i index } { -p path | -a abbreviation | -i index } 
+
 # Update the home of the user
 goto update-path path-path --path /home/myuser --new /home/mynewuser
 

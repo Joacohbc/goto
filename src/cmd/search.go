@@ -13,6 +13,7 @@ var searchCmd = &cobra.Command{
 	Aliases: []string{"search", "find-path", "find"},
 	Short:   "search goto-paths in the goto-paths file",
 	Example: `
+# Format: goto search [ -t ] { -p path | -a abbreviation }
 # To search a specific goto-path you can use the Path or the Abbreviation 
 goto search --path ~/Documents
 goto search --abbv docs

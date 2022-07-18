@@ -14,10 +14,9 @@ var addCmd = &cobra.Command{
 	Short:   "Add a new path to goto-paths file",
 	Long:    `To use the add-path command you need to pass two args: a path and an abbreviation to create a new goto-path`,
 	Example: `
-# This command add the current directory to the gpaths file with the abbreviation "currentDir"	
-goto add-path --current currentDir 
+# Format: goto add-path [ -t ] path abbv
 
-# The same that:
+# This command add the current directory to the gpaths file with the abbreviation "currentDir"
 goto add-path ./ currentDir
 
 # To specify the path and abbreviation use:
@@ -25,19 +24,7 @@ goto add-path ~/Documents docs
 
 Note: Use -d to search only directorys and don't check if the argument passed is a abbreviation or index
 `,
-	Args: cobra.RangeArgs(1, 2),
-	PreRun: func(cmd *cobra.Command, args []string) {
-
-		// If only 1 args is passed (an abbreviation) the CurrentDirFlag must be passed
-		if len(args) == 1 && !utils.CurrentDirFlagPassed(cmd) {
-			cobra.CheckErr("must be pass 2 arguments, a path and an abbreviation. Or pass the current directory flag and an abbreviation ")
-		}
-
-		// If 2 args are passed the CurrentDirFlag must not be passed
-		if len(args) == 2 && utils.CurrentDirFlagPassed(cmd) {
-			cobra.CheckErr("if the current directory flag is passed, only pass an abbreviation")
-		}
-	},
+	Args: cobra.ExactArgs(2),
 
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -78,7 +65,4 @@ Note: Use -d to search only directorys and don't check if the argument passed is
 func init() {
 	//Add this command to RootCmd
 	rootCmd.AddCommand(addCmd)
-
-	//Flags
-	addCmd.Flags().BoolP(utils.FlagCurrentDir, "c", false, "The Path to add will be the current directory (\"path\" flag value will be overwrite)")
 }

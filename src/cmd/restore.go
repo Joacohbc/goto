@@ -16,6 +16,8 @@ var restoreCmd = &cobra.Command{
 	Use:   "restore",
 	Short: "Do a restore of the goto-paths file",
 	Example: `
+# Format: goto restore [ -t ] [ -i /path/file ]
+
 # Do a restore of goto-paths from a backup in the config directory
 goto restore
 

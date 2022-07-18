@@ -17,8 +17,7 @@ var deleteCmd = &cobra.Command{
 To use the delete-path command you need to Path, Abbreviation or Index from a goto-path`,
 
 	Example: `
-# This command delete indicate thet delete the current directory path from the gpaths file
-goto delete-path --current
+# Format : goto delete-path [ -t ] { -p path | -a abbreviation | -i index } 
 
 # To specify the "Path", "Abbreviation" or Index. use:
 

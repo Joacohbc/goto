@@ -12,6 +12,15 @@ var listCmd = &cobra.Command{
 	Use:     "list-path",
 	Aliases: []string{"list"},
 	Short:   "List goto-paths in the goto-paths file",
+	Example: `
+# Format: goto list [ -t ] [ -R ]
+
+# List all gpaths
+goto list
+
+# List all gpaths form temporal file
+goto list -t
+`,
 	Run: func(cmd *cobra.Command, _ []string) {
 
 		//Load the goto-paths file to array

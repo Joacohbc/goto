@@ -22,6 +22,8 @@ paths and abbreviations.
 `,
 
 	Example: `
+# Format: goto [ -t ] { abbreviation | path | index }
+
 # Move to the destination directory
 # "h" is the abbreviation of /home/user
 goto h
