@@ -143,25 +143,21 @@ goto /home/user/.config/goto
 Output: Go to: /home/user/.config/goto
 ```
 
-**Note**: *goto always gives priority to the abbreviation and index over a path in the current directory. If in the current working directory exists a directory named "scripts" and you put "scripts" goto search first if "scripts" is abbreviation and after search if a valid path*
+**Note**: *goto always gives priority to the abbreviation and index over a path in the current directory. If in the current working directory exists a directory named "scripts" and you put "scripts" goto search first if "scripts" is abbreviation or a index and after search if a valid path. To search only directories use -d flag*
 
 ### Add new path
 
 To add a new *gpath* require a Path and a Abbreviation:
 
 ```bash
-# This command add the current directory(the "Path") to the gpaths file with
-# the abbreviation "currentDir"
-goto add --current -abbv currentDir
+# This command add the current directory(the "Path") to the gpaths file with the abbreviation "currentDir"
+goto add-path --current currentDir 
 
-#The same that 
-goto add -c -a currentDir
+# The same that:
+goto add-path ./ currentDir
 
-# To specify the "Path" and "Abbreviation" use:
-goto add --path ~/Documents -abbv docs
-
-#The same that 
-goto add -p ~/Documents -a docs
+# To specify the path and abbreviation use:
+goto add-path ~/Documents docs
 ```
 
 ### List paths

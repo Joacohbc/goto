@@ -13,7 +13,6 @@ import (
 var updateCmd = &cobra.Command{
 	Use:     "update-path",
 	Aliases: []string{"upd", "update", "modify-path", "mod"},
-	Args:    cobra.ExactArgs(1),
 	Short:   "Update a path from goto-path file",
 	Long: `
 To use the update-path command you have 9 modes to update, each mode needs two args, 
@@ -44,37 +43,38 @@ goto update-path path-abbv --path /home/myuser --new home
 # Or
 goto update-path abbv-abbv --abbv h --new home
 `,
+	Args: cobra.RangeArgs(0, 1),
+	PreRun: func(cmd *cobra.Command, args []string) {
 
-	Run: func(cmd *cobra.Command, args []string) {
-
-		modesToUpdate := []string{
-			"path-path", // 0
-			"path-abbv", // 1
-			"path-indx", // 2
-			"abbv-path", // 3
-			"abbv-abbv", // 4
-			"abbv-indx", // 5
-			"indx-path", // 6
-			"indx-abbv", // 7
-			"indx-indx", // 8
+		// If no arguments are passed and neither the modes flag is passed, return a error.
+		if len(args) == 0 && !utils.FlagPassed(cmd, "modes") {
+			cobra.CheckErr("must be specify a mode to update")
 		}
 
-		modesToUpdateShort := []string{
-			"pp", // 0
-			"pa", // 1
-			"pi", // 2
-			"ap", // 3
-			"aa", // 4
-			"ai", // 5
-			"ip", // 6
-			"ia", // 7
-			"ii", // 8
+		// If no value for new flags is passed, return a error
+		if !utils.FlagPassed(cmd, "new") && !utils.FlagPassed(cmd, "new-current") {
+			cobra.CheckErr("must be specify the new filed to update (path/abbreviation/index)")
+		}
+
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+
+		modes := [][]string{
+			{"path-path", "pp"}, // 0
+			{"path-abbv", "pa"}, // 1
+			{"path-indx", "pi"}, // 2
+			{"abbv-path", "ap"}, // 3
+			{"abbv-abbv", "aa"}, // 4
+			{"abbv-indx", "ai"}, // 5
+			{"indx-path", "ip"}, // 6
+			{"indx-abbv", "ia"}, // 7
+			{"indx-indx", "ii"}, // 8
 		}
 
 		//If modes is passed, show all modes
 		if utils.FlagPassed(cmd, "modes") {
-			for i := range modesToUpdate {
-				fmt.Println("Long form:", modesToUpdate[i], "|", "Short form:", modesToUpdateShort[i])
+			for i := range modes {
+				fmt.Println("Long form:", modes[i][0], "|", "Short form:", modes[i][1])
 			}
 			return
 		}
@@ -100,13 +100,14 @@ goto update-path abbv-abbv --abbv h --new home
 		switch args[0] {
 
 		//path-path
-		case modesToUpdate[0], modesToUpdateShort[0]:
+		case modes[0][0], modes[0][1]:
 			//Valid the Path and the new Path
 			path := utils.GetPath(cmd)
 			cobra.CheckErr(gpath.ValidPathVar(&new))
 
 			//And search in the array
 			for i := range gpaths {
+
 				if gpaths[i].Path == path {
 					gpaths[i].Path = new
 					break
@@ -118,7 +119,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//path-abbv
-		case modesToUpdate[1], modesToUpdateShort[1]:
+		case modes[1][0], modes[1][1]:
 			//Valid the Path and the new Abbreviation
 			path := utils.GetPath(cmd)
 			cobra.CheckErr(gpath.ValidAbbreviationVar(&new))
@@ -136,7 +137,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//path-indx
-		case modesToUpdate[2], modesToUpdateShort[2]:
+		case modes[2][0], modes[2][1]:
 			//Valid the Path and the new Abbreviation
 			path := utils.GetPath(cmd)
 			cobra.CheckErr(gpath.IsValidIndex(len(gpaths), new))
@@ -156,7 +157,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//abbv-path
-		case modesToUpdate[3], modesToUpdateShort[3]:
+		case modes[3][0], modes[3][1]:
 			//Valid the Abbreviation and the new Path
 			abbv := utils.GetAbbreviation(cmd)
 			cobra.CheckErr(gpath.ValidPathVar(&new))
@@ -174,7 +175,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//abbv-abbv
-		case modesToUpdate[4], modesToUpdateShort[4]:
+		case modes[4][0], modes[4][1]:
 			//Valid the Abbreviation and the new Path
 			abbv := utils.GetAbbreviation(cmd)
 			cobra.CheckErr(gpath.ValidAbbreviationVar(&new))
@@ -192,7 +193,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//abbv-indx
-		case modesToUpdate[5], modesToUpdateShort[5]:
+		case modes[5][0], modes[5][1]:
 			//Valid the Path and the new Abbreviation
 			abbv := utils.GetAbbreviation(cmd)
 			cobra.CheckErr(gpath.IsValidIndex(len(gpaths), new))
@@ -212,7 +213,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//indx-path
-		case modesToUpdate[6], modesToUpdateShort[6]:
+		case modes[6][0], modes[6][1]:
 			indx := utils.GetIndex(cmd)
 			cobra.CheckErr(gpath.ValidPathVar(&new))
 
@@ -224,7 +225,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//indx-abbv
-		case modesToUpdate[7], modesToUpdateShort[7]:
+		case modes[7][0], modes[7][1]:
 			indx := utils.GetIndex(cmd)
 			cobra.CheckErr(gpath.ValidAbbreviationVar(&new))
 
@@ -236,7 +237,7 @@ goto update-path abbv-abbv --abbv h --new home
 			}
 
 		//indx-indx
-		case modesToUpdate[8], modesToUpdateShort[8]:
+		case modes[8][0], modes[8][1]:
 			indx := utils.GetIndex(cmd)
 			cobra.CheckErr(gpath.IsValidIndex(len(gpaths), new))
 
@@ -264,13 +265,13 @@ func init() {
 
 	//Flags "To Update"
 	updateCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
-	updateCmd.Flags().BoolP(utils.FlagCurrentDir, "c", false, "The Path to update will be the current directory (\"path\" flag will be overwrite)")
+	updateCmd.Flags().BoolP(utils.FlagCurrentDir, "c", false, "The Path to update will be the current directory (\"path\" flag value will be overwrite)")
 	updateCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
 	updateCmd.Flags().IntP(utils.FlagIndex, "i", -1, "The Index of the Path")
 
 	//Flags "Update To"
 	updateCmd.Flags().StringP("new", "n", "", "The Path or Abbreviation new")
-	updateCmd.Flags().BoolP("new-current", "C", false, "The new Path will be the current directory (\"new\" flag will be overwrite)")
+	updateCmd.Flags().BoolP("new-current", "C", false, "The new Path will be the current directory (\"new\" flag value will be overwrite)")
 
 	//Flag info
 	updateCmd.Flags().BoolP("modes", "m", false, "Print all modes formats")

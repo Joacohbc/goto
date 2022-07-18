@@ -15,39 +15,42 @@ import (
 var restoreCmd = &cobra.Command{
 	Use:   "restore",
 	Short: "Do a restore of the goto-paths file",
-	Args:  cobra.ExactArgs(0),
+	Example: `
+# Do a restore of goto-paths from a backup in the config directory
+goto restore
+
+# If you want to specify the input path
+goto restore -i /the/path/file.json.backup
+	`,
+	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, _ []string) {
 
-		//Parse all flags
+		//Parse all flags  (if is not passed, have already a default value)
 		input, err := cmd.Flags().GetString("input")
 		cobra.CheckErr(err)
 
 		//If exists a config backup
 		info, err := os.Stat(input)
-		if os.IsNotExist(err) {
-			cobra.CheckErr(fmt.Errorf("dont have a backup of config file"))
-		} else if err != nil {
-			cobra.CheckErr(err)
-		}
+		cobra.CheckErr(err)
 
 		//If is not a file
 		if info.IsDir() {
-			cobra.CheckErr(fmt.Errorf("the input can't be a directory"))
+			cobra.CheckErr("the input can't be a directory")
 		}
 
 		//Read the config backup
 		backup, err := os.ReadFile(input)
 		if err != nil {
-			cobra.CheckErr(fmt.Errorf("cant read the backup of config file: %v", err))
+			cobra.CheckErr(fmt.Sprintf("cant read the backup of config file: %v", err))
 		}
 
 		//Do the unmarshaling of the config backup
 		var gpaths []gpath.GotoPath
 		if err := json.Unmarshal(backup, &gpaths); err != nil {
-			cobra.CheckErr(fmt.Errorf("cant parse the backup of config file"))
+			cobra.CheckErr("cant parse the backup of config file")
 		}
 
-		//And re-write the config file with the backup
+		//And overwrite the config file with the backup
 		cobra.CheckErr(config.SaveGPathsFile(gpaths, utils.GetFilePath(cmd)))
 
 		fmt.Printf("Restore complete in %s\n", utils.GetFilePath(cmd))

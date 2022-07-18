@@ -37,16 +37,10 @@ goto list --abbv docs
 					fmt.Printf("%v - %s\n", i, gpath.String())
 					return
 				}
-
-				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the path \"%s\" doesn't exist in the gpaths-file", path))
-				}
 			}
-			return
-		}
+			cobra.CheckErr(fmt.Sprintf("the path \"%s\" doesn't exist in the gpaths-file", path))
 
-		// If the abbreviation flag is passed
-		if utils.AbbvFlagPassed(cmd) {
+		} else if utils.AbbvFlagPassed(cmd) { // If the abbreviation flag is passed
 			abbv := utils.GetAbbreviation(cmd)
 			for i, gpath := range gpaths {
 
@@ -54,16 +48,10 @@ goto list --abbv docs
 					fmt.Printf("%v - %s\n", i, gpath.String())
 					return
 				}
-
-				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("doesn't exist a path with that abbreviation \"%s\"", abbv))
-				}
 			}
-			return
-		}
+			cobra.CheckErr(fmt.Sprintf("doesn't exist a path with that abbreviation \"%s\"", abbv))
 
-		//If the flag "reverse" is passed
-		if utils.FlagPassed(cmd, "reverse") {
+		} else if utils.FlagPassed(cmd, "reverse") { //If the flag "reverse" is passed
 			for i := range gpaths {
 				fmt.Printf("%v - %s\n", len(gpaths)-i-1, gpaths[len(gpaths)-i-1].String())
 			}

@@ -39,6 +39,11 @@ func CurrentDirFlagPassed(cmd *cobra.Command) bool {
 	return cmd.Flags().Changed(FlagCurrentDir)
 }
 
+// Check if the FlagPath was passed
+func TemporalFlagPassed(cmd *cobra.Command) bool {
+	return cmd.Flags().Changed("temporal")
+}
+
 // Returns the value of the FlagPath already validated and checking the FlagCurrentDir
 func GetPath(cmd *cobra.Command) string {
 	path, err := cmd.Flags().GetString(FlagPath)

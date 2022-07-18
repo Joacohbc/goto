@@ -13,19 +13,26 @@ import (
 var backupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Do a backup of the goto-paths file",
-	Args:  cobra.ExactArgs(0),
+	Example: `
+# Made a backup of goto-paths in the config directory
+goto backup
+
+# If you want to specify the output path
+goto backup -o /the/path/file.json.backup
+`,
+	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, _ []string) {
 
 		//Read the config file
 		gpaths := utils.LoadGPaths(cmd)
 
-		//Get output flag
+		//Get output flag (if is not passed, have already a default value)
 		output, err := cmd.Flags().GetString("output")
 		cobra.CheckErr(err)
 
 		//Check if exists
 		if _, err := os.Stat(output); err == nil {
-			cobra.CheckErr(fmt.Errorf("the file \"%s\" already exists", output))
+			cobra.CheckErr(fmt.Sprintf("the file \"%s\" already exists", output))
 		}
 
 		cobra.CheckErr(config.SaveGPathsFile(gpaths, output))

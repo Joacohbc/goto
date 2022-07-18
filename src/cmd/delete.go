@@ -13,12 +13,11 @@ var deleteCmd = &cobra.Command{
 	Use:     "delete-path",
 	Aliases: []string{"del", "delete", "remove-path", "rem", "remove"},
 	Short:   "Delete a path from goto-path file",
-	Args:    cobra.ExactArgs(0),
 	Long: `
 To use the delete-path command you need to Path, Abbreviation or Index from a goto-path`,
 
 	Example: `
-# This command delete-path the current directory(the "Path") to the gpaths file
+# This command delete indicate thet delete the current directory path from the gpaths file
 goto delete-path --current
 
 # To specify the "Path", "Abbreviation" or Index. use:
@@ -32,29 +31,39 @@ goto delete-path --abbv docs
 # Delete the gpath in the index "2"
 goto delete-path --indx 2
 `,
+	Args: cobra.ExactArgs(0),
 	PreRun: func(cmd *cobra.Command, _ []string) {
 
-		passed := func(flag string) bool { return cmd.Flags().Changed(flag) }
+		/*
+			Valid cases:
+			- Specify only one flag, to indicate which gpath will be deleted
+			- Specify 2 flags, to indicate which gpath will be deleted and the temporary flag
 
-		//If any flags is passed or more than 2, return an error
+			Invalid cases:
+			- 0 flags
+			- +2 flags
+			- 1 flag that it is the temporary flag
+			- 2 flags and one of these it is not the temporary flag
+		*/
+
+		//If the number or flags are 0 or more than 2, return an error
 		if cmd.Flags().NFlag() == 0 || cmd.Flags().NFlag() > 2 {
-			cobra.CheckErr(fmt.Errorf("you must specify one flag to delete a gpath (Or Path or Abbreviation or Index)"))
+			cobra.CheckErr("you must specify only one flag to delete a gpath (Or Path or Abbreviation or Index)")
 		}
 
-		//If one flags is passed and it is the temporary flags, return an error
-		if cmd.Flags().NFlag() == 1 && passed("temporal") {
-			cobra.CheckErr(fmt.Errorf("you must specify one flag to delete a gpath (Or Path or Abbreviation or Index)"))
+		//If only one flags is passed and it is the temporary flags, return an error
+		if cmd.Flags().NFlag() == 1 && utils.TemporalFlagPassed(cmd) {
+			cobra.CheckErr("you must specify one flag to delete a gpath (Or Path or Abbreviation or Index)")
 		}
 
-		//If 2 flags are passed and the temporary flag is not
-		//passed it means that two flags were passed to identify the gpath
+		//If 2 flags are passed and none of these two is not the temporary flag
+		//it means that two flags were passed to identify the gpath
 		/*
 			2 flags to identify the gpath may cause an error to delete the path.
-			For example, -p /home/user -i 2
-			the index not match with the gpath, so delete one of the paths
+			For example: -p /home/user -i 2, the index not match with the gpath, so delete one of the paths
 		*/
-		if cmd.Flags().NFlag() == 2 && !passed("temporal") {
-			cobra.CheckErr(fmt.Errorf("you must specify one flag to delete a gpath (Or Path or Abbreviation or Index)"))
+		if cmd.Flags().NFlag() == 2 && !utils.TemporalFlagPassed(cmd) {
+			cobra.CheckErr(fmt.Errorf("you must specify only one flag to delete a gpath (Or Path or Abbreviation or Index)"))
 		}
 	},
 	Run: func(cmd *cobra.Command, _ []string) {
@@ -62,45 +71,39 @@ goto delete-path --indx 2
 		//Load the goto-paths file to array
 		gpaths := utils.LoadGPaths(cmd)
 
-		if utils.FlagPassed(cmd, utils.FlagPath) {
+		// If the path flag is passed
+		if utils.PathFlagPassed(cmd) {
 			path := utils.GetPath(cmd)
 
 			//Delete the directory from the array
 			for i, gpath := range gpaths {
 
-				//The gpath passes have the same Path or the same Abbreviation, delete it
+				//The gpath passes have the same Path delete it
 				if gpath.Path == path {
 					gpaths = append(gpaths[:i], gpaths[i+1:]...)
-					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.String())
+					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.Abbreviation)
 					break
 				}
-
-				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("any gpath match with the path \"%s\"", path))
-				}
 			}
-		}
 
-		if utils.FlagPassed(cmd, utils.FlagAbbreviation) {
+			cobra.CheckErr(fmt.Errorf("any gpath match with the path \"%s\"", path))
+
+		} else if utils.AbbvFlagPassed(cmd) { // If the abbreviation flag is passed
 			abbv := utils.GetAbbreviation(cmd)
 
 			//Delete the directory from the array
 			for i, gpath := range gpaths {
 
-				//The gpath passes have the same Path or the same Abbreviation, delete it
+				//The gpath passes have the Abbreviation, delete it
 				if gpath.Abbreviation == abbv {
 					gpaths = append(gpaths[:i], gpaths[i+1:]...)
-					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.String())
+					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.Abbreviation)
 					break
 				}
-
-				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("any gpath match with the abbreviation \"%s\"", abbv))
-				}
 			}
-		}
+			cobra.CheckErr(fmt.Errorf("any gpath match with the abbreviation \"%s\"", abbv))
 
-		if utils.FlagPassed(cmd, utils.FlagIndex) {
+		} else if utils.IndexFlagPassed(cmd) { // If the index flag is passed
 			indx := utils.GetIndex(cmd)
 
 			//Delete the directory from the array
@@ -109,14 +112,11 @@ goto delete-path --indx 2
 				//The gpath passes have the same Path or the same Abbreviation, delete it
 				if i == indx {
 					gpaths = append(gpaths[:i], gpaths[i+1:]...)
-					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.String())
+					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.Abbreviation)
 					break
 				}
-
-				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("any gpath match with the index %d", i))
-				}
 			}
+			cobra.CheckErr(fmt.Errorf("any gpath match with the index %d", indx))
 		}
 
 		//After the changes, valid it

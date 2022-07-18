@@ -11,7 +11,7 @@ import (
 // addCmd represents the addGPath command
 var validCmd = &cobra.Command{
 	Use:     "valid-paths",
-	Aliases: []string{"valid", "check-paths"},
+	Aliases: []string{"valid", "check-paths", "check"},
 	Args:    cobra.ExactArgs(0),
 	Short:   "Valid all path from goto-paths file",
 
@@ -19,17 +19,16 @@ var validCmd = &cobra.Command{
 
 		gpaths := utils.LoadGPaths(cmd)
 
+		// Check all paths are valid from goto-paths file
 		for _, g := range gpaths {
-
 			if err := g.Valid(); err != nil {
-				fmt.Println("Error in the file:", err)
-				return
+				cobra.CheckErr(err)
 			}
 		}
 
+		//Check the whole gpath array
 		if err := gpath.DontRepeatInArray(gpaths); err != nil {
-			fmt.Println("Error in the file:", err)
-			return
+			cobra.CheckErr(err)
 		}
 
 		fmt.Println("All paths are valid <3")
