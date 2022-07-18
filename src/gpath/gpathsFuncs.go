@@ -15,13 +15,13 @@ import (
 // - Get absolute path
 func ValidPathVar(path *string) error {
 
-	//Delete start and ends spaces and clean the path
-	validPath := filepath.Clean(strings.TrimSpace(*path))
-
 	//Check that the path is not empty
-	if len(validPath) < 1 {
+	if len(strings.TrimSpace(*path)) < 1 {
 		return fmt.Errorf("the Path can't be empty or be blank space")
 	}
+
+	//Delete start and ends spaces and clean the path
+	validPath := filepath.Clean(strings.TrimSpace(*path))
 
 	// Get info of the file
 	info, err := os.Stat(validPath)
@@ -51,7 +51,7 @@ func ValidPathVar(path *string) error {
 	}
 
 	// "Save" the value of the ValidPath in the Path string passed
-	path = &validPath
+	*path = validPath
 	return nil
 }
 
@@ -67,7 +67,7 @@ func ValidPath(path string) (string, error) {
 // - Check that is not a number
 func ValidAbbreviationVar(abbv *string) error {
 
-	//Delete start and ends spacesn an clean the path
+	//Delete start and ends spaces an clean the path
 	validAbbv := strings.TrimSpace(*abbv)
 
 	if len(validAbbv) < 1 {
@@ -83,7 +83,7 @@ func ValidAbbreviationVar(abbv *string) error {
 	}
 
 	// "Save" the value of the ValidAbbv in the Abbv string passed
-	abbv = &validAbbv
+	*abbv = validAbbv
 	return nil
 }
 
@@ -94,7 +94,7 @@ func ValidAbbreviation(abbv string) (string, error) {
 }
 
 // This function check if a index is valid and also check that the index
-// is a number beetween 0 and the length of the GotoPath array
+// is a number between 0 and the length of the GotoPath array
 func IsValidIndex(lenght int, index string) error {
 
 	indx, err := strconv.Atoi(index)
@@ -111,7 +111,7 @@ func IsValidIndex(lenght int, index string) error {
 }
 
 //Check that the any gpath has the same Path or same Abbreviation that other
-func ValidArray(gpaths []GotoPath) error {
+func DontRepeatInArray(gpaths []GotoPath) error {
 
 	if len(gpaths) == 0 {
 		return fmt.Errorf("the config file is empty")
@@ -119,8 +119,8 @@ func ValidArray(gpaths []GotoPath) error {
 
 	for i, gpath := range gpaths {
 
-		//Check that 2 Path don't have the same abbreviation, where the indexs are diferents
-		//(With diferent index beacause obviously the same index have the same abbreviation and the same path)
+		//Check that 2 Path don't have the same abbreviation, where the indexes are different
+		//(With different index because obviously the same index have the same abbreviation and the same path)
 		for indexRepeated, gpathRepeated := range gpaths {
 
 			//If have the same path and is not the same index

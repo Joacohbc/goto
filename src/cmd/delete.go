@@ -120,7 +120,7 @@ goto delete-path --indx 2
 		}
 
 		//After the changes, valid it
-		cobra.CheckErr(gpath.ValidArray(gpaths))
+		cobra.CheckErr(gpath.DontRepeatInArray(gpaths))
 		utils.UpdateGPaths(cmd, gpaths)
 	},
 }

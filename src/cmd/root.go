@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"goto/src/gpath"
 	"goto/src/utils"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -37,19 +39,36 @@ goto -t home
 	Args: cobra.ExactArgs(1),
 
 	Run: func(cmd *cobra.Command, args []string) {
-		path, err := utils.CheckIndexOrAbbvOrDir(cmd, args[0])
-		cobra.CheckErr(err)
+
+		path := filepath.Join(args...)
+
+		// If only directory flag is passed, check if is a directory a continue
+		if cmd.Flags().Changed("only-directory") {
+			cobra.CheckErr(gpath.ValidPathVar(&path))
+		} else {
+
+			// If it is not passed
+			var isIndexOrAbbv bool
+
+			// Check if is a index or an abbreviation
+			path, isIndexOrAbbv = utils.IsIndexOrAbbv(cmd, path)
+
+			// If it is not, check if is a directory
+			if !isIndexOrAbbv {
+				cobra.CheckErr(gpath.ValidPathVar(&path))
+			}
+		}
 
 		//If quote flag is passed
 		if cmd.Flags().Changed("quotes") {
 			fmt.Println("\"" + path + "\"")
-			os.Exit(0)
+			return
 		}
 
 		//If spaces flag is passed
 		if cmd.Flags().Changed("spaces") {
 			fmt.Println(strings.ReplaceAll(path, " ", "\\ "))
-			os.Exit(0)
+			return
 		}
 
 		//If quote flag is not passed
@@ -73,5 +92,6 @@ func Execute() {
 func init() {
 	rootCmd.Flags().BoolP("quotes", "q", false, "Return the path between quotes")
 	rootCmd.Flags().BoolP("spaces", "s", false, "Return the path with substituted spaces")
+	rootCmd.Flags().BoolP("only-directory", "d", false, "Only check if the argument passed is a directory")
 	rootCmd.PersistentFlags().BoolP("temporal", "t", false, "Do the action in the temporal gpath file")
 }

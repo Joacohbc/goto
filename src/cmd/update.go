@@ -79,7 +79,7 @@ goto update-path abbv-abbv --abbv h --new home
 			return
 		}
 
-		//Parse the new falg
+		//Parse the new flag
 		new, err := cmd.Flags().GetString("new")
 		cobra.CheckErr(err)
 

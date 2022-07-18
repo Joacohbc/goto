@@ -34,12 +34,12 @@ func IndexFlagPassed(cmd *cobra.Command) bool {
 	return cmd.Flags().Changed(FlagIndex)
 }
 
-// Check if the FlagCurretDir flag was passed
+// Check if the FlagCurrentDir flag was passed
 func CurrentDirFlagPassed(cmd *cobra.Command) bool {
 	return cmd.Flags().Changed(FlagCurrentDir)
 }
 
-// Returns the value of the FlagPath already valided and checking the FlagCurretDir
+// Returns the value of the FlagPath already validated and checking the FlagCurrentDir
 func GetPath(cmd *cobra.Command) string {
 	path, err := cmd.Flags().GetString(FlagPath)
 	cobra.CheckErr(err)
@@ -53,7 +53,7 @@ func GetPath(cmd *cobra.Command) string {
 	return path
 }
 
-// Returns the value of the FlagAbbreviation already valided
+// Returns the value of the FlagAbbreviation already validated
 func GetAbbreviation(cmd *cobra.Command) string {
 	abbv, err := cmd.Flags().GetString(FlagAbbreviation)
 	cobra.CheckErr(err)
@@ -63,7 +63,7 @@ func GetAbbreviation(cmd *cobra.Command) string {
 	return abbv
 }
 
-// Returns the valuef o the FlagIndex flag already valided
+// Returns the value of the FlagIndex flag already validated
 func GetIndex(cmd *cobra.Command) int {
 	index, err := cmd.Flags().GetInt(FlagIndex)
 	cobra.CheckErr(err)

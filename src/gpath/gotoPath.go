@@ -18,13 +18,13 @@ func (d *GotoPath) String() string {
 }
 
 // This function valid a directory with ValidPathVar() and ValidAbbreviationVar()
-func (d *GotoPath) Valid() error {
+func (d GotoPath) Valid() error {
 
-	if err := ValidPathVar(&d.Path); err != nil {
+	if _, err := ValidPath(d.Path); err != nil {
 		return err
 	}
 
-	if err := ValidAbbreviationVar(&d.Abbreviation); err != nil {
+	if _, err := ValidAbbreviation(d.Abbreviation); err != nil {
 		return err
 	}
 

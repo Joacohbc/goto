@@ -50,7 +50,7 @@ func CreateGotoPathsFile(gotoPathsFile string) error {
 // Valid the Array (using gpath.ValidArray) and create a Paths file from directory array
 func SaveGPathsFile(gpaths []gpath.GotoPath, gotoPathsFile string) error {
 
-	if err := gpath.ValidArray(gpaths); err != nil {
+	if err := gpath.DontRepeatInArray(gpaths); err != nil {
 		return err
 	}
 
@@ -84,6 +84,6 @@ func LoadGPathsFile(gpaths *[]gpath.GotoPath, gotoPathsFile string) error {
 		return fmt.Errorf("error parsing config file")
 	}
 
-	//If all is okey, check dir and return
-	return gpath.ValidArray(*gpaths)
+	//If all is OK, check dir and return
+	return gpath.DontRepeatInArray(*gpaths)
 }

@@ -27,7 +27,7 @@ var validCmd = &cobra.Command{
 			}
 		}
 
-		if err := gpath.ValidArray(gpaths); err != nil {
+		if err := gpath.DontRepeatInArray(gpaths); err != nil {
 			fmt.Println("Error in the file:", err)
 			return
 		}
