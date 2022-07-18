@@ -39,11 +39,14 @@ goto update-path path-path --path /home/myuser --new /home/mynewuser
 # "h" the default abbreviation to home directory
 goto update-path abbv-path --abbv h --new /home/mynewuser
 
+# The same that:
+goto update ap --abbv h --new /home/mynewuser
+
 # Change the abbreviation of the come
 goto update-path path-abbv --path /home/myuser --new home
 
-# Or
-goto update-path abbv-abbv --abbv h --new home
+# Or if you want to update the abbreviation of the home
+goto update abbv-abbv --abbv h --new home
 `,
 	Args: cobra.RangeArgs(0, 1),
 	PreRun: func(cmd *cobra.Command, args []string) {
@@ -54,7 +57,7 @@ goto update-path abbv-abbv --abbv h --new home
 		}
 
 		// If no value for new flags is passed, return a error
-		if !utils.FlagPassed(cmd, "new") && !utils.FlagPassed(cmd, "new-current") {
+		if !utils.FlagPassed(cmd, "new") {
 			cobra.CheckErr("must be specify the new filed to update (path/abbreviation/index)")
 		}
 
@@ -84,11 +87,6 @@ goto update-path abbv-abbv --abbv h --new home
 		//Parse the new flag
 		new, err := cmd.Flags().GetString("new")
 		cobra.CheckErr(err)
-
-		//If new-current is passed, overwrite the "new" to current directory
-		if utils.FlagPassed(cmd, "new-current") {
-			new = utils.GetCurrentDirectory()
-		}
 
 		//Load the goto-paths file to array
 		gpaths := utils.LoadGPaths(cmd)
@@ -267,13 +265,11 @@ func init() {
 
 	//Flags "To Update"
 	updateCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
-	updateCmd.Flags().BoolP(utils.FlagCurrentDir, "c", false, "The Path to update will be the current directory (\"path\" flag value will be overwrite)")
 	updateCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
 	updateCmd.Flags().IntP(utils.FlagIndex, "i", -1, "The Index of the Path")
 
 	//Flags "Update To"
 	updateCmd.Flags().StringP("new", "n", "", "The Path or Abbreviation new")
-	updateCmd.Flags().BoolP("new-current", "C", false, "The new Path will be the current directory (\"new\" flag value will be overwrite)")
 
 	//Flag info
 	updateCmd.Flags().BoolP("modes", "m", false, "Print all modes formats")

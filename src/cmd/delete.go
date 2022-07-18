@@ -13,8 +13,7 @@ var deleteCmd = &cobra.Command{
 	Use:     "delete-path",
 	Aliases: []string{"del", "delete", "remove-path", "rem", "remove"},
 	Short:   "Delete a path from goto-path file",
-	Long: `
-To use the delete-path command you need to Path, Abbreviation or Index from a goto-path`,
+	Long:    `To use the delete-path command you need to Path, Abbreviation or Index from a goto-path`,
 
 	Example: `
 # Format : goto delete-path [ -t ] { -p path | -a abbreviation | -i index } 
@@ -81,11 +80,10 @@ goto delete-path --indx 2
 				if gpath.Path == path {
 					gpaths = append(gpaths[:i], gpaths[i+1:]...)
 					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.Abbreviation)
-					break
+					goto SaveAndCheck
 				}
 			}
-
-			cobra.CheckErr(fmt.Errorf("any gpath match with the path \"%s\"", path))
+			cobra.CheckErr(fmt.Sprintf("any gpath match with the path \"%s\"", path))
 
 		} else if utils.AbbvFlagPassed(cmd) { // If the abbreviation flag is passed
 			abbv := utils.GetAbbreviation(cmd)
@@ -97,7 +95,7 @@ goto delete-path --indx 2
 				if gpath.Abbreviation == abbv {
 					gpaths = append(gpaths[:i], gpaths[i+1:]...)
 					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.Abbreviation)
-					break
+					goto SaveAndCheck
 				}
 			}
 			cobra.CheckErr(fmt.Errorf("any gpath match with the abbreviation \"%s\"", abbv))
@@ -112,12 +110,13 @@ goto delete-path --indx 2
 				if i == indx {
 					gpaths = append(gpaths[:i], gpaths[i+1:]...)
 					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.Abbreviation)
-					break
+					goto SaveAndCheck
 				}
 			}
 			cobra.CheckErr(fmt.Errorf("any gpath match with the index %d", indx))
 		}
 
+	SaveAndCheck:
 		//After the changes, valid it
 		cobra.CheckErr(gpath.DontRepeatInArray(gpaths))
 		utils.UpdateGPaths(cmd, gpaths)

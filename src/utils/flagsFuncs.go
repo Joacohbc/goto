@@ -11,7 +11,6 @@ const (
 	FlagPath         string = "path"
 	FlagAbbreviation string = "abbv"
 	FlagIndex        string = "indx"
-	FlagCurrentDir   string = "current"
 )
 
 // Check if the flag (key) was passed
@@ -34,25 +33,15 @@ func IndexFlagPassed(cmd *cobra.Command) bool {
 	return cmd.Flags().Changed(FlagIndex)
 }
 
-// Check if the FlagCurrentDir flag was passed
-func CurrentDirFlagPassed(cmd *cobra.Command) bool {
-	return cmd.Flags().Changed(FlagCurrentDir)
-}
-
 // Check if the FlagPath was passed
 func TemporalFlagPassed(cmd *cobra.Command) bool {
 	return cmd.Flags().Changed("temporal")
 }
 
-// Returns the value of the FlagPath already validated and checking the FlagCurrentDir
+// Returns the value of the FlagPath already validated
 func GetPath(cmd *cobra.Command) string {
 	path, err := cmd.Flags().GetString(FlagPath)
 	cobra.CheckErr(err)
-
-	//If current is passed, overwrite the path to current directory
-	if FlagPassed(cmd, FlagCurrentDir) {
-		path = GetCurrentDirectory()
-	}
 
 	cobra.CheckErr(gpath.ValidPathVar(&path))
 	return path

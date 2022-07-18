@@ -36,7 +36,7 @@ goto search --abbv docs
 		gpaths := utils.LoadGPaths(cmd)
 
 		// If the any path flag is passed
-		if utils.CurrentDirFlagPassed(cmd) || utils.PathFlagPassed(cmd) {
+		if utils.PathFlagPassed(cmd) {
 
 			path := utils.GetPath(cmd)
 
@@ -69,5 +69,4 @@ func init() {
 	//Flags
 	searchCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
 	searchCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
-	searchCmd.Flags().BoolP(utils.FlagCurrentDir, "c", false, "The Path to update will be the current directory (\"path\" flag value will be overwrite)")
 }

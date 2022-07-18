@@ -31,25 +31,11 @@ Note: Use -d to search only directorys and don't check if the argument passed is
 		gpaths := utils.LoadGPaths(cmd)
 
 		// Vars to create the gpath and to report a error
-		var path, abbv string
-		var err error
+		path, err := gpath.ValidPath(args[0])
+		cobra.CheckErr(err)
 
-		// If the CurrentDirFlag is passed, only valid the abbreviation
-		if utils.CurrentDirFlagPassed(cmd) {
-			path = utils.GetCurrentDirectory()
-
-			// If the , the abbreviation is the argument number 0
-			abbv, err = gpath.ValidAbbreviation(args[0])
-			cobra.CheckErr(err)
-
-		} else {
-			// If CurrentDirFlag is passed, the path is the argument number 0 and the abbreviation the number 1
-			path, err = gpath.ValidPath(args[0])
-			cobra.CheckErr(err)
-
-			abbv, err = gpath.ValidAbbreviation(args[1])
-			cobra.CheckErr(err)
-		}
+		abbv, err := gpath.ValidAbbreviation(args[1])
+		cobra.CheckErr(err)
 
 		//Add the new directory to the array
 		gpaths = append(gpaths, gpath.GotoPath{

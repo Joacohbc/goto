@@ -150,10 +150,7 @@ Output: Go to: /home/user/.config/goto
 To add a new *gpath* require a Path and a Abbreviation:
 
 ```bash
-# This command add the current directory(the "Path") to the gpaths file with the abbreviation "currentDir"
-goto add-path --current currentDir 
-
-# The same that:
+# This command add the current directory to the gpaths file with the abbreviation "currentDir"
 goto add-path ./ currentDir
 
 # To specify the path and abbreviation use:
@@ -168,26 +165,28 @@ To list all *gpath* of the *gpaths* file:
 goto list
 
 Output: 
-0- Path: "/home/user", Abbreviation: "h"
-1- Path: "/home/user/.config/goto/", Abbreviation: "config"
-2- Path: "/home/user/Documents", Abbreviation: "docs"
+0 - "/home/user" - h
+1 - "/home/user/.config/goto/" - config
+2 - "/home/user/Documents" - docs
 ...
 ```
 
-You also can get a specific line of the gpaths file using the following flags:
+### Search paths
+
+You also can get a specific line of the gpaths file using the following command:
 
 ```bash
-# -p to indicate the abbreviation (also you can use -c if you want to pass the current directory)
-goto list -p ~/Documents
+# -p to indicate the abbreviation
+goto search -p ~/Documents
 
 Output:
-2- Path: "/home/user/Documents", Abbreviation: "docs"
+2 - "/home/user/Documents" - docs
 
 # -a to indicate the abbreviation
-goto list -a docs
+goto search -a docs
 
 Output:
-2- Path: "/home/user/Documents", Abbreviation: "docs"
+2 - "/home/user/Documents" - docs
 ```
 
 ### Delete paths
@@ -234,13 +233,19 @@ goto update abbv-path --abbv h --new /home/mynewuser
 
 Output: The changes were applied successfully
 
+# The same that: 
+goto update ap -a -n /home/mynewuser
+
 # Change the abbreviation of the home
 goto update path-abbv --path /home/mynewuser --new home
 
-# Or if you want to update the abbreviation of the home
-goto update abbv-abbv --abbv h --new home
+# The same that:
+goto update pa -p /home/mynewuser -n home
 
 Output: The changes were applied successfully
+
+# Or if you want to update the abbreviation of the home
+goto update abbv-abbv --abbv h --new home
 ```
 
 ### Backup and Restore
