@@ -14,21 +14,21 @@ Order of the code
 ```bash
 src
     ├── cmd
-    │   ├── add.go - Add a new gpath
-    │   ├── backup.go - Do a backup of the gpath file
-    │   ├── completion.go 
-    │   ├── delete.go - Delete a gpath
-    │   ├── list.go - List gpaths
-    │   ├── restore.go - Do a restore from the a gpath file
-    │   ├── root.go - Print the gpath 
-    │   ├── update.go - Update the gpath
-    │   ├── valid.go - Valid all gpath from the gpath file
-    │   └── version.go - Print the version of goto
+    │   ├── add.go - Add a new gpath
+    │   ├── backup.go - Do a backup of the gpath file
+    │   ├── completion.go 
+    │   ├── delete.go - Delete a gpath
+    │   ├── list.go - List gpaths
+    │   ├── restore.go - Do a restore from the a gpath file
+    │   ├── root.go - Print the gpath 
+    │   ├── update.go - Update the gpath
+    │   ├── valid.go - Valid all gpath from the gpath file
+    │   └── version.go - Print the version of goto
     ├── config
-    │   └── pathsFileAction.go - Create, Save, and Load (in a Array) the a JSON file 
+    │   └── pathsFileAction.go - Create, Save, and Load (in a Array) the a JSON file 
     ├── gpath
-    │   ├── gotoPath.go - GPath struct
-    │   └── gpathsFuncs.go - Function for GPath objects
+    │   ├── gotoPath.go - GPath struct
+    │   └── gpathsFuncs.go - Function for GPath objects
     ├── LICENSE
     ├── main.go
     └── utils
@@ -143,7 +143,7 @@ goto /home/user/.config/goto
 Output: Go to: /home/user/.config/goto
 ```
 
-**Note**: *goto always gives priority to the abbreviation and index over a path in the current directory. If in the current working directory exists a directory named "scripts" and you put "scripts" goto search first if "scripts" is abbreviation or a index and after search if a valid path. To search only directories use -d flag*
+**Note**: *goto always gives priority to the abbreviation and index over a path in the current directory. If in the current working directory exists a directory named "scripts" and you put "scripts" goto search first if "scripts" is abbreviation and after search if a valid path. Or if the directory is named "123" or "1" goto search first if "1" is index.To search only directories use -d flag*
 
 ### Add new path
 
@@ -284,7 +284,7 @@ If you want to add a gpath, but only for a while (until shutdown, for example) y
 
 ```bash
 # To add you can use exactly the same command to add a normal gpath, with the -t
-goto add -t --current -abbv currentDir
+goto add-path -t ./ currentDir
 
 # For a temporal gpaths you have to use temporal flag(-t / --temporal)
 goto currentDir

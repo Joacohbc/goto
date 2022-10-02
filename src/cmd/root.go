@@ -36,6 +36,10 @@ goto /home/user/.config/goto
 
 # For a temporal gpaths you have to use temporal flag(-t / --temporal)
 goto -t home
+
+# If you have a directory named like a number or like abbreviation you should use -d / --only-directory flag
+goto -d 1 # This will move to the directory "1" and don't move to the first path in the gpaths file
+goto -d h # This will move to the directory "h" and don't move to the path with the abbreviation "h"
 `,
 	//If don't have args, return a error
 	Args: cobra.ExactArgs(1),
@@ -46,9 +50,13 @@ goto -t home
 
 		// If only directory flag is passed, check if is a directory a continue
 		if cmd.Flags().Changed("only-directory") {
+			/*
+				This Flags is use if the directory is a named "123/". Also if the directory
+				is a named like a direcotry an abbreviation in the gpath files and you want
+				to go to the directory and not to the abbreviation
+			*/
 			cobra.CheckErr(gpath.ValidPathVar(&path))
 		} else {
-
 			// If it is not passed
 			var isIndexOrAbbv bool
 
@@ -59,6 +67,7 @@ goto -t home
 			if !isIndexOrAbbv {
 				cobra.CheckErr(gpath.ValidPathVar(&path))
 			}
+
 		}
 
 		//If quote flag is passed
