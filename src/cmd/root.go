@@ -51,8 +51,8 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 		// If only directory flag is passed, check if is a directory a continue
 		if cmd.Flags().Changed("only-directory") {
 			/*
-				This Flags is use if the directory is a named "123/". Also if the directory
-				is a named like a direcotry an abbreviation in the gpath files and you want
+				This Flags is use if the directory is a named "123". Also if the directory
+				is a named like a directory an abbreviation in the gpath files and you want
 				to go to the directory and not to the abbreviation
 			*/
 			cobra.CheckErr(gpath.ValidPathVar(&path))
@@ -73,13 +73,13 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 		//If quote flag is passed
 		if cmd.Flags().Changed("quotes") {
 			fmt.Println("\"" + path + "\"")
-			return
+			os.Exit(0)
 		}
 
 		//If spaces flag is passed
 		if cmd.Flags().Changed("spaces") {
 			fmt.Println(strings.ReplaceAll(path, " ", "\\ "))
-			return
+			os.Exit(0)
 		}
 
 		//If quote flag is not passed

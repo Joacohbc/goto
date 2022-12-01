@@ -21,8 +21,6 @@ goto add-path ./ currentDir
 
 # To specify the path and abbreviation use:
 goto add-path ~/Documents docs
-
-Note: Use -d to search only directorys and don't check if the argument passed is a abbreviation or index
 `,
 	Args: cobra.ExactArgs(2),
 
