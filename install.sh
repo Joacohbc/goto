@@ -59,13 +59,30 @@ else
     exit 1
 fi
 
-#Copy binary file, alias file and README of the repository to CONFIG_DIR
-cp ./bin/goto.bin $CONFIG_DIR
+#Compile the goto.bin if the user wants
+echo "Linux x64 (1) or ARM64 (2)? (1 or 2)"
+read op
 
-if [ $? -ne 0 ]; then
-    error "File couldn't be copied"
-    exit 1
+if [ "$op" = "1" ]; then
+    #Copy binary file, alias file and README of the repository to CONFIG_DIR
+    cp ./bin/goto.bin $CONFIG_DIR
+
+    if [ $? -ne 0 ]; then
+        error "File couldn't be copied"
+        exit 1
+    fi
+else
+    #Copy binary file, alias file and README of the repository to CONFIG_DIR
+    cp ./bin/goto_arm64.bin $CONFIG_DIR
+    mv $CONFIG_DIR/goto_arm64.bin $CONFIG_DIR/goto.bin
+
+
+    if [ $? -ne 0 ]; then
+        error "File couldn't be copied"
+        exit 1
+    fi
 fi
+
 
 cp ./alias.sh $CONFIG_DIR
 
