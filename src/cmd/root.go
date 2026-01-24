@@ -91,9 +91,9 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
+// StartExecution adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
+func StartExecution() {
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
