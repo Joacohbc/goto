@@ -1,0 +1,38 @@
+name: Check Version Change
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'src/**'
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version update
+        run: |
+          # Fetch the base branch
+          git fetch origin ${{ github.base_ref }}
+          
+          # Extract version from current HEAD
+          CURRENT_VERSION=$(grep 'const VersionGoto =' src/cmd/version.go | awk -F '"' '{print $2}')
+          
+          # Extract version from base branch
+          # We need to handle the case where src/cmd/version.go might not exist in base or moved, but assuming it exists.
+          BASE_VERSION=$(git show origin/${{ github.base_ref }}:src/cmd/version.go | grep 'const VersionGoto =' | awk -F '"' '{print $2}')
+          
+          echo "Base Version: $BASE_VERSION"
+          echo "Current Version: $CURRENT_VERSION"
+          
+          if [ "$CURRENT_VERSION" == "$BASE_VERSION" ]; then
+            echo "::error::Source code in src/ has changed, but VersionGoto in src/cmd/version.go has not been updated."
+            exit 1
+          fi
+          
+          echo "Version has been updated."
