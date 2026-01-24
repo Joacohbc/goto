@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"goto/src/gpath"
 	"goto/src/utils"
 	"os"
 
+	"github.com/bytedance/sonic"
 	"github.com/spf13/cobra"
 )
 
@@ -47,7 +47,7 @@ goto restore -i /the/path/file.json.backup
 
 		//Do the unmarshaling of the config backup
 		var gpaths []gpath.GotoPath
-		if err := json.Unmarshal(backup, &gpaths); err != nil {
+		if err := sonic.ConfigFastest.Unmarshal(backup, &gpaths); err != nil {
 			cobra.CheckErr("cant parse the backup of config file")
 		}
 
