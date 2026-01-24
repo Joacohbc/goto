@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"goto/src/gpath"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -61,7 +60,7 @@ func SaveGPathsFile(gpaths []gpath.GotoPath, gotoPathsFile string) error {
 	}
 
 	//Create the config file
-	err = ioutil.WriteFile(gotoPathsFile, jsonFile, 0600)
+	err = os.WriteFile(gotoPathsFile, jsonFile, 0600)
 	if err != nil {
 		return err
 	}
@@ -69,11 +68,11 @@ func SaveGPathsFile(gpaths []gpath.GotoPath, gotoPathsFile string) error {
 	return nil
 }
 
-//Load config files in an array
+// Load config files in an array
 func LoadGPathsFile(gpaths *[]gpath.GotoPath, gotoPathsFile string) error {
 
 	//Read the File
-	file, err := ioutil.ReadFile(gotoPathsFile)
+	file, err := os.ReadFile(gotoPathsFile)
 	if err != nil {
 		return fmt.Errorf("error reading config file")
 	}
