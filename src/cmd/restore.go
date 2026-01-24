@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"goto/src/config"
 	"goto/src/gpath"
 	"goto/src/utils"
 	"os"
@@ -53,7 +52,7 @@ goto restore -i /the/path/file.json.backup
 		}
 
 		//And overwrite the config file with the backup
-		cobra.CheckErr(config.SaveGPathsFile(gpaths, utils.GetFilePath(cmd)))
+		cobra.CheckErr(gpath.SaveGPathsFile(gpaths, utils.GetFilePath(cmd)))
 
 		fmt.Printf("Restore complete in %s\n", utils.GetFilePath(cmd))
 	},
