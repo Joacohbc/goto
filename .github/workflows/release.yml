@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            extension: ""
+          - goos: linux
+            goarch: arm64
+            extension: ""
+          - goos: windows
+            goarch: amd64
+            extension: ".exe"
+          - goos: darwin
+            goarch: amd64
+            extension: ""
+          - goos: darwin
+            goarch: arm64
+            extension: ""
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          mkdir -p build
+          OUTPUT_NAME="goto-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.extension }}"
+          echo "Building $OUTPUT_NAME..."
+          go build -v -o "build/$OUTPUT_NAME" src/main.go
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: build/*
