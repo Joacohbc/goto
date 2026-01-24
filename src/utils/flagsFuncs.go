@@ -11,6 +11,7 @@ const (
 	FlagPath         string = "path"
 	FlagAbbreviation string = "abbv"
 	FlagIndex        string = "indx"
+	FlagTemporal     string = "temporal"
 )
 
 // Check if the flag (key) was passed
@@ -35,7 +36,7 @@ func IndexFlagPassed(cmd *cobra.Command) bool {
 
 // Check if the FlagPath was passed
 func TemporalFlagPassed(cmd *cobra.Command) bool {
-	return cmd.Flags().Changed("temporal")
+	return cmd.Flags().Changed(FlagTemporal)
 }
 
 // Returns the value of the FlagPath already validated
