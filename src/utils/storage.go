@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"goto/src/config"
 	"goto/src/gpath"
 	"os"
 	"path/filepath"
@@ -27,7 +26,7 @@ var (
 	gotoPathsFileBackup string
 )
 
-//Init the Vars
+// Init the Vars
 func init() {
 	//Get the directory
 	configPath, err := os.UserConfigDir()
@@ -39,18 +38,18 @@ func init() {
 	gotoPathsFileBackup = filepath.Clean(gotoPathsFile + ".backup")
 	tempGotoPathsFile = filepath.Join(os.TempDir(), "goto-paths-temp.json")
 
-	cobra.CheckErr(config.CreateGotoPathsFile(gotoPathsFile))
-	cobra.CheckErr(config.CreateGotoPathsFile(tempGotoPathsFile))
+	cobra.CheckErr(gpath.CreateGotoPathsFile(gotoPathsFile))
+	cobra.CheckErr(gpath.CreateGotoPathsFile(tempGotoPathsFile))
 }
 
 // Overwrite the gpaths file (or the temporal gpath file if the flag passed) with the gpaths array.
 func UpdateGPaths(cmd *cobra.Command, gpaths []gpath.GotoPath) {
-	if cmd.Flags().Changed("temporal") {
+	if cmd.Flags().Changed(FlagTemporal) {
 		//If the array is valid, apply the changes
-		cobra.CheckErr(config.SaveGPathsFile(gpaths, tempGotoPathsFile))
+		cobra.CheckErr(gpath.SaveGPathsFile(gpaths, tempGotoPathsFile))
 	} else {
 		//If the array is valid, apply the changes
-		cobra.CheckErr(config.SaveGPathsFile(gpaths, gotoPathsFile))
+		cobra.CheckErr(gpath.SaveGPathsFile(gpaths, gotoPathsFile))
 	}
 
 	fmt.Println("Changes applied successfully")
@@ -59,17 +58,17 @@ func UpdateGPaths(cmd *cobra.Command, gpaths []gpath.GotoPath) {
 // Load the gpaths file (or the temporal gpath file if the flag passed) in the gpaths array.
 func LoadGPaths(cmd *cobra.Command) []gpath.GotoPath {
 	gpaths := &[]gpath.GotoPath{}
-	if cmd.Flags().Changed("temporal") {
-		cobra.CheckErr(config.LoadGPathsFile(gpaths, tempGotoPathsFile))
+	if cmd.Flags().Changed(FlagTemporal) {
+		cobra.CheckErr(gpath.LoadGPathsFile(gpaths, tempGotoPathsFile))
 	} else {
-		cobra.CheckErr(config.LoadGPathsFile(gpaths, gotoPathsFile))
+		cobra.CheckErr(gpath.LoadGPathsFile(gpaths, gotoPathsFile))
 	}
 	return *gpaths
 }
 
 // Return the path of the GPaths File (temporal and normal)
 func GetFilePath(cmd *cobra.Command) string {
-	if cmd.Flags().Changed("temporal") {
+	if cmd.Flags().Changed(FlagTemporal) {
 		return tempGotoPathsFile
 	} else {
 		return gotoPathsFile

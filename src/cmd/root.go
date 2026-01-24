@@ -60,8 +60,11 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 			// If it is not passed
 			var isIndexOrAbbv bool
 
+			// Load the config file
+			gpathsList := utils.LoadGPaths(cmd)
+
 			// Check if is a index or an abbreviation
-			path, isIndexOrAbbv = utils.IsIndexOrAbbv(cmd, path)
+			path, isIndexOrAbbv = gpath.GetPathFromIndexOrAbbreviation(gpathsList, path)
 
 			// If it is not, check if is a directory
 			if !isIndexOrAbbv {
@@ -91,9 +94,9 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
+// StartExecution adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
+func StartExecution() {
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

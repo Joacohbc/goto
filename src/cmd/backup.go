@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"goto/src/config"
+	"goto/src/gpath"
 	"goto/src/utils"
 	"os"
 
@@ -37,7 +37,7 @@ goto backup -o /the/path/file.json.backup
 			cobra.CheckErr(fmt.Sprintf("the file \"%s\" already exists", output))
 		}
 
-		cobra.CheckErr(config.SaveGPathsFile(gpaths, output))
+		cobra.CheckErr(gpath.SaveGPathsFile(gpaths, output))
 		fmt.Printf("Backup complete from %s\n", utils.GetFilePath(cmd))
 	},
 }

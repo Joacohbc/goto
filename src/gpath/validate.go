@@ -8,7 +8,12 @@ import (
 	"strings"
 )
 
-// This function do:
+// ValidPathVar validates and cleans a path in-place.
+// It receives a pointer to the string, so if the validation succeeds,
+// it overwrites the original variable with the absolute and cleaned path.
+// This is useful for directly sanitizing input variables.
+//
+// Steps:
 // - Clean the path
 // - Check that doesn't be empty
 // - Check that exists and it is a directory
@@ -55,13 +60,19 @@ func ValidPathVar(path *string) error {
 	return nil
 }
 
-//Return the same that use ValidPathVar
+// ValidPath is a wrapper around ValidPathVar for convenience.
+// It takes a string value (not a pointer), validates it, and returns the cleaned absolute path.
+// Use this if you prefer returning a new value rather than modifying a variable in-place.
 func ValidPath(path string) (string, error) {
 	err := ValidPathVar(&path)
 	return path, err
 }
 
-// This function do:
+// ValidAbbreviationVar validates and cleans an abbreviation in-place.
+// It receives a pointer to the string, so if the validation succeeds,
+// it overwrites the original variable with the trimmed abbreviation.
+//
+// Steps:
 // - Check that doesn't be empty
 // - Check that the Abbreviation don't contain any space
 // - Check that is not a number
@@ -87,7 +98,9 @@ func ValidAbbreviationVar(abbv *string) error {
 	return nil
 }
 
-//Return the same that use ValidAbbreviationVar
+// ValidAbbreviation is a wrapper around ValidAbbreviationVar for convenience.
+// It takes a string value (not a pointer), validates it, and returns the cleaned abbreviation.
+// Use this if you prefer returning a new value rather than modifying a variable in-place.
 func ValidAbbreviation(abbv string) (string, error) {
 	err := ValidAbbreviationVar(&abbv)
 	return abbv, err
@@ -110,8 +123,8 @@ func IsValidIndex(lenght int, index string) error {
 	return nil
 }
 
-//Check that the any gpath has the same Path or same Abbreviation that other
-func DontRepeatInArray(gpaths []GotoPath) error {
+// Check that the any gpath has the same Path or same Abbreviation that other
+func CheckRepeatedItems(gpaths []GotoPath) error {
 
 	if len(gpaths) == 0 {
 		return fmt.Errorf("the config file is empty")

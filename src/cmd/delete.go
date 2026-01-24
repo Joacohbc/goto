@@ -85,7 +85,7 @@ goto delete-path --indx 2
 			}
 			cobra.CheckErr(fmt.Sprintf("any gpath match with the path \"%s\"", path))
 
-		} else if utils.AbbvFlagPassed(cmd) { // If the abbreviation flag is passed
+		} else if utils.AbbreviationFlagPassed(cmd) { // If the abbreviation flag is passed
 			abbv := utils.GetAbbreviation(cmd)
 
 			//Delete the directory from the array
@@ -118,7 +118,7 @@ goto delete-path --indx 2
 
 	SaveAndCheck:
 		//After the changes, valid it
-		cobra.CheckErr(gpath.DontRepeatInArray(gpaths))
+		cobra.CheckErr(gpath.CheckRepeatedItems(gpaths))
 		utils.UpdateGPaths(cmd, gpaths)
 	},
 }
