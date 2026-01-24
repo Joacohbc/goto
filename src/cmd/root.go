@@ -60,8 +60,11 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 			// If it is not passed
 			var isIndexOrAbbv bool
 
+			// Load the config file
+			gpathsList := utils.LoadGPaths(cmd)
+
 			// Check if is a index or an abbreviation
-			path, isIndexOrAbbv = utils.IsIndexOrAbbreviation(cmd, path)
+			path, isIndexOrAbbv = gpath.GetPathFromIndexOrAbbreviation(gpathsList, path)
 
 			// If it is not, check if is a directory
 			if !isIndexOrAbbv {

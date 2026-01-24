@@ -55,7 +55,7 @@ func ValidPathVar(path *string) error {
 	return nil
 }
 
-//Return the same that use ValidPathVar
+// Return the same that use ValidPathVar
 func ValidPath(path string) (string, error) {
 	err := ValidPathVar(&path)
 	return path, err
@@ -87,7 +87,7 @@ func ValidAbbreviationVar(abbv *string) error {
 	return nil
 }
 
-//Return the same that use ValidAbbreviationVar
+// Return the same that use ValidAbbreviationVar
 func ValidAbbreviation(abbv string) (string, error) {
 	err := ValidAbbreviationVar(&abbv)
 	return abbv, err
@@ -110,7 +110,7 @@ func IsValidIndex(lenght int, index string) error {
 	return nil
 }
 
-//Check that the any gpath has the same Path or same Abbreviation that other
+// Check that the any gpath has the same Path or same Abbreviation that other
 func DontRepeatInArray(gpaths []GotoPath) error {
 
 	if len(gpaths) == 0 {
