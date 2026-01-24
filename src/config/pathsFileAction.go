@@ -8,42 +8,41 @@ import (
 	"path/filepath"
 )
 
+// Create default GotoPath entries
+func createDefaultGotoPathsFile(gotoPathsFile string) ([]gpath.GotoPath, error) {
+	var gpaths []gpath.GotoPath
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+
+	// Default paths
+	gpaths = append(gpaths, gpath.GotoPath{
+		Path:         home,
+		Abbreviation: "h",
+	})
+
+	gpaths = append(gpaths, gpath.GotoPath{
+		Path:         filepath.Dir(gotoPathsFile),
+		Abbreviation: "config",
+	})
+
+	return gpaths, nil
+}
+
 // Create the config file if not already exists
 func CreateGotoPathsFile(gotoPathsFile string) error {
-
 	if _, err := os.Stat(gotoPathsFile); err == nil {
 		return nil
 	}
 
-	//Array of directories
-	var gpaths []gpath.GotoPath
-
-	//Functions to add directories to the config file
-	add := func(path string, abbv string) {
-		gpaths = append(gpaths, gpath.GotoPath{
-			Path:         path,
-			Abbreviation: abbv,
-		})
-	}
-
-	home, err := os.UserHomeDir()
+	gpaths, err := createDefaultGotoPathsFile(gotoPathsFile)
 	if err != nil {
 		return err
 	}
 
-	//Default Path:
-	add(home, "h") //If you write only goto, this will the resulting directory
-
-	//ConfigDir -> filepath.Dir(gotoPathsFile)
-	add(filepath.Dir(gotoPathsFile), "config")
-
-	//Make the json config file
-	if err := SaveGPathsFile(gpaths, gotoPathsFile); err != nil {
-		return err
-	}
-
-	//If the file exists
-	return nil
+	return SaveGPathsFile(gpaths, gotoPathsFile)
 }
 
 // Valid the Array (using gpath.ValidArray) and create a Paths file from directory array
