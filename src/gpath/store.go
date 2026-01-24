@@ -66,7 +66,7 @@ func SaveGPathsFile(gpaths []GotoPath, gotoPathsFile string) error {
 	return nil
 }
 
-// Load config files in an array
+// Load config file into an array
 func LoadGPathsFile(gpaths *[]GotoPath, gotoPathsFile string) error {
 
 	//Read the File
