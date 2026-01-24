@@ -44,7 +44,7 @@ func CreateGotoPathsFile(gotoPathsFile string) error {
 	return SaveGPathsFile(gpaths, gotoPathsFile)
 }
 
-// Valid the Array (using ValidArray) and create a Paths file from directory array
+// Validate the array (using CheckRepeatedItems) and create a paths file from directory array
 func SaveGPathsFile(gpaths []GotoPath, gotoPathsFile string) error {
 
 	if err := CheckRepeatedItems(gpaths); err != nil {
