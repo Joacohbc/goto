@@ -118,7 +118,7 @@ goto delete-path --indx 2
 
 	SaveAndCheck:
 		//After the changes, valid it
-		cobra.CheckErr(gpath.DontRepeatInArray(gpaths))
+		cobra.CheckErr(gpath.CheckRepeatedItems(gpaths))
 		utils.UpdateGPaths(cmd, gpaths)
 	},
 }

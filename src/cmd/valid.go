@@ -27,7 +27,7 @@ var validCmd = &cobra.Command{
 		}
 
 		//Check the whole gpath array
-		if err := gpath.DontRepeatInArray(gpaths); err != nil {
+		if err := gpath.CheckRepeatedItems(gpaths); err != nil {
 			cobra.CheckErr(err)
 		}
 

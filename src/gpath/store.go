@@ -47,7 +47,7 @@ func CreateGotoPathsFile(gotoPathsFile string) error {
 // Valid the Array (using ValidArray) and create a Paths file from directory array
 func SaveGPathsFile(gpaths []GotoPath, gotoPathsFile string) error {
 
-	if err := DontRepeatInArray(gpaths); err != nil {
+	if err := CheckRepeatedItems(gpaths); err != nil {
 		return err
 	}
 
@@ -82,5 +82,5 @@ func LoadGPathsFile(gpaths *[]GotoPath, gotoPathsFile string) error {
 	}
 
 	//If all is OK, check dir and return
-	return DontRepeatInArray(*gpaths)
+	return CheckRepeatedItems(*gpaths)
 }
