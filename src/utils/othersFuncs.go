@@ -9,7 +9,7 @@ import (
 
 // Return the path of a: Index (number) or an Abbreviation.
 // If is not an abbreviation or a valid index return the same input
-func IsIndexOrAbbv(cmd *cobra.Command, arg string) (string, bool) {
+func IsIndexOrAbbreviation(cmd *cobra.Command, arg string) (string, bool) {
 
 	//Load the config file
 	gpaths := LoadGPaths(cmd)

@@ -24,7 +24,7 @@ func PathFlagPassed(cmd *cobra.Command) bool {
 }
 
 // Check if the FlagAbbreviation was passed
-func AbbvFlagPassed(cmd *cobra.Command) bool {
+func AbbreviationFlagPassed(cmd *cobra.Command) bool {
 	return cmd.Flags().Changed(FlagAbbreviation)
 }
 

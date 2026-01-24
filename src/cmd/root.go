@@ -61,7 +61,7 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 			var isIndexOrAbbv bool
 
 			// Check if is a index or an abbreviation
-			path, isIndexOrAbbv = utils.IsIndexOrAbbv(cmd, path)
+			path, isIndexOrAbbv = utils.IsIndexOrAbbreviation(cmd, path)
 
 			// If it is not, check if is a directory
 			if !isIndexOrAbbv {
