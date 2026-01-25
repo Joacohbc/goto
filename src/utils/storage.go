@@ -79,3 +79,8 @@ func GetFilePath(cmd *cobra.Command) string {
 func GetDefaultBackupFilePath() string {
 	return gotoPathsFileBackup
 }
+
+// GetConfigDir returns the configuration directory path
+func GetConfigDir() string {
+	return configDir
+}
