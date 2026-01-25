@@ -34,11 +34,21 @@ func TestValidPath(t *testing.T) {
 	if err == nil {
 		t.Error("Expected error for file path (should be directory)")
 	}
+
+	// Test empty path
+	if _, err := gpath.ValidPath(""); err == nil {
+		t.Error("Expected error for empty path")
+	}
+
+	// Test path with only spaces
+	if _, err := gpath.ValidPath("   "); err == nil {
+		t.Error("Expected error for blank path")
+	}
 }
 
 func TestValidAbbreviation(t *testing.T) {
 	// Valid cases
-	validInputs := []string{"docs", "work", "a", "my_path"}
+	validInputs := []string{"docs", "work", "a", "my_path", "h1"}
 	for _, input := range validInputs {
 		cleaned, err := gpath.ValidAbbreviation(input)
 		if err != nil {
@@ -52,6 +62,11 @@ func TestValidAbbreviation(t *testing.T) {
 	// Invalid cases: spaces
 	if _, err := gpath.ValidAbbreviation("with space"); err == nil {
 		t.Error("Expected error for abbreviation with spaces")
+	}
+
+	// Invalid cases: empty
+	if _, err := gpath.ValidAbbreviation(""); err == nil {
+		t.Error("Expected error for empty abbreviation")
 	}
 
 	// Invalid cases: number (assuming logic forbids pure numbers based on context)
@@ -101,6 +116,11 @@ func TestCheckRepeatedItems(t *testing.T) {
 	if err := gpath.CheckRepeatedItems([]gpath.GotoPath{}); err == nil {
 		t.Error("Expected error for empty list")
 	}
+
+	// Nil list check
+	if err := gpath.CheckRepeatedItems(nil); err == nil {
+		t.Error("Expected error for nil list")
+	}
 }
 
 func TestIsValidIndex(t *testing.T) {
@@ -129,5 +149,45 @@ func TestIsValidIndex(t *testing.T) {
 		if err := gpath.IsValidIndex(tc.length, tc.index); err == nil {
 			t.Errorf("Expected error for %s (len: %d, idx: %s)", tc.desc, tc.length, tc.index)
 		}
+	}
+}
+
+func TestGetPathFromIndexOrAbbreviation(t *testing.T) {
+	gpaths := []gpath.GotoPath{
+		{Path: "/path/a", Abbreviation: "a"},
+		{Path: "/path/b", Abbreviation: "b"},
+		{Path: "/path/num", Abbreviation: "100"}, // Abbreviation that looks like a number
+	}
+
+	// Case 1: Valid Index
+	got, found := gpath.GetPathFromIndexOrAbbreviation(gpaths, "0")
+	if !found || got != "/path/a" {
+		t.Errorf("Expected to find index 0 (/path/a), got %s, found=%v", got, found)
+	}
+
+	// Case 2: Valid Abbreviation
+	got, found = gpath.GetPathFromIndexOrAbbreviation(gpaths, "b")
+	if !found || got != "/path/b" {
+		t.Errorf("Expected to find abbreviation 'b' (/path/b), got %s, found=%v", got, found)
+	}
+
+	// Case 3: Invalid Index (out of bounds) -> Should fall back to Abbv check -> Not found
+	got, found = gpath.GetPathFromIndexOrAbbreviation(gpaths, "5")
+	if found || got != "5" {
+		t.Errorf("Expected not found for '5', got %s, found=%v", got, found)
+	}
+
+	// Case 4: Abbreviation that is a number (but out of bounds index)
+	// '100' is out of bounds for len 3, so IsValidIndex fails.
+	// Logic should find it as abbreviation.
+	got, found = gpath.GetPathFromIndexOrAbbreviation(gpaths, "100")
+	if !found || got != "/path/num" {
+		t.Errorf("Expected to find abbreviation '100' (/path/num), got %s, found=%v", got, found)
+	}
+
+	// Case 5: Non-existent abbreviation
+	got, found = gpath.GetPathFromIndexOrAbbreviation(gpaths, "missing")
+	if found || got != "missing" {
+		t.Errorf("Expected not found for 'missing', got %s, found=%v", got, found)
 	}
 }
