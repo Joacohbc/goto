@@ -4,7 +4,7 @@ Goto is a "Path Manager" that lets you alias directories with shorter names (abb
 
 ## Installation
 
-1. **Download** the latest release from [releases](https://github.com/Joacohbc/goto/releases/latest).
+**Download** the latest release from [releases](https://github.com/Joacohbc/goto/releases/latest).
 
 ### Download Binary (Recommended)
 
@@ -28,9 +28,7 @@ chmod +x goto
 
 ### Run Init
 
-Once downloaded and made executable:
-
-**Run init** to set up aliases automatically:
+Once downloaded and made executable, run init to set up aliases automatically:
 
 ```bash
 ./goto init
@@ -110,3 +108,4 @@ goto -t temp
 *   `goto -q home` : Return quoted path.
 *   `goto -s home` : Return path with escaped spaces.
 *   `\cd ~/Documents` : Bypass alias to use standard `cd`.
+
