@@ -54,6 +54,8 @@ func captureOutput(f func()) string {
 // RunExpectedExit runs the logical part of a test in a subprocess and asserts that it exits with status 1.
 // testName: The name of the test function to run (e.g. "TestAddPathRepeated")
 // envKey: The environment variable key used to trigger the subprocess logic (e.g. "TEST_SUBPROCESS")
+// The application uses os.Exit(1) (via cobra.CheckErr) when it encounters an error, such as a duplicate path.
+// Standard panic/recover mechanisms cannot catch os.Exit, so we must run this test case in a subprocess.
 func RunExpectedExit(t *testing.T, testName string, envKey string) {
 	cmd := exec.Command(os.Args[0], "-test.run="+testName)
 	cmd.Env = append(os.Environ(), envKey+"=1")
