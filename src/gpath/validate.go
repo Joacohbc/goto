@@ -85,7 +85,7 @@ func ValidAbbreviationVar(abbv *string) error {
 		return fmt.Errorf("the Abbreviation can't be empty or be blank space")
 	}
 
-	if strings.Contains(*abbv, " ") {
+	if strings.Contains(validAbbv, " ") {
 		return fmt.Errorf("the Abbreviation can't contain any space")
 	}
 
