@@ -62,12 +62,16 @@ func SaveGPathsFile(gpaths []GotoPath, gotoPathsFile string) error {
 
 	// Use Buffered Writer for efficiency as suggested in the blog
 	writer := bufio.NewWriter(file)
-	defer writer.Flush()
 
 	// Encode directly to the stream
 	enc := sonic.ConfigDefault.NewEncoder(writer)
 	enc.SetIndent("", "\t")
 	if err := enc.Encode(gpaths); err != nil {
+		return err
+	}
+
+	// Flush the buffer to ensure all data is written
+	if err := writer.Flush(); err != nil {
 		return err
 	}
 
