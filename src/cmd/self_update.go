@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -90,6 +91,11 @@ func updateBinary() {
 		if strings.HasPrefix(newVersion, "Goto version is: ") {
 			newVersion = strings.TrimPrefix(newVersion, "Goto version is: ")
 		}
+	}
+
+	if !isNewerVersion(oldVersion, newVersion) {
+		fmt.Printf("Remote version (%s) is not newer than current version (%s). Aborting update.\n", newVersion, oldVersion)
+		return
 	}
 
 	// 5. Replace binary
@@ -175,4 +181,36 @@ func copyFile(src, dst string) error {
 	}
 
 	return err
+}
+
+func isNewerVersion(current, remote string) bool {
+	current = strings.TrimPrefix(current, "v")
+	remote = strings.TrimPrefix(remote, "v")
+
+	partsC := strings.Split(current, ".")
+	partsR := strings.Split(remote, ".")
+
+	maxLen := len(partsC)
+	if len(partsR) > maxLen {
+		maxLen = len(partsR)
+	}
+
+	for i := 0; i < maxLen; i++ {
+		valC := 0
+		if i < len(partsC) {
+			valC, _ = strconv.Atoi(partsC[i])
+		}
+		valR := 0
+		if i < len(partsR) {
+			valR, _ = strconv.Atoi(partsR[i])
+		}
+
+		if valR > valC {
+			return true
+		}
+		if valR < valC {
+			return false
+		}
+	}
+	return false
 }
