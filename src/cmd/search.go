@@ -11,7 +11,7 @@ import (
 var SearchCmd = &cobra.Command{
 	Use:     "search-path",
 	Aliases: []string{"search", "find-path", "find"},
-	Short:   "search goto-paths in the goto-paths file",
+	Short:   "Search goto-paths in the goto-paths file",
 	Example: `
 # Format: goto search [ -t ] { -p path | -a abbreviation }
 # To search a specific goto-path you can use the Path or the Abbreviation 

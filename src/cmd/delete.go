@@ -13,7 +13,7 @@ var DeleteCmd = &cobra.Command{
 	Use:     "delete-path",
 	Aliases: []string{"del", "delete", "remove-path", "rem", "remove"},
 	Short:   "Delete a path from goto-path file",
-	Long:    `To use the delete-path command you need to Path, Abbreviation or Index from a goto-path`,
+	Long:    `To use the delete-path command you need to provide a Path, Abbreviation or Index to identify the goto-path to delete`,
 
 	Example: `
 # Format : goto delete-path [ -t ] { -p path | -a abbreviation | -i index } 

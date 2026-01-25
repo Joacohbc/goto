@@ -13,7 +13,7 @@ var ValidCmd = &cobra.Command{
 	Use:     "valid-paths",
 	Aliases: []string{"valid", "check-paths", "check"},
 	Args:    cobra.ExactArgs(0),
-	Short:   "Valid all path from goto-paths file",
+	Short:   "Validate all paths from goto-paths file",
 
 	Run: func(cmd *cobra.Command, _ []string) {
 
