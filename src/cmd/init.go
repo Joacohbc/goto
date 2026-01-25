@@ -5,6 +5,7 @@ import (
 	"goto/src/utils"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -17,6 +18,12 @@ var InitCmd = &cobra.Command{
 	Long:  `Initialize the .config directory, goto-path.json, and generate alias.sh. It also adds the alias to your shell configuration.`,
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
+		goos := runtime.GOOS
+		if goos == "windows" {
+			fmt.Println("Initialization is not supported on Windows.")
+			return
+		}
+
 		configDir := utils.GetConfigDir()
 		ensureConfigDir(configDir)
 

@@ -31,11 +31,15 @@ func init() {
 func updateBinary() {
 	// 1. Construct URL
 	goos := runtime.GOOS
+	if goos == "windows" {
+		fmt.Println("Self-update is not supported on Windows.")
+		return
+	}
 	goarch := runtime.GOARCH
 	extension := ""
-	if goos == "windows" {
-		extension = ".exe"
-	}
+	// if goos == "windows" {
+	// 	extension = ".exe"
+	// }
 
 	fileName := fmt.Sprintf("goto-%s-%s%s", goos, goarch, extension)
 	downloadURL := fmt.Sprintf("https://github.com/Joacohbc/goto/releases/download/latest/%s", fileName)
