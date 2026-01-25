@@ -6,10 +6,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const VersionGoto = "2.3.0"
+const VersionGoto = "2.3.1"
 
-// versionCmd represents the version command
-var versionCmd = &cobra.Command{
+// VersionCmd represents the version command
+var VersionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version of goto",
 	Run: func(_ *cobra.Command, _ []string) {
@@ -18,5 +18,5 @@ var versionCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	RootCmd.AddCommand(VersionCmd)
 }

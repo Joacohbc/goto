@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// backupCmd represents the backup command
-var backupCmd = &cobra.Command{
+// BackupCmd represents the backup command
+var BackupCmd = &cobra.Command{
 	Use:   "backup",
 	Short: "Do a backup of the goto-paths file",
 	Example: `
@@ -43,8 +43,8 @@ goto backup -o /the/path/file.json.backup
 }
 
 func init() {
-	rootCmd.AddCommand(backupCmd)
+	RootCmd.AddCommand(BackupCmd)
 
 	//Flags
-	backupCmd.Flags().StringP("output", "o", utils.GetDefaultBackupFilePath(), "The backup destination path (must be a file path)")
+	BackupCmd.Flags().StringP("output", "o", utils.GetDefaultBackupFilePath(), "The backup destination path (must be a file path)")
 }

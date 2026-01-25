@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// updateCmd represents the update command
-var updateCmd = &cobra.Command{
+// UpdateCmd represents the update command
+var UpdateCmd = &cobra.Command{
 	Use:     "update-path",
 	Aliases: []string{"upd", "update", "modify-path", "mod"},
 	Short:   "Update a path from goto-path file",
@@ -259,18 +259,18 @@ goto update abbv-abbv --abbv h --new home
 }
 
 func init() {
-	rootCmd.AddCommand(updateCmd)
+	RootCmd.AddCommand(UpdateCmd)
 
 	//Flags//
 
 	//Flags "To Update"
-	updateCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
-	updateCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
-	updateCmd.Flags().IntP(utils.FlagIndex, "i", -1, "The Index of the Path")
+	UpdateCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
+	UpdateCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
+	UpdateCmd.Flags().IntP(utils.FlagIndex, "i", -1, "The Index of the Path")
 
 	//Flags "Update To"
-	updateCmd.Flags().StringP("new", "n", "", "The Path or Abbreviation new")
+	UpdateCmd.Flags().StringP("new", "n", "", "The Path or Abbreviation new")
 
 	//Flag info
-	updateCmd.Flags().BoolP("modes", "m", false, "Print all modes formats")
+	UpdateCmd.Flags().BoolP("modes", "m", false, "Print all modes formats")
 }

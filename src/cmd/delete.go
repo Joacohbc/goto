@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// deleteCmd represents the addGPath command
-var deleteCmd = &cobra.Command{
+// DeleteCmd represents the addGPath command
+var DeleteCmd = &cobra.Command{
 	Use:     "delete-path",
 	Aliases: []string{"del", "delete", "remove-path", "rem", "remove"},
 	Short:   "Delete a path from goto-path file",
@@ -124,10 +124,10 @@ goto delete-path --indx 2
 }
 
 func init() {
-	rootCmd.AddCommand(deleteCmd)
+	RootCmd.AddCommand(DeleteCmd)
 
 	//Flags
-	deleteCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
-	deleteCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
-	deleteCmd.Flags().IntP(utils.FlagIndex, "i", -1, "The Index of the Path")
+	DeleteCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
+	DeleteCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
+	DeleteCmd.Flags().IntP(utils.FlagIndex, "i", -1, "The Index of the Path")
 }

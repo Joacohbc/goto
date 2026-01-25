@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// searchGPathCmd represents the searchGPath command
-var searchCmd = &cobra.Command{
+// SearchCmd represents the searchGPath command
+var SearchCmd = &cobra.Command{
 	Use:     "search-path",
 	Aliases: []string{"search", "find-path", "find"},
 	Short:   "search goto-paths in the goto-paths file",
@@ -64,9 +64,9 @@ goto search --abbv docs
 
 func init() {
 	//Add this command to RootCommand
-	rootCmd.AddCommand(searchCmd)
+	RootCmd.AddCommand(SearchCmd)
 
 	//Flags
-	searchCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
-	searchCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
+	SearchCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
+	SearchCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
 }

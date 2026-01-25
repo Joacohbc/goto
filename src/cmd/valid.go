@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// addCmd represents the addGPath command
-var validCmd = &cobra.Command{
+// ValidCmd represents the addGPath command
+var ValidCmd = &cobra.Command{
 	Use:     "valid-paths",
 	Aliases: []string{"valid", "check-paths", "check"},
 	Args:    cobra.ExactArgs(0),
@@ -37,5 +37,5 @@ var validCmd = &cobra.Command{
 
 func init() {
 	//Add this command to RootCmd
-	rootCmd.AddCommand(validCmd)
+	RootCmd.AddCommand(ValidCmd)
 }
