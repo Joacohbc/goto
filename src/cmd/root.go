@@ -11,8 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:   "goto",
 	Short: "Goto is a \"Path Manager\" that allows you to add a specific path with an identifier and after get it with that identifier (exit with status 2)",
 	Long: `
@@ -97,15 +97,15 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 // StartExecution adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func StartExecution() {
-	err := rootCmd.Execute()
+	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	rootCmd.Flags().BoolP("quotes", "q", false, "Return the path between quotes")
-	rootCmd.Flags().BoolP("spaces", "s", false, "Return the path with substituted spaces")
-	rootCmd.Flags().BoolP("only-directory", "d", false, "Only check if the argument passed is a directory")
-	rootCmd.PersistentFlags().BoolP("temporal", "t", false, "Do the action in the temporal gpath file")
+	RootCmd.Flags().BoolP("quotes", "q", false, "Return the path between quotes")
+	RootCmd.Flags().BoolP("spaces", "s", false, "Return the path with substituted spaces")
+	RootCmd.Flags().BoolP("only-directory", "d", false, "Only check if the argument passed is a directory")
+	RootCmd.PersistentFlags().BoolP("temporal", "t", false, "Do the action in the temporal gpath file")
 }

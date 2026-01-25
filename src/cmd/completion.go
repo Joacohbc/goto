@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var completionCmd = &cobra.Command{
+var CompletionCmd = &cobra.Command{
 	Use:   "completion [bash|zsh|fish|powershell]",
 	Short: "Generate completion script",
 	Long: fmt.Sprintf(`To load completions:
@@ -48,7 +48,7 @@ var completionCmd = &cobra.Command{
 	# To load completions for every new session, run:
 	PS> %[1]s completion powershell > %[1]s.ps1
 	# and source this file from your PowerShell profile.
-`, rootCmd.Root().Name()),
+`, RootCmd.Root().Name()),
 	DisableFlagsInUseLine: true,
 	ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
 	Args:                  cobra.ExactValidArgs(1),
@@ -67,7 +67,7 @@ var completionCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(completionCmd)
+	RootCmd.AddCommand(CompletionCmd)
 
 	// Here you will define your flags and configuration settings.
 

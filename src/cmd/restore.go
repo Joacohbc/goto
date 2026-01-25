@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// restoreCmd represents the restore command
-var restoreCmd = &cobra.Command{
+// RestoreCmd represents the restore command
+var RestoreCmd = &cobra.Command{
 	Use:   "restore",
 	Short: "Do a restore of the goto-paths file",
 	Example: `
@@ -59,8 +59,8 @@ goto restore -i /the/path/file.json.backup
 }
 
 func init() {
-	rootCmd.AddCommand(restoreCmd)
+	RootCmd.AddCommand(RestoreCmd)
 
 	//Flags
-	restoreCmd.Flags().StringP("input", "i", utils.GetDefaultBackupFilePath(), "The ubication of the backup file")
+	RestoreCmd.Flags().StringP("input", "i", utils.GetDefaultBackupFilePath(), "The ubication of the backup file")
 }

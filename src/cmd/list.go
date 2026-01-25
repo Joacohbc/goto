@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listGPathCmd represents the listGPath command
-var listCmd = &cobra.Command{
+// ListCmd represents the listGPath command
+var ListCmd = &cobra.Command{
 	Use:     "list-path",
 	Aliases: []string{"list"},
 	Short:   "List goto-paths in the goto-paths file",
@@ -42,8 +42,8 @@ goto list -t
 
 func init() {
 	//Add this command to RootCommand
-	rootCmd.AddCommand(listCmd)
+	RootCmd.AddCommand(ListCmd)
 
 	//Flags
-	listCmd.Flags().BoolP("reverse", "R", false, "List the goto-paths in reverse")
+	ListCmd.Flags().BoolP("reverse", "R", false, "List the goto-paths in reverse")
 }

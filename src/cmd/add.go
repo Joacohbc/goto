@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// addCmd represents the addGPath command
-var addCmd = &cobra.Command{
+// AddCmd represents the addGPath command
+var AddCmd = &cobra.Command{
 	Use:     "add-path",
 	Aliases: []string{"add", "create-path", "create"},
 	Short:   "Add a new path to goto-paths file",
@@ -48,5 +48,5 @@ goto add-path ~/Documents docs
 
 func init() {
 	//Add this command to RootCmd
-	rootCmd.AddCommand(addCmd)
+	RootCmd.AddCommand(AddCmd)
 }
