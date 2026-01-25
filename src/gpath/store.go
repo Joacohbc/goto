@@ -38,6 +38,10 @@ func CreateGotoPathsFile(gotoPathsFile string) error {
 		return nil
 	}
 
+	if err := os.MkdirAll(filepath.Dir(gotoPathsFile), 0755); err != nil {
+		return err
+	}
+
 	gpaths, err := createDefaultGotoPathsFile(gotoPathsFile)
 	if err != nil {
 		return err
