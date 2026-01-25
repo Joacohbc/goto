@@ -1,10 +1,12 @@
 package gpath
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/bytedance/sonic"
 )
 
 // Create default GotoPath entries
@@ -51,15 +53,25 @@ func SaveGPathsFile(gpaths []GotoPath, gotoPathsFile string) error {
 		return err
 	}
 
-	//Make the json config file
-	jsonFile, err := json.MarshalIndent(gpaths, "", "\t")
+	// Open the file for writing (create or truncate)
+	file, err := os.OpenFile(gotoPathsFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
-	//Create the config file
-	err = os.WriteFile(gotoPathsFile, jsonFile, 0600)
-	if err != nil {
+	// Use Buffered Writer for efficiency as suggested in the blog
+	writer := bufio.NewWriter(file)
+
+	// Encode directly to the stream
+	enc := sonic.ConfigDefault.NewEncoder(writer)
+	enc.SetIndent("", "\t")
+	if err := enc.Encode(gpaths); err != nil {
+		return err
+	}
+
+	// Flush the buffer to ensure all data is written
+	if err := writer.Flush(); err != nil {
 		return err
 	}
 
@@ -69,15 +81,19 @@ func SaveGPathsFile(gpaths []GotoPath, gotoPathsFile string) error {
 // Load config file into an array
 func LoadGPathsFile(gpaths *[]GotoPath, gotoPathsFile string) error {
 
-	//Read the File
-	file, err := os.ReadFile(gotoPathsFile)
+	// Open the File
+	file, err := os.Open(gotoPathsFile)
 	if err != nil {
 		return fmt.Errorf("error reading config file")
 	}
+	defer file.Close()
 
-	//Load the Paths in []directories
-	err = json.Unmarshal(file, &gpaths)
-	if err != nil {
+	// Use Buffered Reader for efficiency
+	reader := bufio.NewReader(file)
+
+	// Load the Paths using sonic's stream decoder
+	dec := sonic.ConfigFastest.NewDecoder(reader)
+	if err := dec.Decode(gpaths); err != nil {
 		return fmt.Errorf("error parsing config file")
 	}
 
