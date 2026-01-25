@@ -1,248 +1,85 @@
-# Goto 2.0
+# Goto
 
-Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an index number. Those path are automatically save in a json file, the goto-paths (*gpaths*) files. From these files can add, update, delete and list paths and abbreviations. A *gpath* consists of a Path and an Abbreviation to identify the path. A example of a *gpath* in the goto-paths file:
-
-```json
-{
-    "path": "/home/user", 
-    "abbreviation": "home", 
-} 
-```
+Goto is a "Path Manager" that lets you alias directories with shorter names (abbreviations) or index numbers for quick navigation. These aliases are saved in a JSON file (`goto-paths`).
 
 ## Installation
 
-1. **Download** the latest release for your OS from:
-    [https://github.com/Joacohbc/goto/releases/latest](https://github.com/Joacohbc/goto/releases/latest)
+1. **Download** the latest release from [releases](https://github.com/Joacohbc/goto/releases/latest).
+2. **Make it executable**: `chmod +x goto`
+3. **Initialize**: `./goto init` (creates config, generates aliases, updates shell rc).
+4. **Restart terminal**.
 
-2. **Make it executable** (Linux/macOS):
-    ```bash
-    chmod +x goto
-    ```
-
-3. **Initialize** configuration:
-
-    ```bash
-    ./goto init
-    ```
-    This command will create the configuration directory, move the binary, generate the alias script, and add it to your shell configuration file (e.g., .bashrc, .zshrc).
-
-4. **Restart** your terminal or source your shell configuration file.
-
-For manual installation instructions or to understand how the alias works, see [MANUAL-INSTALL.md](MANUAL-INSTALL.md).
-
-## Self-Update
-
-You can easily update Goto to the latest version by running:
-
-```bash
-goto update-goto
-```
+See [MANUAL-INSTALL.md](MANUAL-INSTALL.md) for manual setup.
 
 ## Usage
 
-### Move (cd aliases)
-
-To use the main function of goto:
-
-```bash  
-# Move to the destination directory
-# "home" is the abbreviation of /home/user
-goto home
-
-Output: Go to: /home/user/
-
-# You also can use "0" (that is the default index of the /home/user)
-goto 0
-
-Output: Go to: /home/user/
-```
-
-Or also you can use goto like cd, use a complete/relative path:
-
-```bash  
-goto /home/user/.config/goto
-
-Output: Go to: /home/user/.config/goto
-```
-
-**Note**: *goto always gives priority to the abbreviation and index over a path in the current directory. If in the current working directory exists a directory named "scripts" and you put "scripts" goto search first if "scripts" is abbreviation and after search if a valid path. Or if the directory is named "123" or "1" goto search first if "1" is index.To search only directories use -d flag*
-
-### Add new path
-
-To add a new *gpath* require a Path and a Abbreviation:
+### Navigation
 
 ```bash
-# This command add the current directory to the gpaths file with the abbreviation "currentDir"
-goto add-path ./ currentDir
-
-# To specify the path and abbreviation use:
-goto add-path ~/Documents docs
+goto home      # Go to path with abbreviation "home"
+goto 0         # Go to path at index 0
+goto /tmp      # Like regular cd
 ```
 
-### List paths
+*Note: Abbreviations and indices take precedence over local directory names. Use `-d` to force directory navigation.*
 
-To list all *gpath* of the *gpaths* file:
+### Manage Paths
 
+**Add Path**
+```bash
+goto add-path ./ currentDir      # Add current dir as "currentDir"
+goto add-path ~/Documents docs   # Add specific path
+```
+
+**List Paths**
 ```bash
 goto list
-
-Output: 
-0 - "/home/user" - h
-1 - "/home/user/.config/goto/" - config
-2 - "/home/user/Documents" - docs
-...
+# Output: 0 - "/home/user" - h
 ```
 
-### Search paths
-
-You also can get a specific line of the gpaths file using the following command:
-
+**Search**
 ```bash
-# -p to indicate the abbreviation
-goto search -p ~/Documents
-
-Output:
-2 - "/home/user/Documents" - docs
-
-# -a to indicate the abbreviation
-goto search -a docs
-
-Output:
-2 - "/home/user/Documents" - docs
+goto search -a docs    # Search by abbreviation
+goto search -p ~/Docs  # Search by path
 ```
 
-### Delete paths
-
-To delete a *gpath* require a Path or a Abbreviation:
-
+**Delete Path**
 ```bash
-#I want to delete the path /home/user/Documents
-goto delete --path /home/user/Documents
-
-Output: The changes were applied successfully
-
-#You also can use the Abbreviation or the Index
+goto delete --path ~/Documents
 goto delete --abbv docs
-
-#Or to delete the gpath in the index 2
 goto delete --indx 2
-
-Output: The changes were applied successfully
 ```
 
-### Modify paths
+**Modify Path**
+Update entries using `goto update <mode>`. Modes combine the *identifier* and the *target* to change (e.g., `path-abbv` means identify by path, update abbreviation).
 
-To update a *gpath* you can use 9 modes to update, each mode needs two args, the first to identify the goto-path and the second specific to what is to be updated.
-
-The 9 modes are:
-
-- A "Path" and a new "Path" (path-path)
-- A "Path" and a new "Abbreviation" (path-abbv)
-- A "Path" and a new "Indx" (path-indx)
-- A "Abbreviation" and a new "Path" (abbv-path)
-- A "Abbreviation" and a new "Abbreviation" (abbv-path)
-- A "Abbreviation" and a new "Indx" (abbv-indx)
-- A "Index" and a new "Path" (indx-path)
-- A "Index" and a new "Abbreviation" (indx-abbv)
-- A "Index" and a new "Index" (indx-indx)
+Shortcuts: `pp` (path-path), `pa` (path-abbv), `pi` (path-indx), `ap` (abbv-path), `aa`, `ai`, `ip`, `ia`, `ii`.
 
 ```bash
-# Update the home of the user using the path to identify the gpath
-goto update path-path --path /home/myuser --new /home/mynewuser
+# Update path (identify by abbreviation 'h')
+goto update ap -a h -n /new/path
 
-# Or "h" the default abbreviation to home directory 
-goto update abbv-path --abbv h --new /home/mynewuser
-
-Output: The changes were applied successfully
-
-# The same that: 
-goto update ap -a -n /home/mynewuser
-
-# Change the abbreviation of the home
-goto update path-abbv --path /home/mynewuser --new home
-
-# The same that:
-goto update pa -p /home/mynewuser -n home
-
-Output: The changes were applied successfully
-
-# Or if you want to update the abbreviation of the home
-goto update abbv-abbv --abbv h --new home
+# Rename abbreviation (identify by path)
+goto update pa -p /current/path -n newname
 ```
 
-### Backup and Restore
+### Self-Update
+`goto update-goto`
 
-To make a backup of the configuration file
-
+### Backup & Restore
 ```bash
-# Made a backup of goto-paths in the config directory
-goto backup
-
-Output: Backup complete
-
-# If you want to specify the output path
-goto backup -o /the/path/file.json.backup
-
-Output: Backup complete
+goto backup [-o file.json]
+goto restore [-i file.json]
 ```
 
-To make a restore of the configuration file from a backup
-
+### Temporary Session
+Use `-t` flag for temporary paths (cleared on reboot).
 ```bash
-# Do a restore of goto-paths from a backup in the config directory
-goto restore
-
-Output: Restore complete
-
-# If you want to specify the input path
-goto restore -i /the/path/file.json.backup
-
-Output: Restore complete
+goto add-path -t ./ temp
+goto -t temp
 ```
 
-## Temporal gpaths
-
-If you want to add a gpath, but only for a while (until shutdown, for example) you can use the temporary flags (-t) which do the adding, deleting, updating and listing of gpaths in/from a temporary gpath file. The temporary gpath file is deleted on reboot.
-
-```bash
-# To add you can use exactly the same command to add a normal gpath, with the -t
-goto add-path -t ./ currentDir
-
-# For a temporal gpaths you have to use temporal flag(-t / --temporal)
-goto currentDir
-
-Output: Error: the Path "currentDir" do not exist
-
-# You have to use -t to gpaths in the temporal gpath file
-goto -t currentDir
-```
-
-## Extras
-
-More options besides the goto to move:
-
-```bash
-# Return a path with quotes, you need to specify a abbreviation, a number of index or a directory 
-goto -q home
-
-Output: "/home/user"
-
-# You can use the Index
-goto -q 0
-
-Output: "/home/user"
-
-# Return a path without spaces (" " -> "\ ") you need to specify a abbreviation, a number of index or a directory 
-goto -s example
-
-Output: "/home/user/Dir\ with \ Spaces"
-```
-
-## IMPORTANT
-
-**If you want to use only cd, not the alias of he goto function, you should use:**
-
-```bash
-#This use the command cd and not the alias
-\cd ~/Documents
-```
+### Extras
+*   `goto -q home` : Return quoted path.
+*   `goto -s home` : Return path with escaped spaces.
+*   `\cd ~/Documents` : Bypass alias to use standard `cd`.

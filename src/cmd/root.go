@@ -16,8 +16,8 @@ var RootCmd = &cobra.Command{
 	Use:   "goto",
 	Short: "Goto is a \"Path Manager\" that allows you to add a specific path with an identifier and after get it with that identifier (exit with status 2)",
 	Long: `
-Goto is a "Path Manager" that allows you to add a specific path with an identifier, this path can be used as an abbreviation or an 
-index number. Those path are automatically save in a json file, the goto-paths files. From this files can add, update, delete and list
+Goto is a "Path Manager" that allows you to add a specific path with an identifier. This path can be used as an abbreviation or an 
+index number. These paths are automatically saved in a json file, the goto-paths file. You can add, update, delete and list
 paths and abbreviations.
 `,
 
