@@ -40,7 +40,7 @@ func updateBinary() {
 	goarch := runtime.GOARCH
 	extension := ""
 	fileName := fmt.Sprintf("goto-%s-%s%s", goos, goarch, extension)
-	downloadURL := fmt.Sprintf("https://github.com/Joacohbc/goto/releases/download/latest/%s", fileName)
+	downloadURL := fmt.Sprintf("https://github.com/Joacohbc/goto/releases/latest/download/%s", fileName)
 
 	tmpDir := os.TempDir()
 	tmpFilePath := filepath.Join(tmpDir, fileName)
