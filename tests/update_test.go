@@ -37,7 +37,7 @@ func TestUpdatePathPath(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Error("Frequency update failed for path-path")
+		t.Error("Path update failed for path-path")
 	}
 }
 
