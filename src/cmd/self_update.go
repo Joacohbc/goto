@@ -35,12 +35,9 @@ func updateBinary() {
 		fmt.Println("Self-update is not supported on Windows.")
 		return
 	}
+
 	goarch := runtime.GOARCH
 	extension := ""
-	// if goos == "windows" {
-	// 	extension = ".exe"
-	// }
-
 	fileName := fmt.Sprintf("goto-%s-%s%s", goos, goarch, extension)
 	downloadURL := fmt.Sprintf("https://github.com/Joacohbc/goto/releases/download/latest/%s", fileName)
 
@@ -103,7 +100,9 @@ func updateBinary() {
 
 	err = os.Rename(tmpFilePath, currentExe)
 	if err != nil {
-		// If rename fails (e.g. diff filesystem), try copy
+		// If rename fails (e.g. diff filesystem), try copy.
+		// On Linux, we cannot overwrite a running executable (ETXTBSY), so we remove it first.
+		_ = os.Remove(currentExe)
 		if err := copyFile(tmpFilePath, currentExe); err != nil {
 			cobra.CheckErr(fmt.Errorf("failed to replace binary: %w", err))
 		}
