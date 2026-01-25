@@ -29,22 +29,6 @@ goto() {
 
 ## Manual Installation
 
-### Download Binary (Recommended)
-
-1. **Download** the latest binary from [Releases](https://github.com/Joacohbc/goto/releases/latest).
-
-2. **Make it executable**:
-    ```bash
-    chmod +x goto
-    ```
-
-3. **Run init** to set up aliases automatically:
-    ```bash
-    ./goto init
-    ```
-
-### Build from Source (Manual Steps)
-
 1. **Clone** this the repository and go there:
 
     ```bash

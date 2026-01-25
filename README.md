@@ -5,9 +5,36 @@ Goto is a "Path Manager" that lets you alias directories with shorter names (abb
 ## Installation
 
 1. **Download** the latest release from [releases](https://github.com/Joacohbc/goto/releases/latest).
-2. **Make it executable**: `chmod +x goto`
-3. **Initialize**: `./goto init` (creates config, generates aliases, updates shell rc).
-4. **Restart terminal**.
+
+### Download Binary (Recommended)
+
+You can download the binary directly using `curl` or `wget`. Choose the command for your OS and architecture:
+
+#### Linux
+
+##### **AMD64**
+
+```bash
+curl -L -o goto https://github.com/Joacohbc/goto/releases/latest/download/goto-linux-amd64
+chmod +x goto
+```
+
+##### **ARM64**
+
+```bash
+curl -L -o goto https://github.com/Joacohbc/goto/releases/latest/download/goto-linux-arm64
+chmod +x goto
+```
+
+### Run Init
+
+Once downloaded and made executable:
+
+**Run init** to set up aliases automatically:
+
+```bash
+./goto init
+```
 
 See [MANUAL-INSTALL.md](MANUAL-INSTALL.md) for manual setup.
 
