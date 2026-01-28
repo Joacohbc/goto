@@ -130,22 +130,22 @@ func CheckRepeatedItems(gpaths []GotoPath) error {
 		return fmt.Errorf("the config file is empty")
 	}
 
+	pathMap := make(map[string]int)
+	abbrMap := make(map[string]int)
+
 	for i, gpath := range gpaths {
 
-		//Check that 2 Path don't have the same abbreviation, where the indexes are different
-		//(With different index because obviously the same index have the same abbreviation and the same path)
-		for indexRepeated, gpathRepeated := range gpaths {
-
-			//If have the same path and is not the same index
-			if (gpath.Path == gpathRepeated.Path) && (i != indexRepeated) {
-				return fmt.Errorf("the path: \"%v\" already exists", gpathRepeated.Path)
-			}
-
-			//If have the same path and is not the same index
-			if (gpath.Abbreviation == gpathRepeated.Abbreviation) && (i != indexRepeated) {
-				return fmt.Errorf("the Path: \"%v\"(index %v) have the same Abbreviation that \"%v\"(index %v)", gpath.Path, i, gpathRepeated.Path, indexRepeated)
-			}
+		// Check for duplicate path
+		if _, exists := pathMap[gpath.Path]; exists {
+			return fmt.Errorf("the path: \"%v\" already exists", gpath.Path)
 		}
+		pathMap[gpath.Path] = i
+
+		// Check for duplicate abbreviation
+		if idx, exists := abbrMap[gpath.Abbreviation]; exists {
+			return fmt.Errorf("the Path: \"%v\"(index %v) have the same Abbreviation that \"%v\"(index %v)", gpath.Path, i, gpaths[idx].Path, idx)
+		}
+		abbrMap[gpath.Abbreviation] = i
 	}
 
 	return nil
