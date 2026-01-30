@@ -14,11 +14,8 @@ func GetPathFromIndexOrAbbreviation(gpaths []GotoPath, arg string) (string, bool
 		//I already know that "arg" is a number
 		pathNumber, _ := strconv.Atoi(arg)
 
-		for i, gpath := range gpaths {
-			if pathNumber == i {
-				return gpath.Path, true
-			}
-		}
+		// Optimization: Direct access O(1) instead of linear scan O(N)
+		return gpaths[pathNumber].Path, true
 	}
 
 	//If not a number, check if is an abbreviation

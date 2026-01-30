@@ -4,15 +4,13 @@ import (
 	"fmt"
 )
 
-//
 // GotoPath Type
-//
 type GotoPath struct {
 	Path         string `json:"path"`
 	Abbreviation string `json:"abbreviation"`
 }
 
-//Return gpath in String format
+// Return gpath in String format
 func (d *GotoPath) String() string {
 	return fmt.Sprintf("\"%s\" - %s", d.Path, d.Abbreviation)
 }
