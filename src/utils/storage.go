@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"goto/src/gpath"
 	"os"
+	"os/user"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -36,10 +37,49 @@ func init() {
 	gotoPathsFile = filepath.Join(configDir, "gpath.json")
 	gotoPathsFile = filepath.Join(configDir, "goto-paths.json")
 	gotoPathsFileBackup = filepath.Clean(gotoPathsFile + ".backup")
-	tempGotoPathsFile = filepath.Join(configDir, "goto-paths-temp.json")
+
+	tempGotoPathsFile, err = getSecureTempFile()
+	cobra.CheckErr(err)
 
 	cobra.CheckErr(gpath.CreateGotoPathsFile(gotoPathsFile))
 	cobra.CheckErr(gpath.CreateGotoPathsFile(tempGotoPathsFile))
+}
+
+func getSecureTempFile() (string, error) {
+	// Try XDG_RUNTIME_DIR first (Linux standard)
+	if dir := os.Getenv("XDG_RUNTIME_DIR"); dir != "" {
+		return filepath.Join(dir, "goto-paths.json"), nil
+	}
+
+	// Fallback to creating a secure directory in os.TempDir()
+	u, err := user.Current()
+	uid := "unknown"
+	if err == nil {
+		uid = u.Uid
+	}
+
+	dir := filepath.Join(os.TempDir(), "goto-cli-"+uid)
+
+	// Check if directory exists
+	info, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		// Create with 0700 permissions
+		if err := os.Mkdir(dir, 0700); err != nil {
+			return "", err
+		}
+	} else if err != nil {
+		return "", err
+	} else {
+		// Verify permissions (must be 0700)
+		if info.Mode().Perm() != 0700 {
+			// Try to fix permissions
+			if err := os.Chmod(dir, 0700); err != nil {
+				return "", fmt.Errorf("insecure permissions on %s and cannot fix: %v", dir, err)
+			}
+		}
+	}
+
+	return filepath.Join(dir, "goto-paths.json"), nil
 }
 
 // Overwrite the gpaths file (or the temporal gpath file if the flag passed) with the gpaths array.
