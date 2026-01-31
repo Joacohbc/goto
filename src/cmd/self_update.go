@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -14,6 +13,10 @@ import (
 
 	"github.com/spf13/cobra"
 )
+
+type GithubRelease struct {
+	TagName string `json:"tag_name"`
+}
 
 // UpdateBinaryCmd represents the update command for the binary itself
 var UpdateBinaryCmd = &cobra.Command{
@@ -29,8 +32,40 @@ func init() {
 	RootCmd.AddCommand(UpdateBinaryCmd)
 }
 
+func getLatestVersion() (string, error) {
+	resp, err := http.Get("https://api.github.com/repos/Joacohbc/goto/releases/latest")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("GitHub API returned status: %s", resp.Status)
+	}
+
+	var release GithubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return "", err
+	}
+	return release.TagName, nil
+}
+
 func updateBinary() {
-	// 1. Construct URL
+	// 1. Check version first
+	fmt.Println("Checking for updates...")
+	newVersion, err := getLatestVersion()
+	if err != nil {
+		fmt.Printf("Warning: Could not check for updates: %v\n", err)
+		return
+	}
+
+	oldVersion := VersionGoto
+	if !isNewerVersion(oldVersion, newVersion) {
+		fmt.Printf("You are already using the latest version (%s). Remote: %s\n", oldVersion, newVersion)
+		return
+	}
+
+	// 2. Construct URL
 	goos := runtime.GOOS
 	if goos == "windows" {
 		fmt.Println("Self-update is not supported on Windows.")
@@ -45,8 +80,8 @@ func updateBinary() {
 	tmpDir := os.TempDir()
 	tmpFilePath := filepath.Join(tmpDir, fileName)
 
-	// 2. Download to tmp
-	fmt.Printf("Downloading latest version from %s...\n", downloadURL)
+	// 3. Download to tmp
+	fmt.Printf("Downloading version %s from %s...\n", newVersion, downloadURL)
 	if err := downloadFile(tmpFilePath, downloadURL); err != nil {
 		cobra.CheckErr(fmt.Errorf("failed to download: %w", err))
 	}
@@ -55,7 +90,7 @@ func updateBinary() {
 		_ = os.Remove(tmpFilePath)
 	}()
 
-	// 3. Compare SHA256 of tmp file and current executable
+	// 4. Replace binary
 	currentExe, err := os.Executable()
 	cobra.CheckErr(err)
 
@@ -63,40 +98,9 @@ func updateBinary() {
 	currentExe, err = filepath.EvalSymlinks(currentExe)
 	cobra.CheckErr(err)
 
-	currentHash, err := calculateSHA256(currentExe)
-	cobra.CheckErr(err)
-
-	newHash, err := calculateSHA256(tmpFilePath)
-	cobra.CheckErr(err)
-
-	if currentHash == newHash {
-		fmt.Println("You are already using the latest version.")
-		return
-	}
-
-	// 4. Get versions
-	oldVersion := VersionGoto
-
-	// Make new binary executable to run verification
+	// Make new binary executable
 	err = os.Chmod(tmpFilePath, 0755)
 	cobra.CheckErr(err)
-
-	// Run new binary to get version
-	out, err := exec.Command(tmpFilePath, "version").Output()
-	newVersion := "unknown"
-	if err != nil {
-		fmt.Printf("Warning: Could not determine new version from downloaded binary: %v\n", err)
-	} else {
-		newVersion = strings.TrimSpace(string(out))
-		if strings.HasPrefix(newVersion, "Goto version is: ") {
-			newVersion = strings.TrimPrefix(newVersion, "Goto version is: ")
-		}
-	}
-
-	if !isNewerVersion(oldVersion, newVersion) {
-		fmt.Printf("Remote version (%s) is not newer than current version (%s). Aborting update.\n", newVersion, oldVersion)
-		return
-	}
 
 	// 5. Replace binary
 	// Prepare destination
@@ -139,21 +143,6 @@ func downloadFile(filepath string, url string) error {
 
 	_, err = io.Copy(out, resp.Body)
 	return err
-}
-
-func calculateSHA256(filePath string) (string, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	hash := sha256.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%x", hash.Sum(nil)), nil
 }
 
 func copyFile(src, dst string) error {

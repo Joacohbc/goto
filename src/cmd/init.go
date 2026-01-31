@@ -77,10 +77,10 @@ GOTO_FILE="%s"
 #GOTO FUNC
 goto() {
     OUTPUT=$("$GOTO_FILE" $@)
-    
+
     #If the return "2", the program return a gpath successfully
     if [ $? -eq 2 ]; then
-        cd "$OUTPUT"   
+        cd "$OUTPUT"
         echo "Go to:" $OUTPUT
     elif [ $? -eq 1 ]; then # If error exit with status 1
         echo "$OUTPUT"
