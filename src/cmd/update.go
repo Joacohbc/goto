@@ -9,6 +9,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const msgPathNotExist = "the Path \"%v\" doesn't exist in the goto-paths file"
+const msgAbbvNotExist = "the Abbreviation \"%v\" doesn't exist in the goto-paths file"
+
 // UpdateCmd represents the update command
 var UpdateCmd = &cobra.Command{
 	Use:     "update-path",
@@ -114,7 +117,7 @@ goto update abbv-abbv --abbv h --new home
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Path \"%v\" doesn't exist in the goto-paths file", path))
+					cobra.CheckErr(fmt.Errorf(msgPathNotExist, path))
 				}
 			}
 
@@ -132,7 +135,7 @@ goto update abbv-abbv --abbv h --new home
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Path \"%v\" doesn't exist in the goto-paths file", path))
+					cobra.CheckErr(fmt.Errorf(msgPathNotExist, path))
 				}
 			}
 
@@ -152,7 +155,7 @@ goto update abbv-abbv --abbv h --new home
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Path \"%v\" doesn't exist in the goto-paths file", path))
+					cobra.CheckErr(fmt.Errorf(msgPathNotExist, path))
 				}
 			}
 
@@ -170,7 +173,7 @@ goto update abbv-abbv --abbv h --new home
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Abbreviation \"%v\" doesn't exist in the goto-paths file", abbv))
+					cobra.CheckErr(fmt.Errorf(msgAbbvNotExist, abbv))
 				}
 			}
 
@@ -188,7 +191,7 @@ goto update abbv-abbv --abbv h --new home
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Abbreviation \"%v\" doesn't exist in the goto-paths file", abbv))
+					cobra.CheckErr(fmt.Errorf(msgAbbvNotExist, abbv))
 				}
 			}
 
@@ -208,7 +211,7 @@ goto update abbv-abbv --abbv h --new home
 				}
 
 				if i == len(gpaths)-1 {
-					cobra.CheckErr(fmt.Errorf("the Abbreviation \"%v\" doesn't exist in the goto-paths file", abbv))
+					cobra.CheckErr(fmt.Errorf(msgAbbvNotExist, abbv))
 				}
 			}
 

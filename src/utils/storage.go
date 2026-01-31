@@ -36,7 +36,7 @@ func init() {
 	gotoPathsFile = filepath.Join(configDir, "gpath.json")
 	gotoPathsFile = filepath.Join(configDir, "goto-paths.json")
 	gotoPathsFileBackup = filepath.Clean(gotoPathsFile + ".backup")
-	tempGotoPathsFile = filepath.Join(os.TempDir(), "goto-paths-temp.json")
+	tempGotoPathsFile = filepath.Join(configDir, "goto-paths-temp.json")
 
 	cobra.CheckErr(gpath.CreateGotoPathsFile(gotoPathsFile))
 	cobra.CheckErr(gpath.CreateGotoPathsFile(tempGotoPathsFile))
