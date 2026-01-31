@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const msgPathDeleted = "The path %s (%s) was deleted\n"
+
 // DeleteCmd represents the addGPath command
 var DeleteCmd = &cobra.Command{
 	Use:     "delete-path",
@@ -79,7 +81,7 @@ goto delete-path --indx 2
 				//The gpath passes have the same Path delete it
 				if gpath.Path == path {
 					gpaths = append(gpaths[:i], gpaths[i+1:]...)
-					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.Abbreviation)
+					fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
 					goto SaveAndCheck
 				}
 			}
@@ -94,7 +96,7 @@ goto delete-path --indx 2
 				//The gpath passes have the Abbreviation, delete it
 				if gpath.Abbreviation == abbv {
 					gpaths = append(gpaths[:i], gpaths[i+1:]...)
-					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.Abbreviation)
+					fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
 					goto SaveAndCheck
 				}
 			}
@@ -109,7 +111,7 @@ goto delete-path --indx 2
 				//The gpath passes have the same Path or the same Abbreviation, delete it
 				if i == indx {
 					gpaths = append(gpaths[:i], gpaths[i+1:]...)
-					fmt.Printf("The path %s (%s) was deleted\n", gpath.Path, gpath.Abbreviation)
+					fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
 					goto SaveAndCheck
 				}
 			}
