@@ -27,6 +27,10 @@ var (
 	gotoPathsFileBackup string
 )
 
+const (
+	GOTO_FILE_NAME = "goto-paths.json"
+)
+
 // Init the Vars
 func init() {
 	//Get the directory
@@ -34,8 +38,7 @@ func init() {
 	cobra.CheckErr(err)
 
 	configDir = filepath.Join(configPath, "/goto/")
-	gotoPathsFile = filepath.Join(configDir, "gpath.json")
-	gotoPathsFile = filepath.Join(configDir, "goto-paths.json")
+	gotoPathsFile = filepath.Join(configDir, GOTO_FILE_NAME)
 	gotoPathsFileBackup = filepath.Clean(gotoPathsFile + ".backup")
 
 	tempGotoPathsFile, err = getSecureTempFile()
@@ -46,9 +49,10 @@ func init() {
 }
 
 func getSecureTempFile() (string, error) {
+
 	// Try XDG_RUNTIME_DIR first (Linux standard)
 	if dir := os.Getenv("XDG_RUNTIME_DIR"); dir != "" {
-		return filepath.Join(dir, "goto-paths.json"), nil
+		return filepath.Join(dir, GOTO_FILE_NAME), nil
 	}
 
 	// Fallback to creating a secure directory in os.TempDir()
@@ -79,7 +83,7 @@ func getSecureTempFile() (string, error) {
 		}
 	}
 
-	return filepath.Join(dir, "goto-paths.json"), nil
+	return filepath.Join(dir, GOTO_FILE_NAME), nil
 }
 
 // Overwrite the gpaths file (or the temporal gpath file if the flag passed) with the gpaths array.
