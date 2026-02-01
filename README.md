@@ -7,7 +7,7 @@
   
   <p>
     A lightning-fast, minimalist <strong>Path Manager</strong> CLI tool designed to supercharge your terminal workflow. 
-    Alias your most-used directories, index them automatically, and jump between folders instantly—leaving long paths in the past.
+    Alias your most-used directories, index them, and jump between folders instantly—leaving long paths in the past.
   </p>
 
 </div>
@@ -122,5 +122,6 @@ goto -t temp
 *   `goto -q home` : Return quoted path.
 *   `goto -s home` : Return path with escaped spaces.
 *   `\cd ~/Documents` : Bypass alias to use standard `cd`.
+
 
 
