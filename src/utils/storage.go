@@ -5,6 +5,7 @@ import (
 	"goto/src/gpath"
 	"os"
 	"path/filepath"
+	"testing"
 
 	"github.com/spf13/cobra"
 )
@@ -33,6 +34,12 @@ func init() {
 	cobra.CheckErr(err)
 
 	configDir = filepath.Join(configPath, "/goto/")
+
+	// Use temporary directory during tests (GOLANG_GOTO_APP_TESTING=1 for RunExpectedExit)
+	if testing.Testing() || os.Getenv("GOLANG_GOTO_APP_TESTING") == "1" {
+		configDir = filepath.Join(configDir, "goto-run-testing")
+	}
+
 	gotoPathsFile = filepath.Join(configDir, "gpath.json")
 	gotoPathsFile = filepath.Join(configDir, "goto-paths.json")
 	gotoPathsFileBackup = filepath.Clean(gotoPathsFile + ".backup")

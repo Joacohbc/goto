@@ -6,32 +6,30 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/spf13/cobra"
 )
 
 // Helper to reset the temporal file before each test
-func resetTempFile(t *testing.T) {
-	cmd := getTempCmd()
-
+func resetConfigFile(t *testing.T) (*cobra.Command, func()) {
+	cmd := getCmd()
 	path := utils.GetFilePath(cmd)
 
-	// Write minimal valid content (cannot be empty per logic)
-	// We use TempDir as default entry
-	tmp := os.TempDir()
-	content := `[{"Path":"` + tmp + `","Abbreviation":"default_test_entry"}]`
-	err := os.WriteFile(path, []byte(content), 0666)
-	if err != nil {
-		t.Fatal(err)
+	return cmd, func() {
+		if err := os.RemoveAll(filepath.Dir(path)); err != nil {
+			t.Fatalf("Failed to reset config file: %v", err)
+		}
 	}
 }
 
 // Helper to get a command configured with temporal flag
-func getTempCmd() *cobra.Command {
+func getCmd() *cobra.Command {
 	cmd := &cobra.Command{}
-	cmd.Flags().BoolP("temporal", "t", false, "")
-	_ = cmd.Flags().Set("temporal", "true")
+	// TODO: This method should set the temporal flag to true/false by passing argument
+	// cmd.Flags().BoolP("temporal", "t", false, "")
+	// _ = cmd.Flags().Set("temporal", "true")
 	return cmd
 }
 

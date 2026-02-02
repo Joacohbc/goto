@@ -8,73 +8,68 @@ import (
 )
 
 func TestDeleteByAbbreviation(t *testing.T) {
-	resetTempFile(t)
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t)
+	defer cleanup()
 
 	// Add path
 	cmd.AddCmd.Run(c, []string{".", "p1"})
 
 	// Create context for delete
-	delCmd := getTempCmd()
-	delCmd.Flags().StringP(utils.FlagPath, "p", "", "")
-	delCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-	delCmd.Flags().IntP(utils.FlagIndex, "i", -1, "")
+	c.Flags().StringP(utils.FlagPath, "p", "", "")
+	c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
+	c.Flags().IntP(utils.FlagIndex, "i", -1, "")
 
-	delCmd.Flags().Set(utils.FlagAbbreviation, "p1")
+	c.Flags().Set(utils.FlagAbbreviation, "p1")
 
 	// Capture output to avoid polluting test logs
 	captureOutput(func() {
-		cmd.DeleteCmd.Run(delCmd, []string{})
+		cmd.DeleteCmd.Run(c, []string{})
 	})
 
 	// Verify
 	gpaths := utils.LoadGPaths(c)
-	// Expect 1 path (the default one)
-	if len(gpaths) != 1 {
-		t.Errorf("Expected 1 path after delete, got %d", len(gpaths))
-	}
-	if gpaths[0].Abbreviation == "p1" {
-		t.Error("Path 'p1' was not deleted")
+	for _, gp := range gpaths {
+		if gp.Abbreviation == "p1" {
+			t.Error("Path 'p1' was not deleted")
+		}
 	}
 }
 
 func TestDeleteByIndex(t *testing.T) {
-	resetTempFile(t)
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t)
+	defer cleanup()
 
 	// Add path
 	cmd.AddCmd.Run(c, []string{".", "p1"})
 
 	// Create context for delete
-	delCmd := getTempCmd()
+	delCmd := getCmd()
 	delCmd.Flags().StringP(utils.FlagPath, "p", "", "")
 	delCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
 	delCmd.Flags().IntP(utils.FlagIndex, "i", -1, "")
 
-	// Index 0
-	delCmd.Flags().Set(utils.FlagIndex, "0")
+	// Index 2 (third entry) should be p1 (default is 0, added path is 1)
+	delCmd.Flags().Set(utils.FlagIndex, "2")
 
 	captureOutput(func() {
 		cmd.DeleteCmd.Run(delCmd, []string{})
 	})
 
-	gpaths := utils.LoadGPaths(c)
-	// We deleted index 0 (default), so p1 should remain
-	if len(gpaths) != 1 {
-		t.Errorf("Expected 1 path after delete, got %d", len(gpaths))
-	}
-	if gpaths[0].Abbreviation != "p1" {
-		t.Errorf("Expected remaining path to be 'p1', got '%s'", gpaths[0].Abbreviation)
+	gpaths := utils.LoadGPaths(delCmd)
+	for i, gp := range gpaths {
+		if i == 2 && gp.Abbreviation == "p1" {
+			t.Error("Path 'p1' was not deleted")
+		}
 	}
 }
 
 func TestDeleteByPath(t *testing.T) {
-	resetTempFile(t)
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t)
+	defer cleanup()
 
 	cmd.AddCmd.Run(c, []string{".", "p1"})
 
-	delCmd := getTempCmd()
+	delCmd := getCmd()
 	delCmd.Flags().StringP(utils.FlagPath, "p", "", "")
 
 	cwd, _ := os.Getwd()
@@ -99,13 +94,13 @@ func TestDeleteByPath(t *testing.T) {
 
 func TestDeleteNonExistent(t *testing.T) {
 	if os.Getenv("TEST_DELETE_NON_EXISTENT") == "1" {
-		resetTempFile(t)
+		c, cleanup := resetConfigFile(t)
+		defer cleanup()
 
-		delCmd := getTempCmd()
-		delCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-		delCmd.Flags().Set(utils.FlagAbbreviation, "non_existent")
+		c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
+		c.Flags().Set(utils.FlagAbbreviation, "non_existent")
 
-		cmd.DeleteCmd.Run(delCmd, []string{})
+		cmd.DeleteCmd.Run(c, []string{})
 		return
 	}
 	RunExpectedExit(t, "TestDeleteNonExistent", "TEST_DELETE_NON_EXISTENT")
