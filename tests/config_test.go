@@ -23,13 +23,11 @@ func TestGetConfigDir(t *testing.T) {
 	// filepath.Join in init() might behave slightly differently regarding trailing slash
 	// or cleaning depending on OS.
 	// In the code: configDir = filepath.Join(configPath, "/goto/")
+	// Normalize both paths before comparison to account for such differences.
+	cleanConfigDir := filepath.Clean(configDir)
+	cleanExpected := filepath.Clean(expected)
 
-	// Let's just check if it contains "goto"
-	if filepath.Base(configDir) != "goto" {
-		t.Errorf("Expected config dir to end with 'goto', got %s", configDir)
-	}
-
-	if configDir != expected {
-		t.Logf("Note: Exact match failed. Expected %s, got %s. This might be due to path cleaning.", expected, configDir)
+	if cleanConfigDir != cleanExpected {
+		t.Errorf("Expected config dir to be %s, got %s", cleanExpected, cleanConfigDir)
 	}
 }
