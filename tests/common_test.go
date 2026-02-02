@@ -13,24 +13,32 @@ import (
 )
 
 // Helper to reset the temporal file before each test
-func resetConfigFile(t *testing.T) (*cobra.Command, func()) {
-	cmd := getCmd()
+func resetConfigFile(t *testing.T, temporalDir bool) (*cobra.Command, func()) {
+	cmd := &cobra.Command{}
+
+	cmd.Flags().BoolP("temporal", "t", false, "")
+	if temporalDir {
+		_ = cmd.Flags().Set("temporal", "true")
+	}
+
 	path := utils.GetFilePath(cmd)
+	dir := filepath.Dir(path)
+	if err := os.RemoveAll(dir); err != nil {
+		t.Fatalf("Failed to reset config file: %v", err)
+	}
+
+	utils.SetupConfigFile()
 
 	return cmd, func() {
-		if err := os.RemoveAll(filepath.Dir(path)); err != nil {
-			t.Fatalf("Failed to reset config file: %v", err)
+		// If path is in a temp dir like /tmp, do not remove the directory, just the file
+		if dir == os.TempDir() || filepath.Clean(dir) == "/tmp" {
+			_ = os.Remove(path)
+		} else {
+			if err := os.RemoveAll(dir); err != nil {
+				t.Fatalf("Failed to reset config file: %v", err)
+			}
 		}
 	}
-}
-
-// Helper to get a command configured with temporal flag
-func getCmd() *cobra.Command {
-	cmd := &cobra.Command{}
-	// TODO: This method should set the temporal flag to true/false by passing argument
-	// cmd.Flags().BoolP("temporal", "t", false, "")
-	// _ = cmd.Flags().Set("temporal", "true")
-	return cmd
 }
 
 // Helper to capture stdout
@@ -56,7 +64,7 @@ func captureOutput(f func()) string {
 // Standard panic/recover mechanisms cannot catch os.Exit, so we must run this test case in a subprocess.
 func RunExpectedExit(t *testing.T, testName string, envKey string) {
 	cmd := exec.Command(os.Args[0], "-test.run="+testName)
-	cmd.Env = append(os.Environ(), envKey+"=1")
+	cmd.Env = append(os.Environ(), envKey+"=1", utils.TESTING_ENV_VAR+"="+utils.TESTING_ENV_VAR_VALUE)
 	err := cmd.Run()
 
 	// Verify that the subprocess failed as expected (exit status 1)

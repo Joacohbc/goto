@@ -29,15 +29,23 @@ var (
 
 // Init the Vars
 func init() {
-	//Get the directory
+	SetupConfigFile()
+}
+
+const TESTING_ENV_VAR = "GOLANG_GOTO_APP_TESTING"
+const TESTING_ENV_VAR_VALUE = "1"
+const TESTING_FILE_DIR = "goto-run-testing"
+
+// SetupConfigFile initializes the configuration file paths.
+func SetupConfigFile() {
 	configPath, err := os.UserConfigDir()
 	cobra.CheckErr(err)
 
 	configDir = filepath.Join(configPath, "/goto/")
 
 	// Use temporary directory during tests (GOLANG_GOTO_APP_TESTING=1 for RunExpectedExit)
-	if testing.Testing() || os.Getenv("GOLANG_GOTO_APP_TESTING") == "1" {
-		configDir = filepath.Join(configDir, "goto-run-testing")
+	if testing.Testing() || os.Getenv(TESTING_ENV_VAR) == TESTING_ENV_VAR_VALUE {
+		configDir = filepath.Join(configDir, TESTING_FILE_DIR)
 	}
 
 	gotoPathsFile = filepath.Join(configDir, "gpath.json")
