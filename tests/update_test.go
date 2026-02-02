@@ -255,3 +255,140 @@ func TestUpdateInvalidMode(t *testing.T) {
 	}
 	RunExpectedExit(t, "TestUpdateInvalidMode", "TEST_UPDATE_INVALID_MODE")
 }
+
+func TestPreRunUpdate_NoArgsNoMode(t *testing.T) {
+	if os.Getenv("TEST_PRERUN_UPDATE_NOARGS") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+		// No args, no flags
+		cmd.UpdateCmd.PreRun(c, []string{})
+		return
+	}
+	RunExpectedExit(t, "TestPreRunUpdate_NoArgsNoMode", "TEST_PRERUN_UPDATE_NOARGS")
+}
+
+func TestPreRunUpdate_NoNewFlag(t *testing.T) {
+	if os.Getenv("TEST_PRERUN_UPDATE_NONEW") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+		c.Flags().BoolP("modes", "m", false, "")
+		c.Flags().StringP("new", "n", "", "")
+		// Arg present, but no new flag
+		cmd.UpdateCmd.PreRun(c, []string{"path-path"})
+		return
+	}
+	RunExpectedExit(t, "TestPreRunUpdate_NoNewFlag", "TEST_PRERUN_UPDATE_NONEW")
+}
+
+func TestRunUpdate_ModesFlag(t *testing.T) {
+	// This does not exit, just prints
+	c, cleanup := resetConfigFile(t, false)
+	defer cleanup()
+	c.Flags().BoolP("modes", "m", false, "")
+	c.Flags().Set("modes", "true")
+
+	// Helper to capture stdout if we wanted, but not strictly necessary for coverage
+	cmd.UpdateCmd.Run(c, []string{})
+}
+
+func TestRunUpdate_PathPath_NotFound(t *testing.T) {
+	if os.Getenv("TEST_RUN_UPDATE_PP_NOTFOUND") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+		c.Flags().StringP(utils.FlagPath, "p", "", "")
+		c.Flags().StringP("new", "n", "", "")
+		c.Flags().BoolP("modes", "m", false, "")
+
+		c.Flags().Set("new", ".")
+		c.Flags().Set(utils.FlagPath, "/not/found")
+
+		cmd.UpdateCmd.Run(c, []string{"path-path"})
+		return
+	}
+	RunExpectedExit(t, "TestRunUpdate_PathPath_NotFound", "TEST_RUN_UPDATE_PP_NOTFOUND")
+}
+
+func TestRunUpdate_PathAbbv_NotFound(t *testing.T) {
+	if os.Getenv("TEST_RUN_UPDATE_PA_NOTFOUND") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+		c.Flags().StringP(utils.FlagPath, "p", "", "")
+		c.Flags().StringP("new", "n", "", "")
+		c.Flags().BoolP("modes", "m", false, "")
+
+		c.Flags().Set("new", "newabbv")
+		c.Flags().Set(utils.FlagPath, "/not/found")
+
+		cmd.UpdateCmd.Run(c, []string{"path-abbv"})
+		return
+	}
+	RunExpectedExit(t, "TestRunUpdate_PathAbbv_NotFound", "TEST_RUN_UPDATE_PA_NOTFOUND")
+}
+
+func TestRunUpdate_PathIndex_NotFound(t *testing.T) {
+	if os.Getenv("TEST_RUN_UPDATE_PI_NOTFOUND") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+		c.Flags().StringP(utils.FlagPath, "p", "", "")
+		c.Flags().StringP("new", "n", "", "")
+		c.Flags().BoolP("modes", "m", false, "")
+
+		c.Flags().Set("new", "0")
+		c.Flags().Set(utils.FlagPath, "/not/found")
+
+		cmd.UpdateCmd.Run(c, []string{"path-indx"})
+		return
+	}
+	RunExpectedExit(t, "TestRunUpdate_PathIndex_NotFound", "TEST_RUN_UPDATE_PI_NOTFOUND")
+}
+
+func TestRunUpdate_AbbvPath_NotFound(t *testing.T) {
+	if os.Getenv("TEST_RUN_UPDATE_AP_NOTFOUND") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+		c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
+		c.Flags().StringP("new", "n", "", "")
+		c.Flags().BoolP("modes", "m", false, "")
+
+		c.Flags().Set("new", ".")
+		c.Flags().Set(utils.FlagAbbreviation, "notfound")
+
+		cmd.UpdateCmd.Run(c, []string{"abbv-path"})
+		return
+	}
+	RunExpectedExit(t, "TestRunUpdate_AbbvPath_NotFound", "TEST_RUN_UPDATE_AP_NOTFOUND")
+}
+
+func TestRunUpdate_AbbvAbbv_NotFound(t *testing.T) {
+	if os.Getenv("TEST_RUN_UPDATE_AA_NOTFOUND") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+		c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
+		c.Flags().StringP("new", "n", "", "")
+		c.Flags().BoolP("modes", "m", false, "")
+
+		c.Flags().Set("new", "newabbv")
+		c.Flags().Set(utils.FlagAbbreviation, "notfound")
+
+		cmd.UpdateCmd.Run(c, []string{"abbv-abbv"})
+		return
+	}
+	RunExpectedExit(t, "TestRunUpdate_AbbvAbbv_NotFound", "TEST_RUN_UPDATE_AA_NOTFOUND")
+}
+
+func TestRunUpdate_AbbvIndex_NotFound(t *testing.T) {
+	if os.Getenv("TEST_RUN_UPDATE_AI_NOTFOUND") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+		c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
+		c.Flags().StringP("new", "n", "", "")
+		c.Flags().BoolP("modes", "m", false, "")
+
+		c.Flags().Set("new", "0")
+		c.Flags().Set(utils.FlagAbbreviation, "notfound")
+
+		cmd.UpdateCmd.Run(c, []string{"abbv-indx"})
+		return
+	}
+	RunExpectedExit(t, "TestRunUpdate_AbbvIndex_NotFound", "TEST_RUN_UPDATE_AI_NOTFOUND")
+}

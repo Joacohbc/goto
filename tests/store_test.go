@@ -122,3 +122,87 @@ func TestSaveGPathsFile_InvalidDir(t *testing.T) {
 		t.Error("Expected error when saving to non-existent directory")
 	}
 }
+func TestGotoPath_Valid_Error(t *testing.T) {
+	// Invalid path
+	gp := gpath.GotoPath{
+		Path:         "/non/existent/path",
+		Abbreviation: "valid",
+	}
+	if err := gp.Valid(); err == nil {
+		t.Error("Expected error for invalid path, got nil")
+	}
+
+	// Invalid abbreviation
+	cwd, _ := os.Getwd()
+	gp2 := gpath.GotoPath{
+		Path:         cwd,
+		Abbreviation: "", // invalid empty
+	}
+	if err := gp2.Valid(); err == nil {
+		t.Error("Expected error for invalid abbreviation, got nil")
+	}
+}
+
+func TestSaveGPathsFile_RepeatedError(t *testing.T) {
+	cwd, _ := os.Getwd()
+	gpaths := []gpath.GotoPath{
+		{Path: cwd, Abbreviation: "one"},
+		{Path: cwd, Abbreviation: "two"}, // Repeated path
+	}
+
+	tmpFile := filepath.Join(os.TempDir(), "goto_test_save_repeated.json")
+
+	if err := gpath.SaveGPathsFile(gpaths, tmpFile); err == nil {
+		t.Error("Expected error due to repeated items, got nil")
+	}
+}
+
+func TestSaveGPathsFile_OpenFileError(t *testing.T) {
+	cwd, _ := os.Getwd()
+	gpaths := []gpath.GotoPath{{Path: cwd, Abbreviation: "one"}}
+
+	// Try to save to a directory path instead of a file
+	tmpDir := os.TempDir()
+
+	if err := gpath.SaveGPathsFile(gpaths, tmpDir); err == nil {
+		t.Error("Expected error when saving to a directory path, got nil")
+	}
+}
+
+func TestLoadGPathsFile_OpenError(t *testing.T) {
+	var gpaths []gpath.GotoPath
+	// Non-existent file
+	if err := gpath.LoadGPathsFile(&gpaths, "/non/existent/file.json"); err == nil {
+		t.Error("Expected error loading non-existent file, got nil")
+	}
+}
+
+func TestLoadGPathsFile_DecodeError(t *testing.T) {
+	// Create a corrupted file
+	tmpFile := filepath.Join(os.TempDir(), "goto_test_corrupt.json")
+	os.WriteFile(tmpFile, []byte("{ invalid json"), 0644)
+	defer os.Remove(tmpFile)
+
+	var gpaths []gpath.GotoPath
+	if err := gpath.LoadGPathsFile(&gpaths, tmpFile); err == nil {
+		t.Error("Expected error decoding corrupted file, got nil")
+	}
+}
+
+func TestCreateGotoPathsFile_MkdirError(t *testing.T) {
+	// Pass a path where the directory cannot be created.
+	// E.g. /proc/invalid/goto-paths.json or similar?
+	// Or a file exists where the dir should be.
+
+	tmpFile := filepath.Join(os.TempDir(), "goto_mkdir_test")
+	// Create a file here
+	os.WriteFile(tmpFile, []byte(""), 0644)
+	defer os.Remove(tmpFile)
+
+	// Now try to create a file inside this 'file' (treating it as dir)
+	target := filepath.Join(tmpFile, "file.json")
+
+	if err := gpath.CreateGotoPathsFile(target); err == nil {
+		t.Error("Expected error when creating dir over a file, got nil")
+	}
+}

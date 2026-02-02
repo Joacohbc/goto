@@ -33,3 +33,21 @@ func TestBackup(t *testing.T) {
 		t.Error("Backup file not created")
 	}
 }
+
+func TestRunBackup_OutputExists(t *testing.T) {
+	if os.Getenv("TEST_RUN_BACKUP_EXISTS") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+
+		tmpFile := filepath.Join(os.TempDir(), "backup_exists.json")
+		os.WriteFile(tmpFile, []byte(""), 0644)
+		defer os.Remove(tmpFile)
+
+		c.Flags().StringP("output", "o", "", "")
+		c.Flags().Set("output", tmpFile)
+
+		cmd.BackupCmd.Run(c, []string{})
+		return
+	}
+	RunExpectedExit(t, "TestRunBackup_OutputExists", "TEST_RUN_BACKUP_EXISTS")
+}
