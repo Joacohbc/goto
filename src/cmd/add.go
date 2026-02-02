@@ -24,26 +24,28 @@ goto add-path ~/Documents docs
 `,
 	Args: cobra.ExactArgs(2),
 
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: runAdd,
+}
 
-		gpaths := utils.LoadGPaths(cmd)
+func runAdd(cmd *cobra.Command, args []string) {
 
-		// Vars to create the gpath and to report a error
-		path, err := gpath.ValidPath(args[0])
-		cobra.CheckErr(err)
+	gpaths := utils.LoadGPaths(cmd)
 
-		abbv, err := gpath.ValidAbbreviation(args[1])
-		cobra.CheckErr(err)
+	// Vars to create the gpath and to report a error
+	path, err := gpath.ValidPath(args[0])
+	cobra.CheckErr(err)
 
-		//Add the new directory to the array
-		gpaths = append(gpaths, gpath.GotoPath{
-			Path:         path,
-			Abbreviation: abbv,
-		})
+	abbv, err := gpath.ValidAbbreviation(args[1])
+	cobra.CheckErr(err)
 
-		// And added to the file
-		utils.UpdateGPaths(cmd, gpaths)
-	},
+	//Add the new directory to the array
+	gpaths = append(gpaths, gpath.GotoPath{
+		Path:         path,
+		Abbreviation: abbv,
+	})
+
+	// And added to the file
+	utils.UpdateGPaths(cmd, gpaths)
 }
 
 func init() {

@@ -21,23 +21,25 @@ goto list
 # List all gpaths form temporal file
 goto list -t
 `,
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: runList,
+}
 
-		//Load the goto-paths file to array
-		gpaths := utils.LoadGPaths(cmd)
+func runList(cmd *cobra.Command, _ []string) {
 
-		if utils.FlagPassed(cmd, "reverse") { // If the reverse flag is passed
-			for i := range gpaths {
-				fmt.Printf("%v - %s\n", len(gpaths)-i-1, gpaths[len(gpaths)-i-1].String())
-			}
-			return
+	//Load the goto-paths file to array
+	gpaths := utils.LoadGPaths(cmd)
+
+	if utils.FlagPassed(cmd, "reverse") { // If the reverse flag is passed
+		for i := range gpaths {
+			fmt.Printf("%v - %s\n", len(gpaths)-i-1, gpaths[len(gpaths)-i-1].String())
 		}
+		return
+	}
 
-		//If any flag is passed
-		for i, gpath := range gpaths {
-			fmt.Printf("%v - %s\n", i, gpath.String())
-		}
-	},
+	//If any flag is passed
+	for i, gpath := range gpaths {
+		fmt.Printf("%v - %s\n", i, gpath.String())
+	}
 }
 
 func init() {

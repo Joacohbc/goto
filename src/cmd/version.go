@@ -12,9 +12,11 @@ const VersionGoto = "2.4.5"
 var VersionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version of goto",
-	Run: func(_ *cobra.Command, _ []string) {
-		fmt.Println("Goto version is: " + VersionGoto)
-	},
+	Run:   runVersion,
+}
+
+func runVersion(_ *cobra.Command, _ []string) {
+	fmt.Println("Goto version is: " + VersionGoto)
 }
 
 func init() {

@@ -15,24 +15,26 @@ var ValidCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(0),
 	Short:   "Validate all paths from goto-paths file",
 
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: runValid,
+}
 
-		gpaths := utils.LoadGPaths(cmd)
+func runValid(cmd *cobra.Command, _ []string) {
 
-		// Check all paths are valid from goto-paths file
-		for _, g := range gpaths {
-			if err := g.Valid(); err != nil {
-				cobra.CheckErr(err)
-			}
-		}
+	gpaths := utils.LoadGPaths(cmd)
 
-		//Check the whole gpath array
-		if err := gpath.CheckRepeatedItems(gpaths); err != nil {
+	// Check all paths are valid from goto-paths file
+	for _, g := range gpaths {
+		if err := g.Valid(); err != nil {
 			cobra.CheckErr(err)
 		}
+	}
 
-		fmt.Println("All paths are valid <3")
-	},
+	//Check the whole gpath array
+	if err := gpath.CheckRepeatedItems(gpaths); err != nil {
+		cobra.CheckErr(err)
+	}
+
+	fmt.Println("All paths are valid <3")
 }
 
 func init() {
