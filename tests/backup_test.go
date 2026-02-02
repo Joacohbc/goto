@@ -8,21 +8,25 @@ import (
 )
 
 func TestBackup(t *testing.T) {
-	resetTempFile(t)
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t, false)
+	defer cleanup()
+
 	cmd.AddCmd.Run(c, []string{".", "bkp"})
 
 	backupFile := filepath.Join(os.TempDir(), "goto-test-backup.json")
+
 	// Ensure it doesn't exist
-	os.Remove(backupFile)
+	if err := os.Remove(backupFile); err != nil && !os.IsNotExist(err) {
+		t.Fatal(err)
+	}
+
 	defer os.Remove(backupFile)
 
-	bkpCmd := getTempCmd()
-	bkpCmd.Flags().StringP("output", "o", "", "")
-	bkpCmd.Flags().Set("output", backupFile)
+	c.Flags().StringP("output", "o", "", "")
+	c.Flags().Set("output", backupFile)
 
 	captureOutput(func() {
-		cmd.BackupCmd.Run(bkpCmd, []string{})
+		cmd.BackupCmd.Run(c, []string{})
 	})
 
 	if _, err := os.Stat(backupFile); os.IsNotExist(err) {

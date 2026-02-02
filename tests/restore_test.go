@@ -9,8 +9,8 @@ import (
 )
 
 func TestRestore(t *testing.T) {
-	resetTempFile(t)
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
 	// Create backup file manually
 	backupFile := filepath.Join(os.TempDir(), "goto-test-restore.json")
@@ -30,12 +30,11 @@ func TestRestore(t *testing.T) {
 	}
 	defer os.Remove(backupFile)
 
-	rstCmd := getTempCmd()
-	rstCmd.Flags().StringP("input", "i", "", "")
-	rstCmd.Flags().Set("input", backupFile)
+	c.Flags().StringP("input", "i", "", "")
+	c.Flags().Set("input", backupFile)
 
 	captureOutput(func() {
-		cmd.RestoreCmd.Run(rstCmd, []string{})
+		cmd.RestoreCmd.Run(c, []string{})
 	})
 
 	gpaths := utils.LoadGPaths(c)

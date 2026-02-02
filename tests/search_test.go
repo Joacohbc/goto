@@ -9,19 +9,18 @@ import (
 )
 
 func TestSearchByAbbreviation(t *testing.T) {
-	resetTempFile(t)
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
 	cmd.AddCmd.Run(c, []string{".", "p1"})
 
-	searchCtx := getTempCmd()
-	searchCtx.Flags().StringP(utils.FlagPath, "p", "", "")
-	searchCtx.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
+	c.Flags().StringP(utils.FlagPath, "p", "", "")
+	c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
 
-	searchCtx.Flags().Set(utils.FlagAbbreviation, "p1")
+	c.Flags().Set(utils.FlagAbbreviation, "p1")
 
 	output := captureOutput(func() {
-		cmd.SearchCmd.Run(searchCtx, []string{})
+		cmd.SearchCmd.Run(c, []string{})
 	})
 
 	if !strings.Contains(output, "p1") {
@@ -30,17 +29,16 @@ func TestSearchByAbbreviation(t *testing.T) {
 }
 
 func TestSearchByPath(t *testing.T) {
-	resetTempFile(t)
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 	cmd.AddCmd.Run(c, []string{".", "p1"})
 
-	searchCtx := getTempCmd()
-	searchCtx.Flags().StringP(utils.FlagPath, "p", "", "")
+	c.Flags().StringP(utils.FlagPath, "p", "", "")
 	cwd, _ := os.Getwd()
-	searchCtx.Flags().Set(utils.FlagPath, cwd)
+	c.Flags().Set(utils.FlagPath, cwd)
 
 	output := captureOutput(func() {
-		cmd.SearchCmd.Run(searchCtx, []string{})
+		cmd.SearchCmd.Run(c, []string{})
 	})
 
 	if !strings.Contains(output, "p1") {
@@ -50,13 +48,13 @@ func TestSearchByPath(t *testing.T) {
 
 func TestSearchNotFound(t *testing.T) {
 	if os.Getenv("TEST_SEARCH_NOT_FOUND") == "1" {
-		resetTempFile(t)
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
 
-		searchCtx := getTempCmd()
-		searchCtx.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-		searchCtx.Flags().Set(utils.FlagAbbreviation, "nothere")
+		c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
+		c.Flags().Set(utils.FlagAbbreviation, "nothere")
 
-		cmd.SearchCmd.Run(searchCtx, []string{})
+		cmd.SearchCmd.Run(c, []string{})
 		return
 	}
 	RunExpectedExit(t, "TestSearchNotFound", "TEST_SEARCH_NOT_FOUND")

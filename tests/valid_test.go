@@ -7,8 +7,8 @@ import (
 )
 
 func TestValidPaths(t *testing.T) {
-	resetTempFile(t)
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
 	cmd.AddCmd.Run(c, []string{".", "validp"})
 
