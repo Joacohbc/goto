@@ -92,3 +92,30 @@ func TestRunRestore_InvalidJSON(t *testing.T) {
 	}
 	RunExpectedExit(t, "TestRunRestore_InvalidJSON", "TEST_RUN_RESTORE_INVALID_JSON")
 }
+
+func TestCmd_Restore_ReadError(t *testing.T) {
+	if os.Getenv("TEST_RESTORE_READ_ERROR") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+
+		f, err := os.CreateTemp("", "restore_unreadable")
+		if err != nil {
+			os.Exit(1)
+		}
+		f.Close()
+		defer os.Remove(f.Name())
+
+		if err := os.Chmod(f.Name(), 0200); err != nil {
+			// skip if can't chmod
+} else {
+// Need to make sure we don't fail IsDir check (it is file, so ok).
+			// Need to set flag.
+			c.Flags().StringP("input", "i", "", "")
+			c.Flags().Set("input", f.Name())
+
+			cmd.RestoreCmd.Run(c, []string{})
+		}
+		return
+	}
+	RunExpectedExit(t, "TestCmd_Restore_ReadError", "TEST_RESTORE_READ_ERROR")
+}

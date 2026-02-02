@@ -123,3 +123,19 @@ func TestRunSearch_AbbvNotFound(t *testing.T) {
 	}
 	RunExpectedExit(t, "TestRunSearch_AbbvNotFound", "TEST_RUN_SEARCH_ABBV_NOT_FOUND")
 }
+
+func TestCmd_Search_PathNotFound(t *testing.T) {
+	if os.Getenv("TEST_SEARCH_PATH_NOT_FOUND") == "1" {
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+
+		c.Flags().StringP(utils.FlagPath, "p", "", "")
+		cwd, _ := os.Getwd()
+		c.Flags().Set(utils.FlagPath, cwd) // Existing path but not in config
+
+		// Search
+		cmd.SearchCmd.Run(c, []string{}) // Should exit
+		return
+	}
+	RunExpectedExit(t, "TestCmd_Search_PathNotFound", "TEST_SEARCH_PATH_NOT_FOUND")
+}

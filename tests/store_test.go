@@ -1,8 +1,11 @@
 package tests
 
 import (
+	"fmt"
 	"goto/src/gpath"
+	"goto/src/utils"
 	"os"
+	"os/user"
 	"path/filepath"
 	"testing"
 )
@@ -204,5 +207,81 @@ func TestCreateGotoPathsFile_MkdirError(t *testing.T) {
 
 	if err := gpath.CreateGotoPathsFile(target); err == nil {
 		t.Error("Expected error when creating dir over a file, got nil")
+	}
+}
+
+func TestStorage_Permissions(t *testing.T) {
+	// Determine the path used by getSecureTempFile fallback
+	u, err := user.Current()
+	if err != nil {
+		t.Skip("Cannot get current user, skipping permissions test")
+	}
+	dir := filepath.Join(os.TempDir(), "goto-cli-"+u.Uid)
+
+	// Ensure it doesn't exist
+	os.RemoveAll(dir)
+
+	// Create with wrong permissions (0777)
+	if err := os.Mkdir(dir, 0777); err != nil {
+		t.Fatal(err)
+	}
+	// Defer cleanup
+	defer os.RemoveAll(dir)
+
+	// Unset XDG to force fallback
+	oldXDG := os.Getenv("XDG_RUNTIME_DIR")
+	defer func() {
+		if oldXDG != "" {
+			os.Setenv("XDG_RUNTIME_DIR", oldXDG)
+		} else {
+			os.Unsetenv("XDG_RUNTIME_DIR")
+		}
+	}()
+	os.Unsetenv("XDG_RUNTIME_DIR")
+
+	// Call SetupConfigFile -> calls getSecureTempFile
+	utils.SetupConfigFile()
+
+	// check permissions
+	info, err := os.Stat(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Check if only 0700 bits roughly
+	if info.Mode().Perm() != 0700 {
+		t.Errorf("Expected permissions 0700, got %v", info.Mode().Perm())
+	}
+}
+
+func TestStorage_TempDirIsFile(t *testing.T) {
+	if os.Getenv("TEST_STORAGE_TEMP_IS_FILE") == "1" {
+		// Prepare condition
+		u, err := user.Current()
+		if err != nil {
+			os.Exit(0) // skip
+		}
+		dir := filepath.Join(os.TempDir(), "goto-cli-"+u.Uid)
+		os.RemoveAll(dir)
+
+		f, err := os.Create(dir) // Create simple file at dir path
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		f.Close()
+		defer os.Remove(dir)
+
+		// Unset XDG
+		os.Unsetenv("XDG_RUNTIME_DIR")
+
+		utils.SetupConfigFile() // Should exit because CreateGotoPathsFile fails
+		return
+	}
+	RunExpectedExit(t, "TestStorage_TempDirIsFile", "TEST_STORAGE_TEMP_IS_FILE")
+
+	// Cleanup artifact left by subprocess
+	if u, err := user.Current(); err == nil {
+		dir := filepath.Join(os.TempDir(), "goto-cli-"+u.Uid)
+		os.Remove(dir)
 	}
 }
