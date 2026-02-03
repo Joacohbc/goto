@@ -28,6 +28,9 @@ jobs:
         with:
           go-version: '1.25'
 
+      - name: Buiild Source Code
+        run: go build -v ./src/...
+      
       - name: Run Tests and Generate Coverage
         run: go test -v -coverpkg=./src/... -coverprofile=coverage.out ./tests
 
