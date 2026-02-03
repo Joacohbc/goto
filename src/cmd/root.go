@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"goto/src/gpath"
+	"goto/src/core"
 	"goto/src/utils"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -49,32 +48,8 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 
 func runRoot(cmd *cobra.Command, args []string) {
 
-	path := filepath.Join(args...)
-
-	// If only directory flag is passed, check if is a directory a continue
-	if cmd.Flags().Changed("only-directory") {
-		/*
-			This Flags is use if the directory is a named "123". Also if the directory
-			is a named like a directory an abbreviation in the gpath files and you want
-			to go to the directory and not to the abbreviation
-		*/
-		cobra.CheckErr(gpath.ValidPathVar(&path))
-	} else {
-		// If it is not passed
-		var isIndexOrAbbv bool
-
-		// Load the config file
-		gpathsList := utils.LoadGPaths(cmd)
-
-		// Check if is a index or an abbreviation
-		path, isIndexOrAbbv = gpath.GetPathFromIndexOrAbbreviation(gpathsList, path)
-
-		// If it is not, check if is a directory
-		if !isIndexOrAbbv {
-			cobra.CheckErr(gpath.ValidPathVar(&path))
-		}
-
-	}
+	path, err := core.ResolvePath(args, cmd.Flags().Changed("only-directory"), utils.TemporalFlagPassed(cmd))
+	cobra.CheckErr(err)
 
 	//If quote flag is passed
 	if cmd.Flags().Changed("quotes") {

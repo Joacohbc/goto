@@ -63,7 +63,8 @@ func GetIndex(cmd *cobra.Command) int {
 	index, err := cmd.Flags().GetInt(FlagIndex)
 	cobra.CheckErr(err)
 
-	gpaths := LoadGPaths(cmd)
+	gpaths, err := LoadGPaths(TemporalFlagPassed(cmd))
+	cobra.CheckErr(err)
 
 	cobra.CheckErr(gpath.IsValidIndex(len(gpaths), strconv.Itoa(index)))
 	return index

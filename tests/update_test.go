@@ -27,7 +27,7 @@ func TestUpdatePathPath(t *testing.T) {
 	// Mode path-path or pp
 	cmd.UpdateCmd.Run(c, []string{"path-path"})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
 	found := false
 	for _, gp := range gpaths {
 		if gp.Path == newDir && gp.Abbreviation == "p1" {
@@ -55,7 +55,7 @@ func TestUpdatePathAbbv(t *testing.T) {
 
 	cmd.UpdateCmd.Run(c, []string{"path-abbv"})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
 	found := false
 	for _, gp := range gpaths {
 		if gp.Abbreviation == "p1_new" {
@@ -85,7 +85,7 @@ func TestUpdatePathIndex(t *testing.T) {
 
 	cmd.UpdateCmd.Run(c, []string{"path-indx"})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
 	if len(gpaths) > 1 {
 		// Index 0 should be "p1"
 		if gpaths[0].Abbreviation != "p1" {
@@ -111,7 +111,7 @@ func TestUpdateAbbvPath(t *testing.T) {
 
 	cmd.UpdateCmd.Run(c, []string{"abbv-path"})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
 	found := false
 	for _, gp := range gpaths {
 		if gp.Abbreviation == "p1" && gp.Path == newDir {
@@ -138,7 +138,7 @@ func TestUpdateAbbvAbbv(t *testing.T) {
 
 	cmd.UpdateCmd.Run(c, []string{"abbv-abbv"})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
 	found := false
 	for _, gp := range gpaths {
 		if gp.Abbreviation == "newname" {
@@ -165,7 +165,7 @@ func TestUpdateAbbvIndex(t *testing.T) {
 
 	cmd.UpdateCmd.Run(c, []string{"abbv-indx"})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
 	if gpaths[0].Abbreviation != "p1" {
 		t.Errorf("Expected p1 at index 0 after swap")
 	}
@@ -192,7 +192,7 @@ func TestUpdateIndexPath(t *testing.T) {
 
 	cmd.UpdateCmd.Run(c, []string{"indx-path"})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
 	// Check index 1
 	if gpaths[1].Path != newDir {
 		t.Error("Update failed for indx-path")
@@ -213,7 +213,7 @@ func TestUpdateIndexAbbv(t *testing.T) {
 
 	cmd.UpdateCmd.Run(c, []string{"indx-abbv"})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
 	if gpaths[1].Abbreviation != "p1_updated" {
 		t.Error("Update failed for indx-abbv")
 	}
@@ -234,7 +234,7 @@ func TestUpdateIndexIndex(t *testing.T) {
 	// Swap 1 and 0
 	cmd.UpdateCmd.Run(c, []string{"indx-indx"})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
 	if gpaths[0].Abbreviation != "p1" {
 		t.Error("Update failed for indx-indx -> p1 should be at 0")
 	}

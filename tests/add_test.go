@@ -11,31 +11,33 @@ func TestAddPath(t *testing.T) {
 	c, cleanup := resetConfigFile(t, false)
 	defer cleanup()
 
-	// Add current directory as "current"
-	args := []string{".", "current"}
-	cmd.AddCmd.Run(c, args)
+	// Add path
+	cmd.AddCmd.Run(c, []string{".", "current"})
 
-	// Verify it was added
-	gpaths := utils.LoadGPaths(c)
+	// Verify
+	gpaths, err := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	if err != nil {
+		t.Fatalf("Failed to load gpaths: %v", err)
+	}
+
 	found := false
-	for _, gp := range gpaths {
-		if gp.Abbreviation == "current" {
+	for _, p := range gpaths {
+		if p.Abbreviation == "current" {
 			found = true
 			break
 		}
 	}
 	if !found {
-		t.Errorf("Expected to find abbreviation 'current' in gpaths")
+		t.Errorf("Expected path 'current' to be added")
 	}
 }
 
 func TestAddPathRepeated(t *testing.T) {
-	// This block runs in the subprocess because of the environment variable check below.
 	if os.Getenv("TEST_ADD_PATH_REPEATED_SUBPROCESS") == "1" {
 		c, cleanup := resetConfigFile(t, false)
 		defer cleanup()
 
-		// Add "current"
+		// Add first
 		cmd.AddCmd.Run(c, []string{".", "current"})
 
 		// Add same again - should exit 1 because of repeated valid path logic in Validate/Save

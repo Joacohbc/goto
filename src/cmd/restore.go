@@ -2,11 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"goto/src/gpath"
+	"goto/src/core"
 	"goto/src/utils"
-	"os"
 
-	"github.com/bytedance/sonic"
 	"github.com/spf13/cobra"
 )
 
@@ -33,31 +31,9 @@ func runRestore(cmd *cobra.Command, _ []string) {
 	input, err := cmd.Flags().GetString("input")
 	cobra.CheckErr(err)
 
-	//If exists a config backup
-	info, err := os.Stat(input)
-	cobra.CheckErr(err)
+	cobra.CheckErr(core.RestoreGPaths(input, utils.TemporalFlagPassed(cmd)))
 
-	//If is not a file
-	if info.IsDir() {
-		cobra.CheckErr("the input can't be a directory")
-	}
-
-	//Read the config backup
-	backup, err := os.ReadFile(input)
-	if err != nil {
-		cobra.CheckErr(fmt.Sprintf("cant read the backup of config file: %v", err))
-	}
-
-	//Do the unmarshaling of the config backup
-	var gpaths []gpath.GotoPath
-	if err := sonic.ConfigFastest.Unmarshal(backup, &gpaths); err != nil {
-		cobra.CheckErr("cant parse the backup of config file")
-	}
-
-	//And overwrite the config file with the backup
-	cobra.CheckErr(gpath.SaveGPathsFile(gpaths, utils.GetFilePath(cmd)))
-
-	fmt.Printf("Restore complete in %s\n", utils.GetFilePath(cmd))
+	fmt.Printf("Restore complete in %s\n", utils.GetFilePath(utils.TemporalFlagPassed(cmd)))
 }
 
 func init() {

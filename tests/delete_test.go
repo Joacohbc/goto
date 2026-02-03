@@ -27,7 +27,10 @@ func TestDeleteByAbbreviation(t *testing.T) {
 	})
 
 	// Verify
-	gpaths := utils.LoadGPaths(c)
+	gpaths, err := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, gp := range gpaths {
 		if gp.Abbreviation == "p1" {
 			t.Error("Path 'p1' was not deleted")
@@ -53,7 +56,10 @@ func TestDeleteByIndex(t *testing.T) {
 		cmd.DeleteCmd.Run(c, []string{})
 	})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, err := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	if err != nil {
+		t.Fatal(err)
+	}
 	for i, gp := range gpaths {
 		if i == 2 && gp.Abbreviation == "p1" {
 			t.Error("Path 'p1' was not deleted")
@@ -76,7 +82,10 @@ func TestDeleteByPath(t *testing.T) {
 		cmd.DeleteCmd.Run(c, []string{})
 	})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, err := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Should delete p1. Default remains.
 	found := false
