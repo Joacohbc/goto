@@ -4,6 +4,7 @@ import (
 	"goto/src/gpath"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -189,5 +190,93 @@ func TestGetPathFromIndexOrAbbreviation(t *testing.T) {
 	got, found = gpath.GetPathFromIndexOrAbbreviation(gpaths, "missing")
 	if found || got != "missing" {
 		t.Errorf("Expected not found for 'missing', got %s, found=%v", got, found)
+	}
+}
+
+func TestValidPathVar_File(t *testing.T) {
+	// Create a temp file
+	f, err := os.CreateTemp("", "goto_test_file")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(f.Name())
+
+	p := f.Name()
+	// path is a file, should return error
+	err = gpath.ValidPathVar(&p)
+	if err == nil {
+		t.Error("Expected error when path is a file, got nil")
+	}
+}
+
+func TestValidPathVar_Empty(t *testing.T) {
+	p := "   "
+	if err := gpath.ValidPathVar(&p); err == nil {
+		t.Error("Expected error for empty path")
+	}
+	p = ""
+	if err := gpath.ValidPathVar(&p); err == nil {
+		t.Error("Expected error for empty path")
+	}
+}
+
+func TestValidPathVar_StatError(t *testing.T) {
+	// Create a constrained directory
+	dir, err := os.MkdirTemp("", "goto_test_stat")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir) // This might fail if we don't restore permissions
+
+	subdir := filepath.Join(dir, "subdir")
+	// We don't create subdir.
+	// We make parent unreadable.
+
+	if err := os.Chmod(dir, 0000); err != nil {
+		t.Skip("Cannot chmod 0000, skipping stat error test")
+	}
+	defer os.Chmod(dir, 0755) // Restore for cleanup
+
+	p := subdir
+	err = gpath.ValidPathVar(&p)
+	if err == nil {
+		t.Error("Expected error for stat failure")
+	} else if strings.Contains(err.Error(), "do not exist") {
+		// Acceptable failure to provoke specific error
+	}
+}
+
+func TestValidAbbreviation_Errors(t *testing.T) {
+	// Empty
+	s := ""
+	if err := gpath.ValidAbbreviationVar(&s); err == nil {
+		t.Error("Expected error for empty abbreviation")
+	}
+
+	// Space
+	s = "a b"
+	if err := gpath.ValidAbbreviationVar(&s); err == nil {
+		t.Error("Expected error for abbreviation with space")
+	}
+
+	// Number
+	s = "123"
+	if err := gpath.ValidAbbreviationVar(&s); err == nil {
+		t.Error("Expected error for numeric abbreviation")
+	}
+}
+
+func TestIsValidIndex_Errors(t *testing.T) {
+	// Not number
+	if err := gpath.IsValidIndex(5, "abc"); err == nil {
+		t.Error("Expected error for non-numeric index")
+	}
+
+	// Out of bounds
+	if err := gpath.IsValidIndex(5, "-1"); err == nil {
+		t.Error("Expected error for negative index")
+	}
+	if err := gpath.IsValidIndex(5, "5"); err == nil {
+		t.Error("Expected error for index >= length (index 5 for len 5 is out of bounds 0-4)")
 	}
 }

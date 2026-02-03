@@ -1,6 +1,20 @@
-# Goto
+<div align="center">
+  <h1>Goto</h1>
+  
+  <p>
+    <strong>Navigate faster, not harder.</strong>
+  </p>
+  
+  <p>
+    A lightning-fast, minimalist <strong>Path Manager</strong> CLI tool designed to supercharge your terminal workflow. 
+    Alias your most-used directories, index them, and jump between folders instantly—leaving long paths in the past.
+  </p>
 
-Goto is a "Path Manager" that lets you alias directories with shorter names (abbreviations) or index numbers for quick navigation. These aliases are saved in a JSON file (`goto-paths`).
+</div>
+
+## 🛠️ Built With
+
+[![Go](https://img.shields.io/badge/Go-%2300ADD8.svg?&logo=go&logoColor=white)](#) [![JSON](https://img.shields.io/badge/JSON-000?logo=json&logoColor=fff)](#) [![Bash](https://img.shields.io/badge/Bash-4EAA25?logo=gnubash&logoColor=fff)](#) [![SonarQube Cloud](https://img.shields.io/badge/SonarQube%20Cloud-126ED3?logo=sonarqubecloud&logoColor=fff)](#) [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](#) [![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)](#) [![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=F0F0F0)](#) [![Windows](https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white)](#)
 
 ## Installation
 
@@ -108,4 +122,6 @@ goto -t temp
 *   `goto -q home` : Return quoted path.
 *   `goto -s home` : Return path with escaped spaces.
 *   `\cd ~/Documents` : Bypass alias to use standard `cd`.
+
+
 

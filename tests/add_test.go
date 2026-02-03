@@ -8,10 +8,8 @@ import (
 )
 
 func TestAddPath(t *testing.T) {
-	resetTempFile(t)
-
-	// Use temporary command context
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
 	// Add current directory as "current"
 	args := []string{".", "current"}
@@ -34,8 +32,8 @@ func TestAddPath(t *testing.T) {
 func TestAddPathRepeated(t *testing.T) {
 	// This block runs in the subprocess because of the environment variable check below.
 	if os.Getenv("TEST_ADD_PATH_REPEATED_SUBPROCESS") == "1" {
-		resetTempFile(t)
-		c := getTempCmd()
+		c, cleanup := resetConfigFile(t, false)
+		defer cleanup()
 
 		// Add "current"
 		cmd.AddCmd.Run(c, []string{".", "current"})

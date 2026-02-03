@@ -44,54 +44,56 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 	//If don't have args, return a error
 	Args: cobra.ExactArgs(1),
 
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: runRoot,
+}
 
-		path := filepath.Join(args...)
+func runRoot(cmd *cobra.Command, args []string) {
 
-		// If only directory flag is passed, check if is a directory a continue
-		if cmd.Flags().Changed("only-directory") {
-			/*
-				This Flags is use if the directory is a named "123". Also if the directory
-				is a named like a directory an abbreviation in the gpath files and you want
-				to go to the directory and not to the abbreviation
-			*/
+	path := filepath.Join(args...)
+
+	// If only directory flag is passed, check if is a directory a continue
+	if cmd.Flags().Changed("only-directory") {
+		/*
+			This Flags is use if the directory is a named "123". Also if the directory
+			is a named like a directory an abbreviation in the gpath files and you want
+			to go to the directory and not to the abbreviation
+		*/
+		cobra.CheckErr(gpath.ValidPathVar(&path))
+	} else {
+		// If it is not passed
+		var isIndexOrAbbv bool
+
+		// Load the config file
+		gpathsList := utils.LoadGPaths(cmd)
+
+		// Check if is a index or an abbreviation
+		path, isIndexOrAbbv = gpath.GetPathFromIndexOrAbbreviation(gpathsList, path)
+
+		// If it is not, check if is a directory
+		if !isIndexOrAbbv {
 			cobra.CheckErr(gpath.ValidPathVar(&path))
-		} else {
-			// If it is not passed
-			var isIndexOrAbbv bool
-
-			// Load the config file
-			gpathsList := utils.LoadGPaths(cmd)
-
-			// Check if is a index or an abbreviation
-			path, isIndexOrAbbv = gpath.GetPathFromIndexOrAbbreviation(gpathsList, path)
-
-			// If it is not, check if is a directory
-			if !isIndexOrAbbv {
-				cobra.CheckErr(gpath.ValidPathVar(&path))
-			}
-
 		}
 
-		//If quote flag is passed
-		if cmd.Flags().Changed("quotes") {
-			fmt.Println("\"" + path + "\"")
-			os.Exit(0)
-		}
+	}
 
-		//If spaces flag is passed
-		if cmd.Flags().Changed("spaces") {
-			fmt.Println(strings.ReplaceAll(path, " ", "\\ "))
-			os.Exit(0)
-		}
+	//If quote flag is passed
+	if cmd.Flags().Changed("quotes") {
+		fmt.Println("\"" + path + "\"")
+		os.Exit(0)
+	}
 
-		//If quote flag is not passed
-		fmt.Println(path)
+	//If spaces flag is passed
+	if cmd.Flags().Changed("spaces") {
+		fmt.Println(strings.ReplaceAll(path, " ", "\\ "))
+		os.Exit(0)
+	}
 
-		//Return 2 because is easier for the alias.sh
-		//only need if [[ "$?" == "2"]]
-		os.Exit(2)
-	},
+	//If quote flag is not passed
+	fmt.Println(path)
+
+	//Return 2 because is easier for the alias.sh
+	//only need if [[ "$?" == "2"]]
+	os.Exit(2)
 }
 
 // StartExecution adds all child commands to the root command and sets flags appropriately.

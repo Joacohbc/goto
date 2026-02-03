@@ -7,8 +7,8 @@ import (
 )
 
 func TestList(t *testing.T) {
-	resetTempFile(t)
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
 	// Add some paths first
 	cmd.AddCmd.Run(c, []string{".", "p1"})
@@ -28,18 +28,17 @@ func TestList(t *testing.T) {
 }
 
 func TestListReverse(t *testing.T) {
-	resetTempFile(t)
-	c := getTempCmd()
+	c, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
 	cmd.AddCmd.Run(c, []string{".", "p1"})
 
 	// Create a command with reverse flag
-	listCmdCtx := getTempCmd()
-	listCmdCtx.Flags().BoolP("reverse", "R", false, "")
-	listCmdCtx.Flags().Set("reverse", "true")
+	c.Flags().BoolP("reverse", "R", false, "")
+	c.Flags().Set("reverse", "true")
 
 	output := captureOutput(func() {
-		cmd.ListCmd.Run(listCmdCtx, []string{})
+		cmd.ListCmd.Run(c, []string{})
 	})
 
 	if !strings.Contains(output, "p1") {
