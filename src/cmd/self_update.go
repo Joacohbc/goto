@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -20,91 +21,90 @@ var UpdateBinaryCmd = &cobra.Command{
 	Use:   "update-goto",
 	Short: "Update goto to the latest version",
 	Long:  `Downloads the latest release from GitHub and updates the current binary if a newer version is available.`,
-	Run:   runUpdateBinary,
-}
-
-func runUpdateBinary(cmd *cobra.Command, args []string) {
-	updateBinary()
+	Run: func(cmd *cobra.Command, args []string) {
+		updateBinary()
+	},
 }
 
 func init() {
 	RootCmd.AddCommand(UpdateBinaryCmd)
 }
 
+type GitHubAsset struct {
+	Name               string `json:"name"`
+	BrowserDownloadURL string `json:"browser_download_url"`
+	Digest             string `json:"digest"`
+}
+
+type GitHubRelease struct {
+	TagName string        `json:"tag_name"`
+	Assets  []GitHubAsset `json:"assets"`
+}
+
 func updateBinary() {
-	// 1. Construct URL
 	goos := runtime.GOOS
 	if goos == "windows" {
 		fmt.Println("Self-update is not supported on Windows.")
 		return
 	}
 
-	goarch := runtime.GOARCH
-	extension := ""
-	fileName := fmt.Sprintf("goto-%s-%s%s", goos, goarch, extension)
-	downloadURL := fmt.Sprintf("https://github.com/Joacohbc/goto/releases/latest/download/%s", fileName)
+	// 1. Check for latest release via GitHub API
+	fmt.Println("Checking for updates...")
+	release, err := getLatestRelease()
+	if err != nil {
+		cobra.CheckErr(fmt.Errorf("failed to check for updates: %w", err))
+	}
 
+	// 2. Compare versions
+	newVersion := release.TagName
+	cleanNewVersion := strings.TrimPrefix(newVersion, "v")
+	cleanOldVersion := strings.TrimPrefix(VersionGoto, "v")
+
+	if !isNewerVersion(cleanOldVersion, cleanNewVersion) {
+		fmt.Printf("You are already using the latest version (%s).\n", VersionGoto)
+		return
+	}
+
+	fmt.Printf("New version available: %s (current: %s)\n", newVersion, VersionGoto)
+
+	// 3. Find matching asset
+	downloadURL, digest, err := findAssetURL(release.Assets, runtime.GOOS, runtime.GOARCH)
+	if err != nil {
+		cobra.CheckErr(fmt.Errorf("failed to find suitable binary for %s/%s: %w", runtime.GOOS, runtime.GOARCH, err))
+	}
+
+	// 4. Download to tmp
 	tmpDir := os.TempDir()
+	fileName := filepath.Base(downloadURL)
 	tmpFilePath := filepath.Join(tmpDir, fileName)
 
-	// 2. Download to tmp
 	fmt.Printf("Downloading latest version from %s...\n", downloadURL)
 	if err := downloadFile(tmpFilePath, downloadURL); err != nil {
 		cobra.CheckErr(fmt.Errorf("failed to download: %w", err))
 	}
-	// Attempt to clean up tmp file on exit
+
 	defer func() {
 		_ = os.Remove(tmpFilePath)
 	}()
 
-	// 3. Compare SHA256 of tmp file and current executable
+	// Verify digest if available
+	if digest != "" {
+		fmt.Println("Verifying download checksum...")
+		if err := verifyDigest(tmpFilePath, digest); err != nil {
+			cobra.CheckErr(fmt.Errorf("checksum verification failed: %w", err))
+		}
+		fmt.Println("Checksum verified successfully.")
+	}
+
+	// 5. Replace binary
 	currentExe, err := os.Executable()
 	cobra.CheckErr(err)
 
 	// Resolve symlinks to ensure we are updating the real binary
+	// Check if the executable file is a symbolic link and follow it to find the real file.
+	// This ensures that the original binary is updated and the link is not broken.
 	currentExe, err = filepath.EvalSymlinks(currentExe)
 	cobra.CheckErr(err)
-
-	currentHash, err := calculateSHA256(currentExe)
-	cobra.CheckErr(err)
-
-	newHash, err := calculateSHA256(tmpFilePath)
-	cobra.CheckErr(err)
-
-	if currentHash == newHash {
-		fmt.Println("You are already using the latest version.")
-		return
-	}
-
-	// 4. Get versions
-	oldVersion := VersionGoto
-
-	// Make new binary executable to run verification
-	err = os.Chmod(tmpFilePath, 0755)
-	cobra.CheckErr(err)
-
-	// Run new binary to get version
-	out, err := exec.Command(tmpFilePath, "version").Output()
-	newVersion := "unknown"
-	if err != nil {
-		fmt.Printf("Warning: Could not determine new version from downloaded binary: %v\n", err)
-	} else {
-		newVersion = strings.TrimSpace(string(out))
-		if strings.HasPrefix(newVersion, "Goto version is: ") {
-			newVersion = strings.TrimPrefix(newVersion, "Goto version is: ")
-		}
-	}
-
-	if !isNewerVersion(oldVersion, newVersion) {
-		fmt.Printf("Remote version (%s) is not newer than current version (%s). Aborting update.\n", newVersion, oldVersion)
-		return
-	}
-
-	// 5. Replace binary
-	// Prepare destination
-	// Since currentExe is running, on Linux we can rename/move over it.
-	// On Windows, we can't overwrite running executable easily.
-	// The provided code assumes Linux environment per prompt context.
 
 	err = os.Rename(tmpFilePath, currentExe)
 	if err != nil {
@@ -119,7 +119,74 @@ func updateBinary() {
 	// Ensure permissions on the new file (in case of copy)
 	_ = os.Chmod(currentExe, 0755)
 
-	fmt.Printf("Successfully updated from %s to %s\n", oldVersion, newVersion)
+	fmt.Printf("Successfully updated from %s to %s\n", VersionGoto, newVersion)
+}
+
+func getLatestRelease() (*GitHubRelease, error) {
+	url := "https://api.github.com/repos/Joacohbc/goto/releases/latest"
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("bad status: %s", resp.Status)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var release GitHubRelease
+	err = json.Unmarshal(body, &release)
+	if err != nil {
+		return nil, err
+	}
+
+	return &release, nil
+}
+
+func findAssetURL(assets []GitHubAsset, osName, archName string) (string, string, error) {
+	targetName := fmt.Sprintf("goto-%s-%s", osName, archName)
+
+	for _, asset := range assets {
+		if asset.Name == targetName {
+			return asset.BrowserDownloadURL, asset.Digest, nil
+		}
+		if asset.Name == targetName+".exe" {
+			return asset.BrowserDownloadURL, asset.Digest, nil
+		}
+	}
+
+	return "", "", fmt.Errorf("no asset found matching %s or %s.exe", targetName, targetName)
+}
+
+func verifyDigest(filepath, digest string) error {
+	f, err := os.Open(filepath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if strings.HasPrefix(digest, "sha256:") {
+		expectedHash := strings.TrimPrefix(digest, "sha256:")
+		h := sha256.New()
+		if _, err := io.Copy(h, f); err != nil {
+			return err
+		}
+		calculatedHash := hex.EncodeToString(h.Sum(nil))
+		if calculatedHash != expectedHash {
+			return fmt.Errorf("hash mismatch: expected %s, got %s", expectedHash, calculatedHash)
+		}
+		return nil
+	}
+
+	// If digest format is unknown or not supported, we can either warn or error out.
+	// For now, let's just warn and proceed, or we could return an error.
+	// Returning error is safer.
+	return fmt.Errorf("unsupported digest format: %s", digest)
 }
 
 func downloadFile(filepath string, url string) error {
@@ -140,22 +207,12 @@ func downloadFile(filepath string, url string) error {
 	defer out.Close()
 
 	_, err = io.Copy(out, resp.Body)
-	return err
-}
-
-func calculateSHA256(filePath string) (string, error) {
-	file, err := os.Open(filePath)
 	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	hash := sha256.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return "", err
+		return err
 	}
 
-	return fmt.Sprintf("%x", hash.Sum(nil)), nil
+	// Explicitly chmod the downloaded file to be executable before moving/copying
+	return os.Chmod(filepath, 0755)
 }
 
 func copyFile(src, dst string) error {
