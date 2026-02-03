@@ -18,48 +18,52 @@ var SearchCmd = &cobra.Command{
 goto search --path ~/Documents
 goto search --abbv docs
 `,
-	PreRun: func(cmd *cobra.Command, args []string) {
+	PreRun: preRunSearch,
+	Run:    runSearch,
+}
 
-		//If the number or flags are 0 or more than 2, return an error
-		if cmd.Flags().NFlag() == 0 || cmd.Flags().NFlag() > 2 {
-			cobra.CheckErr("you must specify only one flag to find a gpath (Or Path or Abbreviation)")
-		}
+func preRunSearch(cmd *cobra.Command, args []string) {
 
-		//If only one flags is passed and it is the temporary flags, return an error
-		if cmd.Flags().NFlag() == 1 && utils.TemporalFlagPassed(cmd) {
-			cobra.CheckErr("you must specify one flag to find a gpath (Or Path or Abbreviation)")
-		}
-	},
-	Run: func(cmd *cobra.Command, _ []string) {
+	//If the number or flags are 0 or more than 2, return an error
+	if cmd.Flags().NFlag() == 0 || cmd.Flags().NFlag() > 2 {
+		cobra.CheckErr("you must specify only one flag to find a gpath (Or Path or Abbreviation)")
+	}
 
-		//Load the goto-paths file to array
-		gpaths := utils.LoadGPaths(cmd)
+	//If only one flags is passed and it is the temporary flags, return an error
+	if cmd.Flags().NFlag() == 1 && utils.TemporalFlagPassed(cmd) {
+		cobra.CheckErr("you must specify one flag to find a gpath (Or Path or Abbreviation)")
+	}
+}
 
-		// If the any path flag is passed
-		if utils.PathFlagPassed(cmd) {
+func runSearch(cmd *cobra.Command, _ []string) {
 
-			path := utils.GetPath(cmd)
+	//Load the goto-paths file to array
+	gpaths := utils.LoadGPaths(cmd)
 
-			for i, gpath := range gpaths {
-				if gpath.Path == path {
-					fmt.Printf("%v - %s\n", i, gpath.String())
-					return
-				}
+	// If the any path flag is passed
+	if utils.PathFlagPassed(cmd) {
+
+		path := utils.GetPath(cmd)
+
+		for i, gpath := range gpaths {
+			if gpath.Path == path {
+				fmt.Printf("%v - %s\n", i, gpath.String())
+				return
 			}
-			cobra.CheckErr(fmt.Errorf("the path \"%s\" doesn't exist in the gpaths-file", path))
-
-		} else {
-			abbv := utils.GetAbbreviation(cmd)
-
-			for i, gpath := range gpaths {
-				if gpath.Abbreviation == abbv {
-					fmt.Printf("%v - %s\n", i, gpath.String())
-					return
-				}
-			}
-			cobra.CheckErr(fmt.Errorf("doesn't exist a path with that abbreviation \"%s\"", abbv))
 		}
-	},
+		cobra.CheckErr(fmt.Errorf("the path \"%s\" doesn't exist in the gpaths-file", path))
+
+	} else {
+		abbv := utils.GetAbbreviation(cmd)
+
+		for i, gpath := range gpaths {
+			if gpath.Abbreviation == abbv {
+				fmt.Printf("%v - %s\n", i, gpath.String())
+				return
+			}
+		}
+		cobra.CheckErr(fmt.Errorf("doesn't exist a path with that abbreviation \"%s\"", abbv))
+	}
 }
 
 func init() {

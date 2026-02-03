@@ -17,22 +17,24 @@ var InitCmd = &cobra.Command{
 	Short: "Initialize goto configuration and shell alias",
 	Long:  `Initialize the .config directory, goto-path.json, and generate alias.sh. It also adds the alias to your shell configuration.`,
 	Args:  cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
-		goos := runtime.GOOS
-		if goos == "windows" {
-			fmt.Println("Initialization is not supported on Windows.")
-			return
-		}
+	Run:   runInit,
+}
 
-		configDir := utils.GetConfigDir()
-		ensureConfigDir(configDir)
+func runInit(cmd *cobra.Command, args []string) {
+	goos := runtime.GOOS
+	if goos == "windows" {
+		fmt.Println("Initialization is not supported on Windows.")
+		return
+	}
 
-		exePath := installBinary(configDir)
-		aliasFile := generateAliasFile(configDir, exePath)
+	configDir := utils.GetConfigDir()
+	ensureConfigDir(configDir)
 
-		configureShell(aliasFile)
-		fmt.Println("Initialization complete. You can delete this file now (was already copied to the config directory). Enjoy using goto!")
-	},
+	exePath := installBinary(configDir)
+	aliasFile := generateAliasFile(configDir, exePath)
+
+	configureShell(aliasFile)
+	fmt.Println("Initialization complete. You can delete this file now (was already copied to the config directory). Enjoy using goto!")
 }
 
 func init() {

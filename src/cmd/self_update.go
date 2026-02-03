@@ -20,9 +20,11 @@ var UpdateBinaryCmd = &cobra.Command{
 	Use:   "update-goto",
 	Short: "Update goto to the latest version",
 	Long:  `Downloads the latest release from GitHub and updates the current binary if a newer version is available.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		updateBinary()
-	},
+	Run:   runUpdateBinary,
+}
+
+func runUpdateBinary(cmd *cobra.Command, args []string) {
+	updateBinary()
 }
 
 func init() {

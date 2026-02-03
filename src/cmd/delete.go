@@ -66,63 +66,65 @@ goto delete-path --indx 2
 			cobra.CheckErr(fmt.Errorf("you must specify only one flag to delete a gpath (Or Path or Abbreviation or Index)"))
 		}
 	},
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: runDelete,
+}
 
-		//Load the goto-paths file to array
-		gpaths := utils.LoadGPaths(cmd)
+func runDelete(cmd *cobra.Command, _ []string) {
 
-		// If the path flag is passed
-		if utils.PathFlagPassed(cmd) {
-			path := utils.GetPath(cmd)
+	//Load the goto-paths file to array
+	gpaths := utils.LoadGPaths(cmd)
 
-			//Delete the directory from the array
-			for i, gpath := range gpaths {
+	// If the path flag is passed
+	if utils.PathFlagPassed(cmd) {
+		path := utils.GetPath(cmd)
 
-				//The gpath passes have the same Path delete it
-				if gpath.Path == path {
-					gpaths = append(gpaths[:i], gpaths[i+1:]...)
-					fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
-					goto SaveAndCheck
-				}
+		//Delete the directory from the array
+		for i, gpath := range gpaths {
+
+			//The gpath passes have the same Path delete it
+			if gpath.Path == path {
+				gpaths = append(gpaths[:i], gpaths[i+1:]...)
+				fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
+				goto SaveAndCheck
 			}
-			cobra.CheckErr(fmt.Sprintf("any gpath match with the path \"%s\"", path))
-
-		} else if utils.AbbreviationFlagPassed(cmd) { // If the abbreviation flag is passed
-			abbv := utils.GetAbbreviation(cmd)
-
-			//Delete the directory from the array
-			for i, gpath := range gpaths {
-
-				//The gpath passes have the Abbreviation, delete it
-				if gpath.Abbreviation == abbv {
-					gpaths = append(gpaths[:i], gpaths[i+1:]...)
-					fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
-					goto SaveAndCheck
-				}
-			}
-			cobra.CheckErr(fmt.Errorf("any gpath match with the abbreviation \"%s\"", abbv))
-
-		} else if utils.IndexFlagPassed(cmd) { // If the index flag is passed
-			indx := utils.GetIndex(cmd)
-
-			//Delete the directory from the array
-			for i, gpath := range gpaths {
-
-				//The gpath passes have the same Path or the same Abbreviation, delete it
-				if i == indx {
-					gpaths = append(gpaths[:i], gpaths[i+1:]...)
-					fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
-					goto SaveAndCheck
-				}
-			}
-			cobra.CheckErr(fmt.Errorf("any gpath match with the index %d", indx))
 		}
+		cobra.CheckErr(fmt.Sprintf("any gpath match with the path \"%s\"", path))
 
-	SaveAndCheck:
-		//After the changes, valid it
-		cobra.CheckErr(gpath.CheckRepeatedItems(gpaths))
-		utils.UpdateGPaths(cmd, gpaths)
-	},
+	} else if utils.AbbreviationFlagPassed(cmd) { // If the abbreviation flag is passed
+		abbv := utils.GetAbbreviation(cmd)
+
+		//Delete the directory from the array
+		for i, gpath := range gpaths {
+
+			//The gpath passes have the Abbreviation, delete it
+			if gpath.Abbreviation == abbv {
+				gpaths = append(gpaths[:i], gpaths[i+1:]...)
+				fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
+				goto SaveAndCheck
+			}
+		}
+		cobra.CheckErr(fmt.Errorf("any gpath match with the abbreviation \"%s\"", abbv))
+
+	} else if utils.IndexFlagPassed(cmd) { // If the index flag is passed
+		indx := utils.GetIndex(cmd)
+
+		//Delete the directory from the array
+		for i, gpath := range gpaths {
+
+			//The gpath passes have the same Path or the same Abbreviation, delete it
+			if i == indx {
+				gpaths = append(gpaths[:i], gpaths[i+1:]...)
+				fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
+				goto SaveAndCheck
+			}
+		}
+		cobra.CheckErr(fmt.Errorf("any gpath match with the index %d", indx))
+	}
+
+SaveAndCheck:
+	//After the changes, valid it
+	cobra.CheckErr(gpath.CheckRepeatedItems(gpaths))
+	utils.UpdateGPaths(cmd, gpaths)
 }
 
 func init() {

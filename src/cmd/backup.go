@@ -23,23 +23,25 @@ goto backup
 goto backup -o /the/path/file.json.backup
 `,
 	Args: cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run:  runBackup,
+}
 
-		//Read the config file
-		gpaths := utils.LoadGPaths(cmd)
+func runBackup(cmd *cobra.Command, _ []string) {
 
-		//Get output flag (if is not passed, have already a default value)
-		output, err := cmd.Flags().GetString("output")
-		cobra.CheckErr(err)
+	//Read the config file
+	gpaths := utils.LoadGPaths(cmd)
 
-		//Check if exists
-		if _, err := os.Stat(output); err == nil {
-			cobra.CheckErr(fmt.Sprintf("the file \"%s\" already exists", output))
-		}
+	//Get output flag (if is not passed, have already a default value)
+	output, err := cmd.Flags().GetString("output")
+	cobra.CheckErr(err)
 
-		cobra.CheckErr(gpath.SaveGPathsFile(gpaths, output))
-		fmt.Printf("Backup complete from %s\n", utils.GetFilePath(cmd))
-	},
+	//Check if exists
+	if _, err := os.Stat(output); err == nil {
+		cobra.CheckErr(fmt.Sprintf("the file \"%s\" already exists", output))
+	}
+
+	cobra.CheckErr(gpath.SaveGPathsFile(gpaths, output))
+	fmt.Printf("Backup complete from %s\n", utils.GetFilePath(cmd))
 }
 
 func init() {
