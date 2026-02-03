@@ -22,7 +22,9 @@ func resetConfigFile(t *testing.T, temporalDir bool) (*cobra.Command, func()) {
 	}
 
 	path := utils.GetFilePath(cmd)
+
 	dir := filepath.Dir(path)
+
 	if err := os.RemoveAll(dir); err != nil {
 		t.Fatalf("Failed to reset config file: %v", err)
 	}

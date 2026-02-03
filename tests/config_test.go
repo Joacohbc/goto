@@ -19,7 +19,7 @@ func TestGetConfigDir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expected := filepath.Join(userConfigDir, "/goto/"+utils.TESTING_FILE_DIR)
+	expected := filepath.Join(userConfigDir, utils.GOTO_FILE_DIR, utils.TESTING_FILE_DIR)
 
 	// Normalize both paths before comparison to account for such differences.
 	cleanConfigDir := filepath.Clean(configDir)
