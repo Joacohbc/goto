@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -31,6 +33,7 @@ func init() {
 type GitHubAsset struct {
 	Name               string `json:"name"`
 	BrowserDownloadURL string `json:"browser_download_url"`
+	Digest             string `json:"digest"`
 }
 
 type GitHubRelease struct {
@@ -52,8 +55,8 @@ func updateBinary() {
 		cobra.CheckErr(fmt.Errorf("failed to check for updates: %w", err))
 	}
 
+	// 2. Compare versions
 	newVersion := release.TagName
-	// Remove 'v' prefix if present for comparison
 	cleanNewVersion := strings.TrimPrefix(newVersion, "v")
 	cleanOldVersion := strings.TrimPrefix(VersionGoto, "v")
 
@@ -64,13 +67,13 @@ func updateBinary() {
 
 	fmt.Printf("New version available: %s (current: %s)\n", newVersion, VersionGoto)
 
-	// 2. Find matching asset
-	downloadURL, err := findAssetURL(release.Assets, runtime.GOOS, runtime.GOARCH)
+	// 3. Find matching asset
+	downloadURL, digest, err := findAssetURL(release.Assets, runtime.GOOS, runtime.GOARCH)
 	if err != nil {
 		cobra.CheckErr(fmt.Errorf("failed to find suitable binary for %s/%s: %w", runtime.GOOS, runtime.GOARCH, err))
 	}
 
-	// 3. Download to tmp
+	// 4. Download to tmp
 	tmpDir := os.TempDir()
 	fileName := filepath.Base(downloadURL)
 	tmpFilePath := filepath.Join(tmpDir, fileName)
@@ -79,15 +82,27 @@ func updateBinary() {
 	if err := downloadFile(tmpFilePath, downloadURL); err != nil {
 		cobra.CheckErr(fmt.Errorf("failed to download: %w", err))
 	}
+
 	defer func() {
 		_ = os.Remove(tmpFilePath)
 	}()
 
-	// 4. Replace binary
+	// Verify digest if available
+	if digest != "" {
+		fmt.Println("Verifying download checksum...")
+		if err := verifyDigest(tmpFilePath, digest); err != nil {
+			cobra.CheckErr(fmt.Errorf("checksum verification failed: %w", err))
+		}
+		fmt.Println("Checksum verified successfully.")
+	}
+
+	// 5. Replace binary
 	currentExe, err := os.Executable()
 	cobra.CheckErr(err)
 
 	// Resolve symlinks to ensure we are updating the real binary
+	// Check if the executable file is a symbolic link and follow it to find the real file.
+	// This ensures that the original binary is updated and the link is not broken.
 	currentExe, err = filepath.EvalSymlinks(currentExe)
 	cobra.CheckErr(err)
 
@@ -133,19 +148,45 @@ func getLatestRelease() (*GitHubRelease, error) {
 	return &release, nil
 }
 
-func findAssetURL(assets []GitHubAsset, osName, archName string) (string, error) {
+func findAssetURL(assets []GitHubAsset, osName, archName string) (string, string, error) {
 	targetName := fmt.Sprintf("goto-%s-%s", osName, archName)
 
 	for _, asset := range assets {
 		if asset.Name == targetName {
-			return asset.BrowserDownloadURL, nil
+			return asset.BrowserDownloadURL, asset.Digest, nil
 		}
 		if asset.Name == targetName+".exe" {
-			return asset.BrowserDownloadURL, nil
+			return asset.BrowserDownloadURL, asset.Digest, nil
 		}
 	}
 
-	return "", fmt.Errorf("no asset found matching %s or %s.exe", targetName, targetName)
+	return "", "", fmt.Errorf("no asset found matching %s or %s.exe", targetName, targetName)
+}
+
+func verifyDigest(filepath, digest string) error {
+	f, err := os.Open(filepath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if strings.HasPrefix(digest, "sha256:") {
+		expectedHash := strings.TrimPrefix(digest, "sha256:")
+		h := sha256.New()
+		if _, err := io.Copy(h, f); err != nil {
+			return err
+		}
+		calculatedHash := hex.EncodeToString(h.Sum(nil))
+		if calculatedHash != expectedHash {
+			return fmt.Errorf("hash mismatch: expected %s, got %s", expectedHash, calculatedHash)
+		}
+		return nil
+	}
+
+	// If digest format is unknown or not supported, we can either warn or error out.
+	// For now, let's just warn and proceed, or we could return an error.
+	// Returning error is safer.
+	return fmt.Errorf("unsupported digest format: %s", digest)
 }
 
 func downloadFile(filepath string, url string) error {
