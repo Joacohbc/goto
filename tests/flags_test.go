@@ -124,7 +124,7 @@ func TestGetIndex(t *testing.T) {
 	tmpDir3 := t.TempDir()
 
 	// Set up a temp file with 3 entries (each with unique path and abbreviation)
-	path := utils.GetFilePath(cmd)
+	path := utils.GetFilePath(utils.TemporalFlagPassed(cmd))
 	content := `[{"Path":"` + tmpDir1 + `","Abbreviation":"entry0"},{"Path":"` + tmpDir2 + `","Abbreviation":"entry1"},{"Path":"` + tmpDir3 + `","Abbreviation":"entry2"}]`
 	err := os.WriteFile(path, []byte(content), 0666)
 	if err != nil {

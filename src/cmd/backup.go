@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"goto/src/gpath"
+	"goto/src/core"
 	"goto/src/utils"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -28,20 +27,12 @@ goto backup -o /the/path/file.json.backup
 
 func runBackup(cmd *cobra.Command, _ []string) {
 
-	//Read the config file
-	gpaths := utils.LoadGPaths(cmd)
-
 	//Get output flag (if is not passed, have already a default value)
 	output, err := cmd.Flags().GetString("output")
 	cobra.CheckErr(err)
 
-	//Check if exists
-	if _, err := os.Stat(output); err == nil {
-		cobra.CheckErr(fmt.Sprintf("the file \"%s\" already exists", output))
-	}
-
-	cobra.CheckErr(gpath.SaveGPathsFile(gpaths, output))
-	fmt.Printf("Backup complete from %s\n", utils.GetFilePath(cmd))
+	cobra.CheckErr(core.BackupGPaths(output, utils.TemporalFlagPassed(cmd)))
+	fmt.Printf("Backup complete from %s\n", utils.GetFilePath(utils.TemporalFlagPassed(cmd)))
 }
 
 func init() {

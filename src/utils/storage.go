@@ -3,12 +3,11 @@ package utils
 import (
 	"fmt"
 	"goto/src/gpath"
+	"log"
 	"os"
 	"os/user"
 	"path/filepath"
 	"testing"
-
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -57,7 +56,9 @@ func init() {
 // SetupConfigFile initializes the configuration file paths.
 func SetupConfigFile() {
 	configPath, err := os.UserConfigDir()
-	cobra.CheckErr(err)
+	if err != nil {
+		log.Fatalf("Failed to get user config dir: %v", err)
+	}
 
 	// Get the config dir path (.e.g., ~/.config/goto)
 	configDir = filepath.Join(configPath, GOTO_FILE_DIR)
@@ -71,13 +72,19 @@ func SetupConfigFile() {
 	gotoPathsFile = filepath.Join(configDir, GOTO_FILE_NAME)
 	gotoPathsFileBackup = filepath.Clean(gotoPathsFile + ".backup")
 
-	cobra.CheckErr(gpath.CreateGotoPathsFile(gotoPathsFile))
+	if err := gpath.CreateGotoPathsFile(gotoPathsFile); err != nil {
+		log.Fatalf("Failed to create goto-paths file: %v", err)
+	}
 
 	// Define the path for the temporal gpaths file using a secure temporary file
 	tempGotoPathsFile, err = getSecureTempFile()
-	cobra.CheckErr(err)
+	if err != nil {
+		log.Fatalf("Failed to get secure temp file: %v", err)
+	}
 
-	cobra.CheckErr(gpath.CreateGotoPathsFile(tempGotoPathsFile))
+	if err := gpath.CreateGotoPathsFile(tempGotoPathsFile); err != nil {
+		log.Fatalf("Failed to create temp goto-paths file: %v", err)
+	}
 }
 
 func getSecureTempFile() (string, error) {
@@ -124,32 +131,31 @@ func getSecureTempFile() (string, error) {
 }
 
 // Overwrite the gpaths file (or the temporal gpath file if the flag passed) with the gpaths array.
-func UpdateGPaths(cmd *cobra.Command, gpaths []gpath.GotoPath) {
-	if cmd.Flags().Changed(FlagTemporal) {
+func UpdateGPaths(useTemporal bool, gpaths []gpath.GotoPath) error {
+	if useTemporal {
 		//If the array is valid, apply the changes
-		cobra.CheckErr(gpath.SaveGPathsFile(gpaths, tempGotoPathsFile))
+		return gpath.SaveGPathsFile(gpaths, tempGotoPathsFile)
 	} else {
 		//If the array is valid, apply the changes
-		cobra.CheckErr(gpath.SaveGPathsFile(gpaths, gotoPathsFile))
+		return gpath.SaveGPathsFile(gpaths, gotoPathsFile)
 	}
-
-	fmt.Println("Changes applied successfully")
 }
 
 // Load the gpaths file (or the temporal gpath file if the flag passed) in the gpaths array.
-func LoadGPaths(cmd *cobra.Command) []gpath.GotoPath {
+func LoadGPaths(useTemporal bool) ([]gpath.GotoPath, error) {
 	gpaths := &[]gpath.GotoPath{}
-	if cmd.Flags().Changed(FlagTemporal) {
-		cobra.CheckErr(gpath.LoadGPathsFile(gpaths, tempGotoPathsFile))
+	var err error
+	if useTemporal {
+		err = gpath.LoadGPathsFile(gpaths, tempGotoPathsFile)
 	} else {
-		cobra.CheckErr(gpath.LoadGPathsFile(gpaths, gotoPathsFile))
+		err = gpath.LoadGPathsFile(gpaths, gotoPathsFile)
 	}
-	return *gpaths
+	return *gpaths, err
 }
 
 // Return the path of the GPaths File (temporal and normal)
-func GetFilePath(cmd *cobra.Command) string {
-	if cmd.Flags().Changed(FlagTemporal) {
+func GetFilePath(useTemporal bool) string {
+	if useTemporal {
 		return tempGotoPathsFile
 	} else {
 		return gotoPathsFile

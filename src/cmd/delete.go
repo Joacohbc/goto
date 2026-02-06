@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"goto/src/gpath"
+	"goto/src/core"
 	"goto/src/utils"
 
 	"github.com/spf13/cobra"
@@ -70,61 +70,14 @@ goto delete-path --indx 2
 }
 
 func runDelete(cmd *cobra.Command, _ []string) {
+	path, _ := cmd.Flags().GetString(utils.FlagPath)
+	abbv, _ := cmd.Flags().GetString(utils.FlagAbbreviation)
+	indx, _ := cmd.Flags().GetInt(utils.FlagIndex)
 
-	//Load the goto-paths file to array
-	gpaths := utils.LoadGPaths(cmd)
+	deleted, err := core.DeletePath(path, abbv, indx, utils.TemporalFlagPassed(cmd))
+	cobra.CheckErr(err)
 
-	// If the path flag is passed
-	if utils.PathFlagPassed(cmd) {
-		path := utils.GetPath(cmd)
-
-		//Delete the directory from the array
-		for i, gpath := range gpaths {
-
-			//The gpath passes have the same Path delete it
-			if gpath.Path == path {
-				gpaths = append(gpaths[:i], gpaths[i+1:]...)
-				fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
-				goto SaveAndCheck
-			}
-		}
-		cobra.CheckErr(fmt.Sprintf("any gpath match with the path \"%s\"", path))
-
-	} else if utils.AbbreviationFlagPassed(cmd) { // If the abbreviation flag is passed
-		abbv := utils.GetAbbreviation(cmd)
-
-		//Delete the directory from the array
-		for i, gpath := range gpaths {
-
-			//The gpath passes have the Abbreviation, delete it
-			if gpath.Abbreviation == abbv {
-				gpaths = append(gpaths[:i], gpaths[i+1:]...)
-				fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
-				goto SaveAndCheck
-			}
-		}
-		cobra.CheckErr(fmt.Errorf("any gpath match with the abbreviation \"%s\"", abbv))
-
-	} else if utils.IndexFlagPassed(cmd) { // If the index flag is passed
-		indx := utils.GetIndex(cmd)
-
-		//Delete the directory from the array
-		for i, gpath := range gpaths {
-
-			//The gpath passes have the same Path or the same Abbreviation, delete it
-			if i == indx {
-				gpaths = append(gpaths[:i], gpaths[i+1:]...)
-				fmt.Printf(msgPathDeleted, gpath.Path, gpath.Abbreviation)
-				goto SaveAndCheck
-			}
-		}
-		cobra.CheckErr(fmt.Errorf("any gpath match with the index %d", indx))
-	}
-
-SaveAndCheck:
-	//After the changes, valid it
-	cobra.CheckErr(gpath.CheckRepeatedItems(gpaths))
-	utils.UpdateGPaths(cmd, gpaths)
+	fmt.Printf(msgPathDeleted, deleted.Path, deleted.Abbreviation)
 }
 
 func init() {

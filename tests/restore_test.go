@@ -37,7 +37,7 @@ func TestRestore(t *testing.T) {
 		cmd.RestoreCmd.Run(c, []string{})
 	})
 
-	gpaths := utils.LoadGPaths(c)
+	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
 	if len(gpaths) == 0 {
 		t.Fatal("Restore failed, gpaths empty")
 	}

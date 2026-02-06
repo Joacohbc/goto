@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"goto/src/core"
 	"goto/src/utils"
 
 	"github.com/spf13/cobra"
@@ -27,7 +28,8 @@ goto list -t
 func runList(cmd *cobra.Command, _ []string) {
 
 	//Load the goto-paths file to array
-	gpaths := utils.LoadGPaths(cmd)
+	gpaths, err := core.ListPaths(utils.TemporalFlagPassed(cmd))
+	cobra.CheckErr(err)
 
 	if utils.FlagPassed(cmd, "reverse") { // If the reverse flag is passed
 		for i := range gpaths {

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"goto/src/core"
 	"goto/src/utils"
 
 	"github.com/spf13/cobra"
@@ -36,34 +37,13 @@ func preRunSearch(cmd *cobra.Command, args []string) {
 }
 
 func runSearch(cmd *cobra.Command, _ []string) {
+	path, _ := cmd.Flags().GetString(utils.FlagPath)
+	abbv, _ := cmd.Flags().GetString(utils.FlagAbbreviation)
 
-	//Load the goto-paths file to array
-	gpaths := utils.LoadGPaths(cmd)
+	idx, gpath, err := core.SearchPath(path, abbv, utils.TemporalFlagPassed(cmd))
+	cobra.CheckErr(err)
 
-	// If the any path flag is passed
-	if utils.PathFlagPassed(cmd) {
-
-		path := utils.GetPath(cmd)
-
-		for i, gpath := range gpaths {
-			if gpath.Path == path {
-				fmt.Printf("%v - %s\n", i, gpath.String())
-				return
-			}
-		}
-		cobra.CheckErr(fmt.Errorf("the path \"%s\" doesn't exist in the gpaths-file", path))
-
-	} else {
-		abbv := utils.GetAbbreviation(cmd)
-
-		for i, gpath := range gpaths {
-			if gpath.Abbreviation == abbv {
-				fmt.Printf("%v - %s\n", i, gpath.String())
-				return
-			}
-		}
-		cobra.CheckErr(fmt.Errorf("doesn't exist a path with that abbreviation \"%s\"", abbv))
-	}
+	fmt.Printf("%v - %s\n", idx, gpath.String())
 }
 
 func init() {

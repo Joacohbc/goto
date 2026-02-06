@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"goto/src/gpath"
+	"goto/src/core"
 	"goto/src/utils"
 
 	"github.com/spf13/cobra"
@@ -28,24 +28,7 @@ goto add-path ~/Documents docs
 }
 
 func runAdd(cmd *cobra.Command, args []string) {
-
-	gpaths := utils.LoadGPaths(cmd)
-
-	// Vars to create the gpath and to report a error
-	path, err := gpath.ValidPath(args[0])
-	cobra.CheckErr(err)
-
-	abbv, err := gpath.ValidAbbreviation(args[1])
-	cobra.CheckErr(err)
-
-	//Add the new directory to the array
-	gpaths = append(gpaths, gpath.GotoPath{
-		Path:         path,
-		Abbreviation: abbv,
-	})
-
-	// And added to the file
-	utils.UpdateGPaths(cmd, gpaths)
+	cobra.CheckErr(core.AddPath(args[0], args[1], utils.TemporalFlagPassed(cmd)))
 }
 
 func init() {

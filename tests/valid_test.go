@@ -29,7 +29,7 @@ func TestRunValid_InvalidPathInFile(t *testing.T) {
 		defer cleanup()
 
 		// Manually create a file with invalid path
-		file := utils.GetFilePath(c)
+		file := utils.GetFilePath(utils.TemporalFlagPassed(c))
 		os.WriteFile(file, []byte(`[{"path":"/non/existent/path","abbreviation":"valid"}]`), 0600)
 
 		cmd.ValidCmd.Run(c, []string{})
@@ -46,7 +46,7 @@ func TestRunValid_RepeatedItems(t *testing.T) {
 		cwd, _ := os.Getwd()
 		// Repeated abbreviation
 		json := `[{"path":"` + cwd + `","abbreviation":"one"},{"path":"` + cwd + `","abbreviation":"one"}]`
-		file := utils.GetFilePath(c)
+		file := utils.GetFilePath(utils.TemporalFlagPassed(c))
 		os.WriteFile(file, []byte(json), 0600)
 
 		cmd.ValidCmd.Run(c, []string{})

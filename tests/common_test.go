@@ -21,7 +21,7 @@ func resetConfigFile(t *testing.T, temporalDir bool) (*cobra.Command, func()) {
 		_ = cmd.Flags().Set("temporal", "true")
 	}
 
-	path := utils.GetFilePath(cmd)
+	path := utils.GetFilePath(utils.TemporalFlagPassed(cmd))
 
 	dir := filepath.Dir(path)
 
