@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -26,15 +27,17 @@ type GitHubRelease struct {
 }
 
 // UpdateBinary checks for updates and updates the binary if a newer version is available.
-func UpdateBinary(currentVersion string) error {
+// It sends progress messages to the provided channel.
+func UpdateBinary(msgChan chan<- Message, currentVersion string) error {
+	notifier := NewNotifier(msgChan)
+
 	goos := runtime.GOOS
 	if goos == "windows" {
-		fmt.Println("Self-update is not supported on Windows.")
-		return nil
+		return errors.New("self-update not supported on Windows")
 	}
 
 	// 1. Check for latest release via GitHub API
-	fmt.Println("Checking for updates...")
+	notifier.Info("Checking for updates...\n")
 	release, err := getLatestRelease()
 	if err != nil {
 		return fmt.Errorf("failed to check for updates: %w", err)
@@ -46,11 +49,11 @@ func UpdateBinary(currentVersion string) error {
 	cleanOldVersion := strings.TrimPrefix(currentVersion, "v")
 
 	if !isNewerVersion(cleanOldVersion, cleanNewVersion) {
-		fmt.Printf("You are already using the latest version (%s).\n", currentVersion)
+		notifier.Info("You are already using the latest version (%s).\n", currentVersion)
 		return nil
 	}
 
-	fmt.Printf("New version available: %s (current: %s)\n", newVersion, currentVersion)
+	notifier.Alert("New version available: %s (current: %s)\n", newVersion, currentVersion)
 
 	// 3. Find matching asset
 	downloadURL, digest, err := findAssetURL(release.Assets, runtime.GOOS, runtime.GOARCH)
@@ -63,7 +66,7 @@ func UpdateBinary(currentVersion string) error {
 	fileName := filepath.Base(downloadURL)
 	tmpFilePath := filepath.Join(tmpDir, fileName)
 
-	fmt.Printf("Downloading latest version from %s...\n", downloadURL)
+	notifier.Info("Downloading latest version from %s...\n", downloadURL)
 	if err := downloadFile(tmpFilePath, downloadURL); err != nil {
 		return fmt.Errorf("failed to download: %w", err)
 	}
@@ -74,11 +77,11 @@ func UpdateBinary(currentVersion string) error {
 
 	// Verify digest if available
 	if digest != "" {
-		fmt.Println("Verifying download checksum...")
+		notifier.Info("Verifying download checksum...\n")
 		if err := verifyDigest(tmpFilePath, digest); err != nil {
 			return fmt.Errorf("checksum verification failed: %w", err)
 		}
-		fmt.Println("Checksum verified successfully.")
+		notifier.Success("Checksum verified successfully.\n")
 	}
 
 	// 5. Replace binary
@@ -105,7 +108,7 @@ func UpdateBinary(currentVersion string) error {
 	// Ensure permissions on the new file (in case of copy)
 	_ = os.Chmod(currentExe, 0755)
 
-	fmt.Printf("Successfully updated from %s to %s\n", currentVersion, newVersion)
+	notifier.Success("Successfully updated from %s to %s\n", currentVersion, newVersion)
 	return nil
 }
 
