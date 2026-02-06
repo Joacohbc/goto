@@ -17,11 +17,14 @@ var InitCmd = &cobra.Command{
 }
 
 func runInit(cmd *cobra.Command, args []string) {
-	msg, err := core.InitializeConfig()
+	handler := core.NewMessageHandler(func(msg core.Message) {
+		fmt.Println(msg.Content)
+	})
+
+	err := core.InitializeConfig(handler.Channel())
+	handler.CloseAndWait()
+
 	cobra.CheckErr(err)
-	if msg != "" {
-		fmt.Println(msg)
-	}
 }
 
 func init() {
