@@ -5,6 +5,8 @@ import (
 	"goto/src/utils"
 	"os"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func TestUpdatePathPath(t *testing.T) {
@@ -391,4 +393,51 @@ func TestRunUpdate_AbbvIndex_NotFound(t *testing.T) {
 		return
 	}
 	RunExpectedExit(t, "TestRunUpdate_AbbvIndex_NotFound", "TEST_RUN_UPDATE_AI_NOTFOUND")
+}
+
+func TestUpdatePreRun_Success(t *testing.T) {
+	preRun := cmd.UpdateCmd.PreRun
+	// Mock command just for flags
+	c := &cobra.Command{}
+	c.Flags().BoolP("modes", "m", false, "")
+	c.Flags().StringP("new", "n", "", "")
+
+	// Case 1: Args present + new flag present
+	// Must pass
+	c.Flags().Set("new", "val")
+	preRun(c, []string{"pp"})
+
+	// Case 2: No args + modes flag present + new flag present
+	c.Flags().Set("modes", "true")
+	preRun(c, []string{})
+}
+
+func TestUpdatePreRun_NoArgsNoModes(t *testing.T) {
+	if os.Getenv("TEST_UPDATE_PRERUN_NOARGS") == "1" {
+		c := &cobra.Command{}
+		c.Flags().BoolP("modes", "m", false, "")
+		c.Flags().StringP("new", "n", "", "")
+
+		// Set new to avoid that error, but leave args empty and modes false
+		c.Flags().Set("new", "val")
+
+		cmd.UpdateCmd.PreRun(c, []string{})
+		return
+	}
+	RunExpectedExit(t, "TestUpdatePreRun_NoArgsNoModes", "TEST_UPDATE_PRERUN_NOARGS")
+}
+
+func TestUpdatePreRun_NoNew(t *testing.T) {
+	if os.Getenv("TEST_UPDATE_PRERUN_NONEW") == "1" {
+		c := &cobra.Command{}
+		c.Flags().BoolP("modes", "m", false, "")
+		c.Flags().StringP("new", "n", "", "")
+
+		// Args present to pass first check
+		// But new flag not set (changed)
+
+		cmd.UpdateCmd.PreRun(c, []string{"pp"})
+		return
+	}
+	RunExpectedExit(t, "TestUpdatePreRun_NoNew", "TEST_UPDATE_PRERUN_NONEW")
 }
