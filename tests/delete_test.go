@@ -1,33 +1,29 @@
 package tests
 
 import (
-	"goto/src/cmd"
+	"goto/src/core"
 	"goto/src/utils"
 	"os"
 	"testing"
 )
 
 func TestDeleteByAbbreviation(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
 
 	// Add path
-	cmd.AddCmd.Run(c, []string{".", "p1"})
+	if err := core.AddPath(".", "p1", false); err != nil {
+		t.Fatal(err)
+	}
 
-	// Create context for delete
-	c.Flags().StringP(utils.FlagPath, "p", "", "")
-	c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-	c.Flags().IntP(utils.FlagIndex, "i", -1, "")
-
-	c.Flags().Set(utils.FlagAbbreviation, "p1")
-
-	// Capture output to avoid polluting test logs
-	captureOutput(func() {
-		cmd.DeleteCmd.Run(c, []string{})
-	})
+	// Delete by abbreviation
+	_, err := core.DeletePath("", "p1", -1, false)
+	if err != nil {
+		t.Errorf("Failed to delete by abbreviation: %v", err)
+	}
 
 	// Verify
-	gpaths, err := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	gpaths, err := utils.LoadGPaths(false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,55 +35,68 @@ func TestDeleteByAbbreviation(t *testing.T) {
 }
 
 func TestDeleteByIndex(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
 
 	// Add path
-	cmd.AddCmd.Run(c, []string{".", "p1"})
+	if err := core.AddPath(".", "p1", false); err != nil {
+		t.Fatal(err)
+	}
 
-	// Create context for delete
-	c.Flags().StringP(utils.FlagPath, "p", "", "")
-	c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-	c.Flags().IntP(utils.FlagIndex, "i", -1, "")
-
-	// Index 2 (third entry) should be p1 (default is 0, added path is 1)
-	c.Flags().Set(utils.FlagIndex, "2")
-	captureOutput(func() {
-		cmd.DeleteCmd.Run(c, []string{})
-	})
-
-	gpaths, err := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	// Find the index of p1
+	gpaths, err := utils.LoadGPaths(false)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	targetIndex := -1
 	for i, gp := range gpaths {
-		if i == 2 && gp.Abbreviation == "p1" {
+		if gp.Abbreviation == "p1" {
+			targetIndex = i
+			break
+		}
+	}
+
+	if targetIndex == -1 {
+		t.Fatal("Failed to find added path 'p1'")
+	}
+
+	// Delete by index
+	_, err = core.DeletePath("", "", targetIndex, false)
+	if err != nil {
+		t.Errorf("Failed to delete by index %d: %v", targetIndex, err)
+	}
+
+	gpaths, err = utils.LoadGPaths(false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, gp := range gpaths {
+		if gp.Abbreviation == "p1" {
 			t.Error("Path 'p1' was not deleted")
 		}
 	}
 }
 
 func TestDeleteByPath(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
 
-	cmd.AddCmd.Run(c, []string{".", "p1"})
-
-	c.Flags().StringP(utils.FlagPath, "p", "", "")
+	if err := core.AddPath(".", "p1", false); err != nil {
+		t.Fatal(err)
+	}
 
 	cwd, _ := os.Getwd()
-	c.Flags().Set(utils.FlagPath, cwd)
+	_, err := core.DeletePath(cwd, "", -1, false)
+	if err != nil {
+		t.Errorf("Failed to delete by path: %v", err)
+	}
 
-	captureOutput(func() {
-		cmd.DeleteCmd.Run(c, []string{})
-	})
-
-	gpaths, err := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	gpaths, err := utils.LoadGPaths(false)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Should delete p1. Default remains.
 	found := false
 	for _, gp := range gpaths {
 		if gp.Abbreviation == "p1" {
@@ -100,58 +109,49 @@ func TestDeleteByPath(t *testing.T) {
 }
 
 func TestDeleteNonExistent(t *testing.T) {
-	if os.Getenv("TEST_DELETE_NON_EXISTENT") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
-
-		c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-		c.Flags().Set(utils.FlagAbbreviation, "non_existent")
-
-		cmd.DeleteCmd.Run(c, []string{})
-		return
-	}
-	RunExpectedExit(t, "TestDeleteNonExistent", "TEST_DELETE_NON_EXISTENT")
-}
-
-func TestCmd_Delete_IndexNotFound(t *testing.T) {
-	if os.Getenv("TEST_DELETE_INDEX_NOT_FOUND") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
-		// Add one path so we have something (index 0, 1)
-		cmd.AddCmd.Run(c, []string{".", "p1"})
-
-		c.Flags().IntP(utils.FlagIndex, "i", -1, "")
-
-		// If we use index 100
-		c.Flags().Set(utils.FlagIndex, "100")
-
-		cmd.DeleteCmd.Run(c, []string{}) // Should exit
-		return
-	}
-	RunExpectedExit(t, "TestCmd_Delete_IndexNotFound", "TEST_DELETE_INDEX_NOT_FOUND")
-}
-
-func TestCmd_Delete_DirectRunNoFlags(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
 
-	// Call Run directly without PreRun.
-	captureOutput(func() {
-		cmd.DeleteCmd.Run(c, []string{})
-	})
+	_, err := core.DeletePath("", "non_existent", -1, false)
+	if err == nil {
+		t.Error("Expected error when deleting non-existent abbreviation")
+	}
 }
 
-func TestCmd_Delete_PathNotFound(t *testing.T) {
-	if os.Getenv("TEST_DELETE_PATH_NOT_FOUND") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
+func TestDeleteIndexNotFound(t *testing.T) {
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
-		c.Flags().StringP(utils.FlagPath, "p", "", "")
-		cwd, _ := os.Getwd()
-		c.Flags().Set(utils.FlagPath, cwd) // Valid path on disk, not in default config
-
-		cmd.DeleteCmd.Run(c, []string{})
-		return
+	if err := core.AddPath(".", "p1", false); err != nil {
+		t.Fatal(err)
 	}
-	RunExpectedExit(t, "TestCmd_Delete_PathNotFound", "TEST_DELETE_PATH_NOT_FOUND")
+
+	_, err := core.DeletePath("", "", 100, false)
+	if err == nil {
+		t.Error("Expected error when deleting non-existent index")
+	}
+}
+
+func TestDeleteNoFlags(t *testing.T) {
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
+
+    // Pass empty args
+	_, err := core.DeletePath("", "", -1, false)
+	if err == nil {
+		t.Error("Expected error when no identifier provided")
+	}
+}
+
+func TestDeletePathNotFound(t *testing.T) {
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
+
+	cwd, _ := os.Getwd()
+    // cwd is where we are running tests.
+    // If we haven't added it, it's not there.
+	_, err := core.DeletePath(cwd, "", -1, false)
+	if err == nil {
+		t.Error("Expected error when deleting non-existent path")
+	}
 }

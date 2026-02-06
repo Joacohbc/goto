@@ -2,34 +2,33 @@ package tests
 
 import (
 	"goto/src/cmd"
+	"goto/src/core"
 	"goto/src/utils"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/spf13/cobra"
 )
 
 func TestUpdatePathPath(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
-	cmd.AddCmd.Run(c, []string{".", "p1"})
 
-	// Update path by path
-	c.Flags().StringP(utils.FlagPath, "p", "", "")
-	c.Flags().StringP("new", "n", "", "")
-	c.Flags().BoolP("modes", "m", false, "")
+	if err := core.AddPath(".", "p1", false); err != nil {
+		t.Fatal(err)
+	}
 
 	cwd, _ := os.Getwd()
-	c.Flags().Set(utils.FlagPath, cwd)
-
 	newDir, _ := os.MkdirTemp("", "goto_test_update_pp")
 	defer os.RemoveAll(newDir)
-	c.Flags().Set("new", newDir)
 
-	// Mode path-path or pp
-	cmd.UpdateCmd.Run(c, []string{"path-path"})
+	// Update path by path (pp)
+	if err := core.UpdatePath("path-path", cwd, "", -1, newDir, false); err != nil {
+		t.Errorf("Update failed: %v", err)
+	}
 
-	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	gpaths, _ := utils.LoadGPaths(false)
 	found := false
 	for _, gp := range gpaths {
 		if gp.Path == newDir && gp.Abbreviation == "p1" {
@@ -43,21 +42,19 @@ func TestUpdatePathPath(t *testing.T) {
 }
 
 func TestUpdatePathAbbv(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
-	cmd.AddCmd.Run(c, []string{".", "p1"})
-
-	c.Flags().StringP(utils.FlagPath, "p", "", "")
-	c.Flags().StringP("new", "n", "", "")
-	c.Flags().BoolP("modes", "m", false, "")
+	if err := core.AddPath(".", "p1", false); err != nil {
+		t.Fatal(err)
+	}
 
 	cwd, _ := os.Getwd()
-	c.Flags().Set(utils.FlagPath, cwd)
-	c.Flags().Set("new", "p1_new")
 
-	cmd.UpdateCmd.Run(c, []string{"path-abbv"})
+	if err := core.UpdatePath("path-abbv", cwd, "", -1, "p1_new", false); err != nil {
+		t.Errorf("Update failed: %v", err)
+	}
 
-	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	gpaths, _ := utils.LoadGPaths(false)
 	found := false
 	for _, gp := range gpaths {
 		if gp.Abbreviation == "p1_new" {
@@ -71,49 +68,65 @@ func TestUpdatePathAbbv(t *testing.T) {
 }
 
 func TestUpdatePathIndex(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
-	// Default entry is index 0. Add p1 -> index 1
-	cmd.AddCmd.Run(c, []string{".", "p1"})
+	// Add p1
+	core.AddPath(".", "p1", false)
 
-	// Now swap index 1 (p1) to 0.
-	c.Flags().StringP(utils.FlagPath, "p", "", "")
-	c.Flags().StringP("new", "n", "", "")
-	c.Flags().BoolP("modes", "m", false, "")
+	newDir2, _ := os.MkdirTemp("", "goto_test_update_pi_2")
+	defer os.RemoveAll(newDir2)
+	core.AddPath(newDir2, "p2", false)
 
-	cwd, _ := os.Getwd()
-	c.Flags().Set(utils.FlagPath, cwd)
-	c.Flags().Set("new", "0") // set to index 0
-
-	cmd.UpdateCmd.Run(c, []string{"path-indx"})
-
-	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
-	if len(gpaths) > 1 {
-		// Index 0 should be "p1"
-		if gpaths[0].Abbreviation != "p1" {
-			t.Errorf("Expected p1 at index 0, got %s", gpaths[0].Abbreviation)
+	// Find p1 index
+	gpaths, _ := utils.LoadGPaths(false)
+	p1Index := -1
+	for i, gp := range gpaths {
+		if gp.Abbreviation == "p1" {
+			p1Index = i
+			break
 		}
+	}
+
+	// Find p2 index
+	p2Index := -1
+	for i, gp := range gpaths {
+		if gp.Abbreviation == "p2" {
+			p2Index = i
+			break
+		}
+	}
+
+	if p1Index == -1 || p2Index == -1 {
+		t.Fatal("Need p1 and p2")
+	}
+
+	// Swap p1 to p2's index
+	cwd, _ := os.Getwd()
+
+	err := core.UpdatePath("path-indx", cwd, "", -1, strconv.Itoa(p2Index), false)
+	if err != nil {
+		t.Errorf("Update failed: %v", err)
+	}
+
+	gpaths, _ = utils.LoadGPaths(false)
+	if gpaths[p2Index].Abbreviation != "p1" {
+		t.Errorf("Expected p1 at index %d", p2Index)
 	}
 }
 
 func TestUpdateAbbvPath(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
-	cmd.AddCmd.Run(c, []string{".", "p1"})
-
-	c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-	c.Flags().StringP("new", "n", "", "")
-	c.Flags().BoolP("modes", "m", false, "")
-
-	c.Flags().Set(utils.FlagAbbreviation, "p1")
+	core.AddPath(".", "p1", false)
 
 	newDir, _ := os.MkdirTemp("", "goto_test_update_ap")
 	defer os.RemoveAll(newDir)
-	c.Flags().Set("new", newDir)
 
-	cmd.UpdateCmd.Run(c, []string{"abbv-path"})
+	if err := core.UpdatePath("abbv-path", "", "p1", -1, newDir, false); err != nil {
+		t.Errorf("Update failed: %v", err)
+	}
 
-	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	gpaths, _ := utils.LoadGPaths(false)
 	found := false
 	for _, gp := range gpaths {
 		if gp.Abbreviation == "p1" && gp.Path == newDir {
@@ -127,20 +140,15 @@ func TestUpdateAbbvPath(t *testing.T) {
 }
 
 func TestUpdateAbbvAbbv(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
-	cmd.AddCmd.Run(c, []string{".", "oldname"})
+	core.AddPath(".", "oldname", false)
 
-	c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-	c.Flags().StringP("new", "n", "", "")
-	c.Flags().BoolP("modes", "m", false, "")
+	if err := core.UpdatePath("abbv-abbv", "", "oldname", -1, "newname", false); err != nil {
+		t.Errorf("Update failed: %v", err)
+	}
 
-	c.Flags().Set(utils.FlagAbbreviation, "oldname")
-	c.Flags().Set("new", "newname")
-
-	cmd.UpdateCmd.Run(c, []string{"abbv-abbv"})
-
-	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	gpaths, _ := utils.LoadGPaths(false)
 	found := false
 	for _, gp := range gpaths {
 		if gp.Abbreviation == "newname" {
@@ -154,108 +162,122 @@ func TestUpdateAbbvAbbv(t *testing.T) {
 }
 
 func TestUpdateAbbvIndex(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
-	cmd.AddCmd.Run(c, []string{".", "p1"})
+	core.AddPath(".", "p1", false)
 
-	c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-	c.Flags().StringP("new", "n", "", "")
-	c.Flags().BoolP("modes", "m", false, "")
+	newDir2, _ := os.MkdirTemp("", "goto_test_update_ai_2")
+	defer os.RemoveAll(newDir2)
+	core.AddPath(newDir2, "p2", false)
 
-	c.Flags().Set(utils.FlagAbbreviation, "p1")
-	c.Flags().Set("new", "0")
+	// swap p1 and p2 via abbv-indx
+	// find p2 index
+	gpaths, _ := utils.LoadGPaths(false)
+	p2Index := -1
+	for i, gp := range gpaths {
+		if gp.Abbreviation == "p2" {
+			p2Index = i
+			break
+		}
+	}
 
-	cmd.UpdateCmd.Run(c, []string{"abbv-indx"})
+	if err := core.UpdatePath("abbv-indx", "", "p1", -1, strconv.Itoa(p2Index), false); err != nil {
+		t.Errorf("Update failed: %v", err)
+	}
 
-	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
-	if gpaths[0].Abbreviation != "p1" {
-		t.Errorf("Expected p1 at index 0 after swap")
+	gpaths, _ = utils.LoadGPaths(false)
+	if gpaths[p2Index].Abbreviation != "p1" {
+		t.Errorf("Expected p1 at index %d", p2Index)
 	}
 }
 
 func TestUpdateIndexPath(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
-	cmd.AddCmd.Run(c, []string{".", "p1"})
+	core.AddPath(".", "p1", false)
 
-	// Clean temp file implies "default_test_entry" at index 0. p1 is at index 1.
-
-	c.Flags().IntP(utils.FlagIndex, "i", -1, "")
-	c.Flags().StringP("new", "n", "", "")
-	c.Flags().BoolP("modes", "m", false, "")
-
-	// Update index 1 (p1)
-	c.Flags().Set(utils.FlagIndex, "1")
+	// find index of p1
+	gpaths, _ := utils.LoadGPaths(false)
+	p1Index := -1
+	for i, gp := range gpaths {
+		if gp.Abbreviation == "p1" {
+			p1Index = i
+			break
+		}
+	}
 
 	newDir, _ := os.MkdirTemp("", "goto_test_update_ip")
 	defer os.RemoveAll(newDir)
 
-	c.Flags().Set("new", newDir)
+	if err := core.UpdatePath("indx-path", "", "", p1Index, newDir, false); err != nil {
+		t.Errorf("Update failed: %v", err)
+	}
 
-	cmd.UpdateCmd.Run(c, []string{"indx-path"})
-
-	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
-	// Check index 1
-	if gpaths[1].Path != newDir {
+	gpaths, _ = utils.LoadGPaths(false)
+	if gpaths[p1Index].Path != newDir {
 		t.Error("Update failed for indx-path")
 	}
 }
 
 func TestUpdateIndexAbbv(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
-	cmd.AddCmd.Run(c, []string{".", "p1"}) // index 1
+	core.AddPath(".", "p1", false)
 
-	c.Flags().IntP(utils.FlagIndex, "i", -1, "")
-	c.Flags().StringP("new", "n", "", "")
-	c.Flags().BoolP("modes", "m", false, "")
+	gpaths, _ := utils.LoadGPaths(false)
+	p1Index := -1
+	for i, gp := range gpaths {
+		if gp.Abbreviation == "p1" {
+			p1Index = i
+			break
+		}
+	}
 
-	c.Flags().Set(utils.FlagIndex, "1")
-	c.Flags().Set("new", "p1_updated")
+	if err := core.UpdatePath("indx-abbv", "", "", p1Index, "p1_updated", false); err != nil {
+		t.Errorf("Update failed: %v", err)
+	}
 
-	cmd.UpdateCmd.Run(c, []string{"indx-abbv"})
-
-	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
-	if gpaths[1].Abbreviation != "p1_updated" {
+	gpaths, _ = utils.LoadGPaths(false)
+	if gpaths[p1Index].Abbreviation != "p1_updated" {
 		t.Error("Update failed for indx-abbv")
 	}
 }
 
 func TestUpdateIndexIndex(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
-	cmd.AddCmd.Run(c, []string{".", "p1"}) // index 1
+	core.AddPath(".", "p1", false)
+	newDir2, _ := os.MkdirTemp("", "goto_test_update_ii_2")
+	defer os.RemoveAll(newDir2)
+	core.AddPath(newDir2, "p2", false)
 
-	c.Flags().IntP(utils.FlagIndex, "i", -1, "")
-	c.Flags().StringP("new", "n", "", "")
-	c.Flags().BoolP("modes", "m", false, "")
+	gpaths, _ := utils.LoadGPaths(false)
+	p1Index := -1
+	p2Index := -1
+	for i, gp := range gpaths {
+		if gp.Abbreviation == "p1" { p1Index = i }
+		if gp.Abbreviation == "p2" { p2Index = i }
+	}
 
-	c.Flags().Set(utils.FlagIndex, "2")
-	c.Flags().Set("new", "0")
+	// Swap p1(index) to p2(value)
+	if err := core.UpdatePath("indx-indx", "", "", p1Index, strconv.Itoa(p2Index), false); err != nil {
+		t.Errorf("Update failed: %v", err)
+	}
 
-	// Swap 1 and 0
-	cmd.UpdateCmd.Run(c, []string{"indx-indx"})
-
-	gpaths, _ := utils.LoadGPaths(utils.TemporalFlagPassed(c))
-	if gpaths[0].Abbreviation != "p1" {
-		t.Error("Update failed for indx-indx -> p1 should be at 0")
+	gpaths, _ = utils.LoadGPaths(false)
+	if gpaths[p2Index].Abbreviation != "p1" {
+		t.Error("Update failed for indx-indx -> p1 should be at p2's old index")
 	}
 }
 
 func TestUpdateInvalidMode(t *testing.T) {
-	if os.Getenv("TEST_UPDATE_INVALID_MODE") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
-		c.Flags().StringP("new", "n", "", "")
-		c.Flags().BoolP("modes", "m", false, "")
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
-		c.Flags().Set("new", "something")
-
-		// Invalid mode
-		cmd.UpdateCmd.Run(c, []string{"invalid-mode"})
-		return
+	err := core.UpdatePath("invalid-mode", "", "", -1, "val", false)
+	if err == nil {
+		t.Error("Expected error for invalid mode")
 	}
-	RunExpectedExit(t, "TestUpdateInvalidMode", "TEST_UPDATE_INVALID_MODE")
 }
 
 func TestPreRunUpdate_NoArgsNoMode(t *testing.T) {
@@ -289,110 +311,67 @@ func TestRunUpdate_ModesFlag(t *testing.T) {
 	c.Flags().BoolP("modes", "m", false, "")
 	c.Flags().Set("modes", "true")
 
-	// Helper to capture stdout if we wanted, but not strictly necessary for coverage
 	cmd.UpdateCmd.Run(c, []string{})
 }
 
-func TestRunUpdate_PathPath_NotFound(t *testing.T) {
-	if os.Getenv("TEST_RUN_UPDATE_PP_NOTFOUND") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
-		c.Flags().StringP(utils.FlagPath, "p", "", "")
-		c.Flags().StringP("new", "n", "", "")
-		c.Flags().BoolP("modes", "m", false, "")
+func TestUpdate_PathPath_NotFound(t *testing.T) {
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
-		c.Flags().Set("new", ".")
-		c.Flags().Set(utils.FlagPath, "/not/found")
-
-		cmd.UpdateCmd.Run(c, []string{"path-path"})
-		return
+	err := core.UpdatePath("path-path", "/not/found", "", -1, ".", false)
+	if err == nil {
+		t.Error("Expected error for non-existent path")
 	}
-	RunExpectedExit(t, "TestRunUpdate_PathPath_NotFound", "TEST_RUN_UPDATE_PP_NOTFOUND")
 }
 
-func TestRunUpdate_PathAbbv_NotFound(t *testing.T) {
-	if os.Getenv("TEST_RUN_UPDATE_PA_NOTFOUND") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
-		c.Flags().StringP(utils.FlagPath, "p", "", "")
-		c.Flags().StringP("new", "n", "", "")
-		c.Flags().BoolP("modes", "m", false, "")
+func TestUpdate_PathAbbv_NotFound(t *testing.T) {
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
-		c.Flags().Set("new", "newabbv")
-		c.Flags().Set(utils.FlagPath, "/not/found")
-
-		cmd.UpdateCmd.Run(c, []string{"path-abbv"})
-		return
+	err := core.UpdatePath("path-abbv", "/not/found", "", -1, "newabbv", false)
+	if err == nil {
+		t.Error("Expected error for non-existent path")
 	}
-	RunExpectedExit(t, "TestRunUpdate_PathAbbv_NotFound", "TEST_RUN_UPDATE_PA_NOTFOUND")
 }
 
-func TestRunUpdate_PathIndex_NotFound(t *testing.T) {
-	if os.Getenv("TEST_RUN_UPDATE_PI_NOTFOUND") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
-		c.Flags().StringP(utils.FlagPath, "p", "", "")
-		c.Flags().StringP("new", "n", "", "")
-		c.Flags().BoolP("modes", "m", false, "")
+func TestUpdate_PathIndex_NotFound(t *testing.T) {
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
-		c.Flags().Set("new", "0")
-		c.Flags().Set(utils.FlagPath, "/not/found")
-
-		cmd.UpdateCmd.Run(c, []string{"path-indx"})
-		return
+	err := core.UpdatePath("path-indx", "/not/found", "", -1, "0", false)
+	if err == nil {
+		t.Error("Expected error for non-existent path")
 	}
-	RunExpectedExit(t, "TestRunUpdate_PathIndex_NotFound", "TEST_RUN_UPDATE_PI_NOTFOUND")
 }
 
-func TestRunUpdate_AbbvPath_NotFound(t *testing.T) {
-	if os.Getenv("TEST_RUN_UPDATE_AP_NOTFOUND") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
-		c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-		c.Flags().StringP("new", "n", "", "")
-		c.Flags().BoolP("modes", "m", false, "")
+func TestUpdate_AbbvPath_NotFound(t *testing.T) {
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
-		c.Flags().Set("new", ".")
-		c.Flags().Set(utils.FlagAbbreviation, "notfound")
-
-		cmd.UpdateCmd.Run(c, []string{"abbv-path"})
-		return
+	err := core.UpdatePath("abbv-path", "", "notfound", -1, ".", false)
+	if err == nil {
+		t.Error("Expected error for non-existent abbreviation")
 	}
-	RunExpectedExit(t, "TestRunUpdate_AbbvPath_NotFound", "TEST_RUN_UPDATE_AP_NOTFOUND")
 }
 
-func TestRunUpdate_AbbvAbbv_NotFound(t *testing.T) {
-	if os.Getenv("TEST_RUN_UPDATE_AA_NOTFOUND") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
-		c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-		c.Flags().StringP("new", "n", "", "")
-		c.Flags().BoolP("modes", "m", false, "")
+func TestUpdate_AbbvAbbv_NotFound(t *testing.T) {
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
-		c.Flags().Set("new", "newabbv")
-		c.Flags().Set(utils.FlagAbbreviation, "notfound")
-
-		cmd.UpdateCmd.Run(c, []string{"abbv-abbv"})
-		return
+	err := core.UpdatePath("abbv-abbv", "", "notfound", -1, "newabbv", false)
+	if err == nil {
+		t.Error("Expected error for non-existent abbreviation")
 	}
-	RunExpectedExit(t, "TestRunUpdate_AbbvAbbv_NotFound", "TEST_RUN_UPDATE_AA_NOTFOUND")
 }
 
-func TestRunUpdate_AbbvIndex_NotFound(t *testing.T) {
-	if os.Getenv("TEST_RUN_UPDATE_AI_NOTFOUND") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
-		c.Flags().StringP(utils.FlagAbbreviation, "a", "", "")
-		c.Flags().StringP("new", "n", "", "")
-		c.Flags().BoolP("modes", "m", false, "")
+func TestUpdate_AbbvIndex_NotFound(t *testing.T) {
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
-		c.Flags().Set("new", "0")
-		c.Flags().Set(utils.FlagAbbreviation, "notfound")
-
-		cmd.UpdateCmd.Run(c, []string{"abbv-indx"})
-		return
+	err := core.UpdatePath("abbv-indx", "", "notfound", -1, "0", false)
+	if err == nil {
+		t.Error("Expected error for non-existent abbreviation")
 	}
-	RunExpectedExit(t, "TestRunUpdate_AbbvIndex_NotFound", "TEST_RUN_UPDATE_AI_NOTFOUND")
 }
 
 func TestUpdatePreRun_Success(t *testing.T) {
@@ -410,34 +389,4 @@ func TestUpdatePreRun_Success(t *testing.T) {
 	// Case 2: No args + modes flag present + new flag present
 	c.Flags().Set("modes", "true")
 	preRun(c, []string{})
-}
-
-func TestUpdatePreRun_NoArgsNoModes(t *testing.T) {
-	if os.Getenv("TEST_UPDATE_PRERUN_NOARGS") == "1" {
-		c := &cobra.Command{}
-		c.Flags().BoolP("modes", "m", false, "")
-		c.Flags().StringP("new", "n", "", "")
-
-		// Set new to avoid that error, but leave args empty and modes false
-		c.Flags().Set("new", "val")
-
-		cmd.UpdateCmd.PreRun(c, []string{})
-		return
-	}
-	RunExpectedExit(t, "TestUpdatePreRun_NoArgsNoModes", "TEST_UPDATE_PRERUN_NOARGS")
-}
-
-func TestUpdatePreRun_NoNew(t *testing.T) {
-	if os.Getenv("TEST_UPDATE_PRERUN_NONEW") == "1" {
-		c := &cobra.Command{}
-		c.Flags().BoolP("modes", "m", false, "")
-		c.Flags().StringP("new", "n", "", "")
-
-		// Args present to pass first check
-		// But new flag not set (changed)
-
-		cmd.UpdateCmd.PreRun(c, []string{"pp"})
-		return
-	}
-	RunExpectedExit(t, "TestUpdatePreRun_NoNew", "TEST_UPDATE_PRERUN_NONEW")
 }

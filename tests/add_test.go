@@ -2,20 +2,23 @@ package tests
 
 import (
 	"goto/src/cmd"
+	"goto/src/core"
 	"goto/src/utils"
-	"os"
 	"testing"
 )
 
 func TestAddPath(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
 
 	// Add path
-	cmd.AddCmd.Run(c, []string{".", "current"})
+	err := core.AddPath(".", "current", false)
+	if err != nil {
+		t.Fatalf("Failed to add path: %v", err)
+	}
 
 	// Verify
-	gpaths, err := utils.LoadGPaths(utils.TemporalFlagPassed(c))
+	gpaths, err := utils.LoadGPaths(false)
 	if err != nil {
 		t.Fatalf("Failed to load gpaths: %v", err)
 	}
@@ -33,18 +36,34 @@ func TestAddPath(t *testing.T) {
 }
 
 func TestAddPathRepeated(t *testing.T) {
-	if os.Getenv("TEST_ADD_PATH_REPEATED_SUBPROCESS") == "1" {
-		c, cleanup := resetConfigFile(t, false)
-		defer cleanup()
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
 
-		// Add first
-		cmd.AddCmd.Run(c, []string{".", "current"})
-
-		// Add same again - should exit 1 because of repeated valid path logic in Validate/Save
-		cmd.AddCmd.Run(c, []string{".", "current"})
-		return
+	// Add first
+	if err := core.AddPath(".", "current", false); err != nil {
+		t.Fatalf("First add failed: %v", err)
 	}
 
-	// Run the test in a subprocess using the helper
-	RunExpectedExit(t, "TestAddPathRepeated", "TEST_ADD_PATH_REPEATED_SUBPROCESS")
+	// Add same again - should fail
+	if err := core.AddPath(".", "current", false); err == nil {
+		t.Error("Expected error for repeated path, got nil")
+	}
+}
+
+func TestAddCmdParams(t *testing.T) {
+	// Verify that AddCmd requires exactly 2 arguments
+	err := cmd.AddCmd.Args(cmd.AddCmd, []string{"one"})
+	if err == nil {
+		t.Error("AddCmd should return error for 1 argument")
+	}
+
+	err = cmd.AddCmd.Args(cmd.AddCmd, []string{"one", "two"})
+	if err != nil {
+		t.Error("AddCmd should accept 2 arguments")
+	}
+
+	err = cmd.AddCmd.Args(cmd.AddCmd, []string{"one", "two", "three"})
+	if err == nil {
+		t.Error("AddCmd should return error for 3 arguments")
+	}
 }

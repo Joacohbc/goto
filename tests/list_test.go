@@ -2,46 +2,38 @@ package tests
 
 import (
 	"goto/src/cmd"
-	"strings"
+	"goto/src/core"
 	"testing"
 )
 
 func TestList(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
+	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
 
 	// Add some paths first
-	cmd.AddCmd.Run(c, []string{".", "p1"})
+	if err := core.AddPath(".", "p1", false); err != nil {
+		t.Fatal(err)
+	}
 
-	// Prepare list command
-	// listCmd uses utils.LoadGPaths(cmd), so we pass our temp cmd
-	// But listCmd is a global variable. Its Run method takes (cmd, args).
-	// We can pass our cmd.
+	paths, err := core.ListPaths(false)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	output := captureOutput(func() {
-		cmd.ListCmd.Run(c, []string{})
-	})
-
-	if !strings.Contains(output, "p1") {
-		t.Errorf("Expected 'p1' in list output, got: %s", output)
+	found := false
+	for _, p := range paths {
+		if p.Abbreviation == "p1" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("Expected 'p1' in list")
 	}
 }
 
-func TestListReverse(t *testing.T) {
-	c, cleanup := resetConfigFile(t, false)
-	defer cleanup()
-
-	cmd.AddCmd.Run(c, []string{".", "p1"})
-
-	// Create a command with reverse flag
-	c.Flags().BoolP("reverse", "R", false, "")
-	c.Flags().Set("reverse", "true")
-
-	output := captureOutput(func() {
-		cmd.ListCmd.Run(c, []string{})
-	})
-
-	if !strings.Contains(output, "p1") {
-		t.Errorf("Expected 'p1' in list output, got: %s", output)
+func TestListCmdFlags(t *testing.T) {
+	if cmd.ListCmd.Flags().Lookup("reverse") == nil {
+		t.Error("ListCmd should have 'reverse' flag")
 	}
 }
