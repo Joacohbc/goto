@@ -38,7 +38,7 @@ func UpdateBinary(msgChan chan<- Message, currentVersion string) error {
 
 	// 1. Check for latest release via GitHub API
 	notifier.Info("Checking for updates...\n")
-	release, err := getLatestRelease()
+	release, err := GetLatestRelease()
 	if err != nil {
 		return fmt.Errorf("failed to check for updates: %w", err)
 	}
@@ -48,7 +48,7 @@ func UpdateBinary(msgChan chan<- Message, currentVersion string) error {
 	cleanNewVersion := strings.TrimPrefix(newVersion, "v")
 	cleanOldVersion := strings.TrimPrefix(currentVersion, "v")
 
-	if !isNewerVersion(cleanOldVersion, cleanNewVersion) {
+	if !IsNewerVersion(cleanOldVersion, cleanNewVersion) {
 		notifier.Info("You are already using the latest version (%s).\n", currentVersion)
 		return nil
 	}
@@ -56,7 +56,7 @@ func UpdateBinary(msgChan chan<- Message, currentVersion string) error {
 	notifier.Alert("New version available: %s (current: %s)\n", newVersion, currentVersion)
 
 	// 3. Find matching asset
-	downloadURL, digest, err := findAssetURL(release.Assets, runtime.GOOS, runtime.GOARCH)
+	downloadURL, digest, err := FindAssetURL(release.Assets, runtime.GOOS, runtime.GOARCH)
 	if err != nil {
 		return fmt.Errorf("failed to find suitable binary for %s/%s: %w", runtime.GOOS, runtime.GOARCH, err)
 	}
@@ -67,7 +67,7 @@ func UpdateBinary(msgChan chan<- Message, currentVersion string) error {
 	tmpFilePath := filepath.Join(tmpDir, fileName)
 
 	notifier.Info("Downloading latest version from %s...\n", downloadURL)
-	if err := downloadFile(tmpFilePath, downloadURL); err != nil {
+	if err := DownloadFile(tmpFilePath, downloadURL); err != nil {
 		return fmt.Errorf("failed to download: %w", err)
 	}
 
@@ -78,7 +78,7 @@ func UpdateBinary(msgChan chan<- Message, currentVersion string) error {
 	// Verify digest if available
 	if digest != "" {
 		notifier.Info("Verifying download checksum...\n")
-		if err := verifyDigest(tmpFilePath, digest); err != nil {
+		if err := VerifyDigest(tmpFilePath, digest); err != nil {
 			return fmt.Errorf("checksum verification failed: %w", err)
 		}
 		notifier.Success("Checksum verified successfully.\n")
@@ -100,7 +100,7 @@ func UpdateBinary(msgChan chan<- Message, currentVersion string) error {
 	if err != nil {
 		// If rename fails (e.g. diff filesystem), try copy.
 		_ = os.Remove(currentExe)
-		if err := copyFile(tmpFilePath, currentExe); err != nil {
+		if err := CopyFile(tmpFilePath, currentExe); err != nil {
 			return fmt.Errorf("failed to replace binary: %w", err)
 		}
 	}
@@ -112,7 +112,7 @@ func UpdateBinary(msgChan chan<- Message, currentVersion string) error {
 	return nil
 }
 
-func getLatestRelease() (*GitHubRelease, error) {
+func GetLatestRelease() (*GitHubRelease, error) {
 	url := "https://api.github.com/repos/Joacohbc/goto/releases/latest"
 	resp, err := http.Get(url)
 	if err != nil {
@@ -138,7 +138,7 @@ func getLatestRelease() (*GitHubRelease, error) {
 	return &release, nil
 }
 
-func findAssetURL(assets []GitHubAsset, osName, archName string) (string, string, error) {
+func FindAssetURL(assets []GitHubAsset, osName, archName string) (string, string, error) {
 	targetName := fmt.Sprintf("goto-%s-%s", osName, archName)
 
 	for _, asset := range assets {
@@ -153,7 +153,7 @@ func findAssetURL(assets []GitHubAsset, osName, archName string) (string, string
 	return "", "", fmt.Errorf("no asset found matching %s or %s.exe", targetName, targetName)
 }
 
-func verifyDigest(filepath, digest string) error {
+func VerifyDigest(filepath, digest string) error {
 	f, err := os.Open(filepath)
 	if err != nil {
 		return err
@@ -178,7 +178,7 @@ func verifyDigest(filepath, digest string) error {
 	return fmt.Errorf("unsupported digest format: %s", digest)
 }
 
-func downloadFile(filepath string, url string) error {
+func DownloadFile(filepath string, url string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -204,7 +204,7 @@ func downloadFile(filepath string, url string) error {
 	return os.Chmod(filepath, 0755)
 }
 
-func copyFile(src, dst string) error {
+func CopyFile(src, dst string) error {
 	in, err := os.Open(src)
 	if err != nil {
 		return err
@@ -231,7 +231,7 @@ func copyFile(src, dst string) error {
 	return err
 }
 
-func isNewerVersion(current, remote string) bool {
+func IsNewerVersion(current, remote string) bool {
 	current = strings.TrimPrefix(current, "v")
 	remote = strings.TrimPrefix(remote, "v")
 
