@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"goto/src/cmd"
+	"goto/src/core"
 	"goto/src/utils"
 	"os"
 	"path/filepath"
@@ -29,23 +29,28 @@ func TestGetConfigDir(t *testing.T) {
 		t.Errorf("Expected config dir to be %s, got %s", cleanExpected, cleanConfigDir)
 	}
 }
+
 func TestUpdateGPaths_Temporal(t *testing.T) {
-	c, cleanup := resetConfigFile(t, true)
+	_, cleanup := resetConfigFile(t, true)
 	defer cleanup()
 
-	args := []string{".", "tempAdd"}
-	// We use AddCmd, but we need to reset its flags because it's a global variable?
-	// AddCmd.Run uses `cmd` passed to it, which is `c`.
-	// But AddCmd defines flags in `init()`.
-	// The `c` we pass has flags set manually.
+	// Add path with temporal=true
+	if err := core.AddPath(".", "tempAdd", true); err != nil {
+		t.Fatal(err)
+	}
 
-	// AddCmd calls utils.UpdateGPaths(cmd, gpaths)
-	// UpdateGPaths checks `cmd.Flags().Changed(FlagTemporal)`
-
-	cmd.AddCmd.Run(c, args)
-
-	// If we are here, UpdateGPaths executed.
-	// We covered the "if temporal" branch.
+	// Verify it was added to temporal file
+	gpaths, _ := utils.LoadGPaths(true)
+	found := false
+	for _, gp := range gpaths {
+		if gp.Abbreviation == "tempAdd" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("Path not added to temporal file")
+	}
 }
 
 func TestGetSecureTempFile_XDG(t *testing.T) {
