@@ -106,18 +106,19 @@ func ValidAbbreviation(abbv string) (string, error) {
 	return abbv, err
 }
 
-// This function check if a index is valid and also check that the index
-// is a number between 0 and the length of the GotoPath array
-func IsValidIndex(lenght int, index string) error {
-
+// IsValidIndex checks if an index is valid (a number within the range [0, length-1]).
+func IsValidIndex(length int, index string) error {
 	indx, err := strconv.Atoi(index)
 	if err != nil {
 		return fmt.Errorf("the Index must be a number")
 	}
 
-	//If the path is over the max index return error
-	if indx < 0 || indx > lenght-1 {
-		return fmt.Errorf("the Index %s is invalid (should be: 0-%v), check config file", index, strconv.Itoa(lenght-1))
+	// Check if the index is within the valid range [0, length-1]
+	if indx < 0 || indx >= length {
+		if length == 0 {
+			return fmt.Errorf("the Index %s is invalid (the list is empty), check config file", index)
+		}
+		return fmt.Errorf("the Index %s is invalid (should be: 0-%d), check config file", index, length-1)
 	}
 
 	return nil
