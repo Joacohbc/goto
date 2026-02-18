@@ -28,7 +28,7 @@ goto add-path ~/Documents docs
 }
 
 func runAdd(cmd *cobra.Command, args []string) {
-	cobra.CheckErr(core.AddPath(args[0], args[1], utils.TemporalFlagPassed(cmd)))
+	cobra.CheckErr(core.AddPath(args[0], args[1], cmd.Flags().Changed(utils.FlagTemporal)))
 }
 
 func init() {

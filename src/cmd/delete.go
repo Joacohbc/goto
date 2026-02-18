@@ -52,7 +52,7 @@ goto delete-path --indx 2
 		}
 
 		//If only one flags is passed and it is the temporary flags, return an error
-		if cmd.Flags().NFlag() == 1 && utils.TemporalFlagPassed(cmd) {
+		if cmd.Flags().NFlag() == 1 && cmd.Flags().Changed(utils.FlagTemporal) {
 			cobra.CheckErr("you must specify one flag to delete a gpath (Or Path or Abbreviation or Index)")
 		}
 
@@ -62,7 +62,7 @@ goto delete-path --indx 2
 			2 flags to identify the gpath may cause an error to delete the path.
 			For example: -p /home/user -i 2, the index not match with the gpath, so delete one of the paths
 		*/
-		if cmd.Flags().NFlag() == 2 && !utils.TemporalFlagPassed(cmd) {
+		if cmd.Flags().NFlag() == 2 && !cmd.Flags().Changed(utils.FlagTemporal) {
 			cobra.CheckErr(fmt.Errorf("you must specify only one flag to delete a gpath (Or Path or Abbreviation or Index)"))
 		}
 	},
@@ -74,7 +74,7 @@ func runDelete(cmd *cobra.Command, _ []string) {
 	abbv, _ := cmd.Flags().GetString(utils.FlagAbbreviation)
 	indx, _ := cmd.Flags().GetInt(utils.FlagIndex)
 
-	deleted, err := core.DeletePath(path, abbv, indx, utils.TemporalFlagPassed(cmd))
+	deleted, err := core.DeletePath(path, abbv, indx, cmd.Flags().Changed(utils.FlagTemporal))
 	cobra.CheckErr(err)
 
 	fmt.Printf(msgPathDeleted, deleted.Path, deleted.Abbreviation)

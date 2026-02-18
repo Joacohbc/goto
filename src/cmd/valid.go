@@ -20,7 +20,7 @@ var ValidCmd = &cobra.Command{
 
 func runValid(cmd *cobra.Command, _ []string) {
 
-	cobra.CheckErr(core.ValidatePaths(utils.TemporalFlagPassed(cmd)))
+	cobra.CheckErr(core.ValidatePaths(cmd.Flags().Changed(utils.FlagTemporal)))
 
 	fmt.Println("All paths are valid <3")
 }

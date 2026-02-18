@@ -55,12 +55,12 @@ goto update abbv-abbv --abbv h --new home
 func preRunUpdate(cmd *cobra.Command, args []string) {
 
 	// If no arguments are passed and neither the modes flag is passed, return a error.
-	if len(args) == 0 && !utils.FlagPassed(cmd, "modes") {
+	if len(args) == 0 && !cmd.Flags().Changed("modes") {
 		cobra.CheckErr("must be specify a mode to update")
 	}
 
 	// If no value for new flags is passed, return a error
-	if !utils.FlagPassed(cmd, "new") {
+	if !cmd.Flags().Changed("new") {
 		cobra.CheckErr("must be specify the new filed to update (path/abbreviation/index)")
 	}
 
@@ -81,7 +81,7 @@ func runUpdate(cmd *cobra.Command, args []string) {
 	}
 
 	//If modes is passed, show all modes
-	if utils.FlagPassed(cmd, "modes") {
+	if cmd.Flags().Changed("modes") {
 		for i := range modes {
 			fmt.Println("Long form:", modes[i][0], "|", "Short form:", modes[i][1])
 		}
@@ -96,7 +96,7 @@ func runUpdate(cmd *cobra.Command, args []string) {
 	abbv, _ := cmd.Flags().GetString(utils.FlagAbbreviation)
 	indx, _ := cmd.Flags().GetInt(utils.FlagIndex)
 
-	cobra.CheckErr(core.UpdatePath(args[0], path, abbv, indx, newVal, utils.TemporalFlagPassed(cmd)))
+	cobra.CheckErr(core.UpdatePath(args[0], path, abbv, indx, newVal, cmd.Flags().Changed(utils.FlagTemporal)))
 }
 
 func init() {

@@ -28,10 +28,10 @@ goto list -t
 func runList(cmd *cobra.Command, _ []string) {
 
 	//Load the goto-paths file to array
-	gpaths, err := core.ListPaths(utils.TemporalFlagPassed(cmd))
+	gpaths, err := core.ListPaths(cmd.Flags().Changed(utils.FlagTemporal))
 	cobra.CheckErr(err)
 
-	if utils.FlagPassed(cmd, "reverse") { // If the reverse flag is passed
+	if cmd.Flags().Changed("reverse") { // If the reverse flag is passed
 		for i := range gpaths {
 			fmt.Printf("%v - %s\n", len(gpaths)-i-1, gpaths[len(gpaths)-i-1].String())
 		}

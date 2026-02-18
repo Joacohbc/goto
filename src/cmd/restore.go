@@ -31,9 +31,9 @@ func runRestore(cmd *cobra.Command, _ []string) {
 	input, err := cmd.Flags().GetString("input")
 	cobra.CheckErr(err)
 
-	cobra.CheckErr(core.RestoreGPaths(input, utils.TemporalFlagPassed(cmd)))
+	cobra.CheckErr(core.RestoreGPaths(input, cmd.Flags().Changed(utils.FlagTemporal)))
 
-	fmt.Printf("Restore complete in %s\n", utils.GetFilePath(utils.TemporalFlagPassed(cmd)))
+	fmt.Printf("Restore complete in %s\n", utils.GetFilePath(cmd.Flags().Changed(utils.FlagTemporal)))
 }
 
 func init() {

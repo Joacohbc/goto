@@ -48,7 +48,7 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 
 func runRoot(cmd *cobra.Command, args []string) {
 
-	path, err := core.ResolvePath(args, cmd.Flags().Changed("only-directory"), utils.TemporalFlagPassed(cmd))
+	path, err := core.ResolvePath(args, cmd.Flags().Changed("only-directory"), cmd.Flags().Changed(utils.FlagTemporal))
 	cobra.CheckErr(err)
 
 	//If quote flag is passed

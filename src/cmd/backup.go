@@ -31,8 +31,8 @@ func runBackup(cmd *cobra.Command, _ []string) {
 	output, err := cmd.Flags().GetString("output")
 	cobra.CheckErr(err)
 
-	cobra.CheckErr(core.BackupGPaths(output, utils.TemporalFlagPassed(cmd)))
-	fmt.Printf("Backup complete from %s\n", utils.GetFilePath(utils.TemporalFlagPassed(cmd)))
+	cobra.CheckErr(core.BackupGPaths(output, cmd.Flags().Changed(utils.FlagTemporal)))
+	fmt.Printf("Backup complete from %s\n", utils.GetFilePath(cmd.Flags().Changed(utils.FlagTemporal)))
 }
 
 func init() {

@@ -31,7 +31,7 @@ func preRunSearch(cmd *cobra.Command, args []string) {
 	}
 
 	//If only one flags is passed and it is the temporary flags, return an error
-	if cmd.Flags().NFlag() == 1 && utils.TemporalFlagPassed(cmd) {
+	if cmd.Flags().NFlag() == 1 && cmd.Flags().Changed(utils.FlagTemporal) {
 		cobra.CheckErr("you must specify one flag to find a gpath (Or Path or Abbreviation)")
 	}
 }
@@ -40,7 +40,7 @@ func runSearch(cmd *cobra.Command, _ []string) {
 	path, _ := cmd.Flags().GetString(utils.FlagPath)
 	abbv, _ := cmd.Flags().GetString(utils.FlagAbbreviation)
 
-	idx, gpath, err := core.SearchPath(path, abbv, utils.TemporalFlagPassed(cmd))
+	idx, gpath, err := core.SearchPath(path, abbv, cmd.Flags().Changed(utils.FlagTemporal))
 	cobra.CheckErr(err)
 
 	fmt.Printf("%v - %s\n", idx, gpath.String())
