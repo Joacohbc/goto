@@ -77,7 +77,7 @@ func SetupConfigFile() {
 	}
 
 	// Define the path for the temporal gpaths file using a secure temporary file
-	tempGotoPathsFile, err = getSecureTempFile()
+	tempGotoPathsFile, err = GetSecureTempFile()
 	if err != nil {
 		log.Fatalf("Failed to get secure temp file: %v", err)
 	}
@@ -87,19 +87,19 @@ func SetupConfigFile() {
 	}
 }
 
-func getSecureTempFile() (string, error) {
-
+func GetSecureTempFile() (string, error) {
 	// This a way to have a secure temp file that is cleaned up on reboot
 	// and is private to the user running the application.
 	const dirTempName = "goto-cli"
 
 	// Try XDG_RUNTIME_DIR first (Linux standard) (e.g., /run/user/1000/goto-cli)
 	if runtimeDir := os.Getenv("XDG_RUNTIME_DIR"); runtimeDir != "" {
-		dir := filepath.Join(runtimeDir, dirTempName)
-		if err := os.MkdirAll(dir, 0700); err != nil {
-			return "", err
+		if filepath.IsAbs(runtimeDir) {
+			dir := filepath.Join(runtimeDir, dirTempName)
+			if path, err := createAndVerifySecureDir(dir); err == nil {
+				return path, nil
+			}
 		}
-		return filepath.Join(dir, GOTO_FILE_NAME), nil
 	}
 
 	// Fallback to creating a secure directory in os.TempDir()
@@ -108,10 +108,12 @@ func getSecureTempFile() (string, error) {
 	if err == nil {
 		uid = u.Uid
 	}
-
 	// Create a user-specific temp directory (e.g., /tmp/goto-cli-1000)
 	dir := filepath.Join(os.TempDir(), dirTempName+"-"+uid)
+	return createAndVerifySecureDir(dir)
+}
 
+func createAndVerifySecureDir(dir string) (string, error) {
 	// Securely create the directory. os.Mkdir is atomic.
 	if err := os.Mkdir(dir, 0700); err != nil {
 		if !os.IsExist(err) {
