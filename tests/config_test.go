@@ -160,4 +160,40 @@ func TestGetSecureTempFile_Security(t *testing.T) {
 			t.Error("Should have rejected symlinked XDG_RUNTIME_DIR and fallen back")
 		}
 	})
+
+	t.Run("Existing directory with insecure permissions", func(t *testing.T) {
+		tempDir, err := os.MkdirTemp("", "insecure_dir")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.RemoveAll(tempDir)
+
+		dir := filepath.Join(tempDir, "goto-cli")
+		// Create with 0755
+		if err := os.Mkdir(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+
+		// Ensure it really has 0755 (umask might have affected it, but 0755 is usually allowed)
+		if err := os.Chmod(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+
+		oldXDG := os.Getenv("XDG_RUNTIME_DIR")
+		defer os.Setenv("XDG_RUNTIME_DIR", oldXDG)
+		os.Setenv("XDG_RUNTIME_DIR", tempDir)
+
+		path, err := utils.GetSecureTempFile()
+		if err != nil {
+			t.Fatalf("Expected success, got error: %v", err)
+		}
+
+		info, err := os.Lstat(filepath.Dir(path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if info.Mode().Perm() != 0700 {
+			t.Errorf("Expected 0700 permissions, got %04o", info.Mode().Perm())
+		}
+	})
 }
