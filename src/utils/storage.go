@@ -119,24 +119,24 @@ func createAndVerifySecureDir(dir string) (string, error) {
 		if !os.IsExist(err) {
 			return "", err
 		}
+	}
 
-		// If it already exists, verify it securely
-		// Use Lstat to avoid following symlinks (security best practice)
-		info, err := os.Lstat(dir)
-		if err != nil {
-			return "", err
-		}
+	// Always verify it securely after creation or if it already exists
+	// Use Lstat to avoid following symlinks (security best practice)
+	info, err := os.Lstat(dir)
+	if err != nil {
+		return "", err
+	}
 
-		if !info.IsDir() {
-			return "", fmt.Errorf("%s exists but is not a directory", dir)
-		}
+	if !info.IsDir() {
+		return "", fmt.Errorf("%s exists but is not a directory", dir)
+	}
 
-		// Verify permissions (must be 0700)
-		if info.Mode().Perm() != 0700 {
-			// Try to fix permissions
-			if err := os.Chmod(dir, 0700); err != nil {
-				return "", fmt.Errorf("insecure permissions on %s and cannot fix: %v", dir, err)
-			}
+	// Verify permissions (must be 0700)
+	if info.Mode().Perm() != 0700 {
+		// Try to fix permissions
+		if err := os.Chmod(dir, 0700); err != nil {
+			return "", fmt.Errorf("insecure permissions on %s and cannot fix: %v", dir, err)
 		}
 	}
 
