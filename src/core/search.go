@@ -14,15 +14,16 @@ func SearchPath(pathArg, abbvArg string, useTemporal bool) (int, *gpath.GotoPath
 		return -1, nil, err
 	}
 
+	return findPath(gpaths, pathArg, abbvArg)
+}
+
+// findPath is an internal helper to find the index and path in a slice of GotoPath.
+func findPath(gpaths []gpath.GotoPath, pathArg, abbvArg string) (int, *gpath.GotoPath, error) {
 	if pathArg != "" {
 		path, err := gpath.ValidPath(pathArg)
 		if err != nil {
 			return -1, nil, err
 		}
-		// Note: Original code uses GetPath which uses ValidPathVar.
-		// ValidPath returns error if path does not exist.
-		// For search, we might want to search even if path doesn't exist on disk?
-		// But existing logic validates it. So we stick to it.
 
 		for i := range gpaths {
 			if gpaths[i].Path == path {
@@ -30,8 +31,9 @@ func SearchPath(pathArg, abbvArg string, useTemporal bool) (int, *gpath.GotoPath
 			}
 		}
 		return -1, nil, fmt.Errorf("the path \"%s\" doesn't exist in the gpaths-file", path)
+	}
 
-	} else {
+	if abbvArg != "" {
 		abbv, err := gpath.ValidAbbreviation(abbvArg)
 		if err != nil {
 			return -1, nil, err
@@ -44,4 +46,6 @@ func SearchPath(pathArg, abbvArg string, useTemporal bool) (int, *gpath.GotoPath
 		}
 		return -1, nil, fmt.Errorf("doesn't exist a path with that abbreviation \"%s\"", abbv)
 	}
+
+	return -1, nil, fmt.Errorf("no identifier provided")
 }
