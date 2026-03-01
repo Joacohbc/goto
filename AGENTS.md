@@ -11,6 +11,11 @@ Goto is a Go-based CLI tool for managing directory aliases. It is built using Co
 *   **Logic Separation**:
     *   `src/core/`: Contains all business logic. This layer must remain framework-agnostic.
     *   `src/cmd/`: Handles CLI interaction using Cobra. Do not place business logic here.
+*   **Messaging**:
+    *   `src/cmd/` is the only layer responsible for displaying messages to the user. `src/core/` must never print output directly.
+    *   All packages within `src/core/` **MUST** use `Notifier` (defined in `src/core/messages.go`) to send status updates or messages up to the `cmd/` layer. Printing output directly (e.g., `fmt.Print*`, `fmt.Fprint*`) is forbidden in `src/core/`.
+    *   Using `fmt.Errorf` or `errors.New` to create error values is allowed. The restriction applies only to printing/outputting messages, not to error construction.
+    *   Temporary `fmt.Print*` calls are only acceptable during local debugging and must not be committed.
 *   **Dependencies**:
     *   **NO NEW DEPENDENCIES**. Use only the existing dependencies defined in `go.mod`.
 
