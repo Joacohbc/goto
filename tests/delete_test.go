@@ -132,6 +132,33 @@ func TestDeleteIndexNotFound(t *testing.T) {
 	}
 }
 
+func TestDeleteInvalidIndexValues(t *testing.T) {
+	_, cleanup := resetConfigFile(t, false)
+	defer cleanup()
+
+	if err := core.AddPath(".", "p1", false); err != nil {
+		t.Fatal(err)
+	}
+
+	// Test negative index
+	_, err := core.DeletePath("", "", -2, false)
+	if err == nil {
+		t.Error("Expected error when deleting with negative index (-2)")
+	}
+
+	// Test index 0 is valid
+	_, err = core.DeletePath("", "", 0, false)
+	if err != nil {
+		t.Errorf("Expected no error when deleting with index 0, got: %v", err)
+	}
+
+	// Test out of bounds after deletion (list should be empty now)
+	_, err = core.DeletePath("", "", 0, false)
+	if err == nil {
+		t.Error("Expected error when deleting from empty list")
+	}
+}
+
 func TestDeleteNoFlags(t *testing.T) {
 	_, cleanup := resetConfigFile(t, false)
 	defer cleanup()
