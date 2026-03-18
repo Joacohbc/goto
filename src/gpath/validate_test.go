@@ -34,6 +34,69 @@ func TestIsValidIndex(t *testing.T) {
 	}
 }
 
+func TestCheckRepeatedItems(t *testing.T) {
+	tests := []struct {
+		name    string
+		gpaths  []GotoPath
+		wantErr bool
+	}{
+		{
+			name:    "empty list",
+			gpaths:  []GotoPath{},
+			wantErr: true,
+		},
+		{
+			name: "single item",
+			gpaths: []GotoPath{
+				{Path: "/path/1", Abbreviation: "p1"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "multiple unique items",
+			gpaths: []GotoPath{
+				{Path: "/path/1", Abbreviation: "p1"},
+				{Path: "/path/2", Abbreviation: "p2"},
+				{Path: "/path/3", Abbreviation: "p3"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "duplicate path",
+			gpaths: []GotoPath{
+				{Path: "/path/1", Abbreviation: "p1"},
+				{Path: "/path/1", Abbreviation: "p2"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "duplicate abbreviation",
+			gpaths: []GotoPath{
+				{Path: "/path/1", Abbreviation: "p1"},
+				{Path: "/path/2", Abbreviation: "p1"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "duplicate both path and abbreviation",
+			gpaths: []GotoPath{
+				{Path: "/path/1", Abbreviation: "p1"},
+				{Path: "/path/1", Abbreviation: "p1"},
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := CheckRepeatedItems(tt.gpaths)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CheckRepeatedItems() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestIsValidIndex_ErrorMessages(t *testing.T) {
 	tests := []struct {
 		name    string
