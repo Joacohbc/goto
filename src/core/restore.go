@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bufio"
 	"fmt"
 	"goto/src/gpath"
 	"goto/src/utils"
@@ -20,13 +21,16 @@ func RestoreGPaths(inputPath string, useTemporal bool) error {
 		return fmt.Errorf("the input can't be a directory")
 	}
 
-	backup, err := os.ReadFile(inputPath)
+	file, err := os.Open(inputPath)
 	if err != nil {
-		return fmt.Errorf("cant read the backup of config file: %v", err)
+		return fmt.Errorf("cant open the backup of config file: %v", err)
 	}
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
 
 	var gpaths []gpath.GotoPath
-	if err := sonic.ConfigFastest.Unmarshal(backup, &gpaths); err != nil {
+	if err := sonic.ConfigFastest.NewDecoder(reader).Decode(&gpaths); err != nil {
 		return fmt.Errorf("cant parse the backup of config file: %v", err)
 	}
 
