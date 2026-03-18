@@ -1,9 +1,5 @@
 package gpath
 
-import (
-	"fmt"
-)
-
 //
 // GotoPath Type
 //
@@ -12,9 +8,9 @@ type GotoPath struct {
 	Abbreviation string `json:"abbreviation"`
 }
 
-//Return gpath in String format
+// Return gpath in String format
 func (d *GotoPath) String() string {
-	return fmt.Sprintf("\"%s\" - %s", d.Path, d.Abbreviation)
+	return "\"" + d.Path + "\" - " + d.Abbreviation
 }
 
 // This function valid a directory with ValidPathVar() and ValidAbbreviationVar()
