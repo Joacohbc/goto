@@ -1,6 +1,8 @@
 package gpath
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -29,6 +31,124 @@ func TestIsValidIndex(t *testing.T) {
 			err := IsValidIndex(tt.length, tt.index)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("IsValidIndex(%d, %q) error = %v, wantErr %v", tt.length, tt.index, err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidPath(t *testing.T) {
+	// Create a temporary directory for testing
+	tmpDir, err := os.MkdirTemp("", "gpath-test-*")
+	if err != nil {
+		t.Fatalf("failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create a temporary file for testing
+	tmpFile, err := os.CreateTemp("", "gpath-test-file-*")
+	if err != nil {
+		t.Fatalf("failed to create temp file: %v", err)
+	}
+	defer tmpFile.Close()
+	defer os.Remove(tmpFile.Name())
+
+	tests := []struct {
+		name    string
+		path    string
+		wantErr bool
+	}{
+		{"valid directory", tmpDir, false},
+		{"empty path", "", true},
+		{"blank space path", "   ", true},
+		{"non-existent path", "/non/existent/path/at/all", true},
+		{"path is a file", tmpFile.Name(), true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ValidPath(tt.path)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ValidPath(%q) error = %v, wantErr %v", tt.path, err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr {
+				if !filepath.IsAbs(got) {
+					t.Errorf("ValidPath(%q) got = %q, want absolute path", tt.path, got)
+				}
+			}
+		})
+	}
+}
+
+func TestValidAbbreviation(t *testing.T) {
+	tests := []struct {
+		name    string
+		abbv    string
+		wantErr bool
+	}{
+		{"valid abbreviation", "work", false},
+		{"empty abbreviation", "", true},
+		{"blank space abbreviation", "   ", true},
+		{"contains space", "my work", true},
+		{"is a number", "123", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ValidAbbreviation(tt.abbv)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ValidAbbreviation(%q) error = %v, wantErr %v", tt.abbv, err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && got != tt.abbv {
+				t.Errorf("ValidAbbreviation(%q) got = %q, want %q", tt.abbv, got, tt.abbv)
+			}
+		})
+	}
+}
+
+func TestCheckRepeatedItems(t *testing.T) {
+	tests := []struct {
+		name    string
+		gpaths  []GotoPath
+		wantErr bool
+	}{
+		{
+			"valid items",
+			[]GotoPath{
+				{Path: "/path/1", Abbreviation: "p1"},
+				{Path: "/path/2", Abbreviation: "p2"},
+			},
+			false,
+		},
+		{
+			"empty list",
+			[]GotoPath{},
+			true,
+		},
+		{
+			"repeated path",
+			[]GotoPath{
+				{Path: "/path/1", Abbreviation: "p1"},
+				{Path: "/path/1", Abbreviation: "p2"},
+			},
+			true,
+		},
+		{
+			"repeated abbreviation",
+			[]GotoPath{
+				{Path: "/path/1", Abbreviation: "p1"},
+				{Path: "/path/2", Abbreviation: "p1"},
+			},
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := CheckRepeatedItems(tt.gpaths)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("CheckRepeatedItems() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
