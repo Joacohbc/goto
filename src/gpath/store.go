@@ -75,11 +75,7 @@ func SaveGPathsFile(gpaths []GotoPath, gotoPathsFile string) error {
 	}
 
 	// Flush the buffer to ensure all data is written
-	if err := writer.Flush(); err != nil {
-		return err
-	}
-
-	return nil
+	return writer.Flush()
 }
 
 // Load config file into an array
