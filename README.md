@@ -1,12 +1,12 @@
 <div align="center">
   <h1>Goto</h1>
-  
+
   <p>
     <strong>Navigate faster, not harder.</strong>
   </p>
-  
+
   <p>
-    A lightning-fast, minimalist <strong>Path Manager</strong> CLI tool designed to supercharge your terminal workflow. 
+    A lightning-fast, minimalist <strong>Path Manager</strong> CLI tool designed to supercharge your terminal workflow.
     Alias your most-used directories, index them, and jump between folders instantly—leaving long paths in the past.
   </p>
 
@@ -18,37 +18,33 @@
 
 ## Installation
 
-**Download** the latest release from [releases](https://github.com/Joacohbc/goto/releases/latest).
+The easiest way to install and configure Goto is by running the automatic installation script.
 
-### Download Binary (Recommended)
-
-You can download the binary directly using `curl` or `wget`. Choose the command for your OS and architecture:
-
-#### Linux
-
-##### **AMD64**
+Open your terminal and run:
 
 ```bash
-curl -L -o goto https://github.com/Joacohbc/goto/releases/latest/download/goto-linux-amd64
-chmod +x goto
+curl -fsSL https://raw.githubusercontent.com/Joacohbc/goto/main/install.sh | bash
 ```
 
-##### **ARM64**
+This script will automatically:
+1. Detect your Operating System (Linux or macOS) and Architecture.
+2. Download the latest release binary.
+3. Move the binary to your `~/.local/bin` folder.
+4. Detect your shell and add the required aliases for `goto` to work seamlessly.
 
-```bash
-curl -L -o goto https://github.com/Joacohbc/goto/releases/latest/download/goto-linux-arm64
-chmod +x goto
-```
-
-### Run Init
-
-Once downloaded and made executable, run init to set up aliases automatically:
-
-```bash
-./goto init
-```
+*Note: After installation, restart your terminal or source your configuration file.*
 
 See [MANUAL-INSTALL.md](MANUAL-INSTALL.md) for manual setup.
+
+## Uninstallation
+
+To completely remove Goto, its binaries, and its shell aliases, simply run the uninstallation script:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Joacohbc/goto/main/uninstall.sh | bash
+```
+
+The script will prompt you to confirm if you also want to remove your saved aliases and configurations.
 
 ## Usage
 
@@ -122,6 +118,3 @@ goto -t temp
 *   `goto -q home` : Return quoted path.
 *   `goto -s home` : Return path with escaped spaces.
 *   `\cd ~/Documents` : Bypass alias to use standard `cd`.
-
-
-
