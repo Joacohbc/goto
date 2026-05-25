@@ -1,16 +1,12 @@
 name: Release
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v*'
+    branches: [ "main" ]
 
   pull_request:
-    branches: [ "main" ]
-    paths:
-      - 'src/**'
-      - 'tests/**'
-
-  push:
     branches: [ "main" ]
     paths:
       - 'src/**'
@@ -59,7 +55,13 @@ jobs:
           mkdir -p build
           OUTPUT_NAME="goto-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.extension }}"
           echo "Building $OUTPUT_NAME..."
-          go build -v -o "build/$OUTPUT_NAME" src/main.go
+
+          VERSION="unknown"
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${{ github.ref_name }}"
+          fi
+
+          go build -ldflags="-X 'goto/src/cmd.VersionGoto=$VERSION'" -v -o "build/$OUTPUT_NAME" src/main.go
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2

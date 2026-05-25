@@ -45,8 +45,9 @@ chmod +x "${BINARY_PATH}"
 echo "Goto successfully downloaded."
 
 # Detect shell
-DETECTED_SHELL=$(basename "$SHELL")
-if [ -z "$DETECTED_SHELL" ]; then
+if [ -n "$SHELL" ]; then
+    DETECTED_SHELL=$(basename "$SHELL")
+else
     DETECTED_SHELL="profile (default)"
 fi
 echo "Detected shell: $DETECTED_SHELL"
