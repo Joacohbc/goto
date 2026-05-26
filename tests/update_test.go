@@ -295,7 +295,7 @@ func TestPreRunUpdate_NoNewFlag(t *testing.T) {
 	if os.Getenv("TEST_PRERUN_UPDATE_NONEW") == "1" {
 		c, cleanup := resetConfigFile(t, false)
 		defer cleanup()
-		c.Flags().BoolP("modes", "m", false, "")
+		c.Flags().StringP("modes", "m", "", "")
 		c.Flags().StringP("new", "n", "", "")
 		// Arg present, but no new flag
 		cmd.UpdateCmd.PreRun(c, []string{"path-path"})
@@ -308,8 +308,8 @@ func TestRunUpdate_ModesFlag(t *testing.T) {
 	// This does not exit, just prints
 	c, cleanup := resetConfigFile(t, false)
 	defer cleanup()
-	c.Flags().BoolP("modes", "m", false, "")
-	c.Flags().Set("modes", "true")
+	c.Flags().StringP("modes", "m", "", "")
+	c.Flags().Set("modes", "show")
 
 	cmd.UpdateCmd.Run(c, []string{})
 }
@@ -378,7 +378,7 @@ func TestUpdatePreRun_Success(t *testing.T) {
 	preRun := cmd.UpdateCmd.PreRun
 	// Mock command just for flags
 	c := &cobra.Command{}
-	c.Flags().BoolP("modes", "m", false, "")
+	c.Flags().StringP("modes", "m", "", "")
 	c.Flags().StringP("new", "n", "", "")
 
 	// Case 1: Args present + new flag present
@@ -387,6 +387,6 @@ func TestUpdatePreRun_Success(t *testing.T) {
 	preRun(c, []string{"pp"})
 
 	// Case 2: No args + modes flag present + new flag present
-	c.Flags().Set("modes", "true")
+	c.Flags().Set("modes", "show")
 	preRun(c, []string{})
 }

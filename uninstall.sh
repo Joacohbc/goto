@@ -42,6 +42,13 @@ for FILE in "${CONFIG_FILES[@]}"; do
     fi
 done
 
+# Remove fish completion if it exists
+FISH_COMPLETION="${HOME_DIR}/.config/fish/completions/goto.fish"
+if [ -f "${FISH_COMPLETION}" ]; then
+    echo "Removing fish completion from ${FISH_COMPLETION}..."
+    rm -f "${FISH_COMPLETION}"
+fi
+
 # Ask user if they want to delete the configuration directory
 CONFIG_DIR="${HOME}/.config/goto"
 if [ -d "${CONFIG_DIR}" ]; then

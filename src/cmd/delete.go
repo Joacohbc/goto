@@ -87,4 +87,7 @@ func init() {
 	DeleteCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
 	DeleteCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
 	DeleteCmd.Flags().IntP(utils.FlagIndex, "i", -1, "The Index of the Path")
+
+	_ = DeleteCmd.RegisterFlagCompletionFunc(utils.FlagAbbreviation, CompleteAbbreviationFlag)
+	_ = DeleteCmd.RegisterFlagCompletionFunc(utils.FlagPath, CompleteDirectoryFlag)
 }

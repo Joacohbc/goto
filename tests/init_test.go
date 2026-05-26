@@ -58,11 +58,21 @@ func TestInitializeConfig(t *testing.T) {
 		t.Errorf(".bashrc does not contain source alias command: %s", string(content))
 	}
 
-	// Check if alias.sh exists (implicitly via .bashrc check, but better check file)
-	// We need to guess the path since we can't access private vars.
-	// It should be tmpHome/.config/goto/goto-run-testing/alias.sh
+	// Check if alias.sh exists
 	expectedAliasPath := filepath.Join(tmpHome, ".config", "goto", "goto-run-testing", "alias.sh")
 	if _, err := os.Stat(expectedAliasPath); os.IsNotExist(err) {
 		t.Errorf("Alias file not created at %s", expectedAliasPath)
+	}
+
+	// Verify alias.sh contains autocompletion logic
+	aliasContent, err := os.ReadFile(expectedAliasPath)
+	if err != nil {
+		t.Fatalf("Failed to read alias.sh: %v", err)
+	}
+	if !strings.Contains(string(aliasContent), "completion.bash") {
+		t.Errorf("alias.sh does not contain completion.bash sourcing: %s", string(aliasContent))
+	}
+	if !strings.Contains(string(aliasContent), "completion.zsh") {
+		t.Errorf("alias.sh does not contain completion.zsh sourcing: %s", string(aliasContent))
 	}
 }

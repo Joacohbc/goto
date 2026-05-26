@@ -24,6 +24,13 @@ goto add-path ~/Documents docs
 `,
 	Args: cobra.ExactArgs(2),
 
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) == 0 {
+			return nil, cobra.ShellCompDirectiveFilterDirs
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	},
+
 	Run: runAdd,
 }
 

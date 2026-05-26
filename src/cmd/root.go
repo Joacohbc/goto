@@ -43,6 +43,36 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 	//If don't have args, return a error
 	Args: cobra.ExactArgs(1),
 
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		// Only autocomplete the first positional argument of goto
+		if len(args) != 0 {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		// If toComplete starts with a path prefix (e.g. "./", "/", "~", "../") or contains "/", suggest directories
+		if strings.HasPrefix(toComplete, ".") || strings.HasPrefix(toComplete, "/") || strings.HasPrefix(toComplete, "~") || strings.Contains(toComplete, "/") {
+			return nil, cobra.ShellCompDirectiveFilterDirs
+		}
+
+		// Otherwise, load saved abbreviations and return them as completions
+		gpaths, err := utils.LoadGPaths(utils.TemporalFlagPassed(cmd))
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		var completions []string
+		for _, gp := range gpaths {
+			if gp.Abbreviation != "" {
+				if toComplete == "" || strings.HasPrefix(gp.Abbreviation, toComplete) {
+					completions = append(completions, gp.Abbreviation+"\t"+gp.Path)
+				}
+			}
+		}
+
+		// Use ShellCompDirectiveNoFileComp to show our abbreviations and subcommands without regular files
+		return completions, cobra.ShellCompDirectiveNoFileComp
+	},
+
 	Run: runRoot,
 }
 
@@ -85,4 +115,26 @@ func init() {
 	RootCmd.Flags().BoolP("spaces", "s", false, "Return the path with substituted spaces")
 	RootCmd.Flags().BoolP("only-directory", "d", false, "Only check if the argument passed is a directory")
 	RootCmd.PersistentFlags().BoolP("temporal", "t", false, "Do the action in the temporal gpath file")
+}
+
+// CompleteAbbreviationFlag is a reusable flag completion function that autocompletes saved abbreviations with their paths as descriptions.
+func CompleteAbbreviationFlag(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	gpaths, err := utils.LoadGPaths(utils.TemporalFlagPassed(cmd))
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveError
+	}
+	var completions []string
+	for _, gp := range gpaths {
+		if gp.Abbreviation != "" {
+			if toComplete == "" || strings.HasPrefix(gp.Abbreviation, toComplete) {
+				completions = append(completions, gp.Abbreviation+"\t"+gp.Path)
+			}
+		}
+	}
+	return completions, cobra.ShellCompDirectiveNoFileComp
+}
+
+// CompleteDirectoryFlag is a reusable flag completion function that dynamically suggests directories only.
+func CompleteDirectoryFlag(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return nil, cobra.ShellCompDirectiveFilterDirs
 }

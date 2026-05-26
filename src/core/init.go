@@ -98,7 +98,18 @@ goto() {
 #cd is change by goto function
 alias cd="goto"
 alias cdt="goto -t"
-`, exePath)
+
+# Source shell completions if they exist
+if [ -n "$BASH_VERSION" ]; then
+    if [ -f "%s/completion.bash" ]; then
+        source "%s/completion.bash"
+    fi
+elif [ -n "$ZSH_VERSION" ]; then
+    if [ -f "%s/completion.zsh" ]; then
+        source "%s/completion.zsh"
+    fi
+fi
+`, exePath, configDir, configDir, configDir, configDir)
 
 	aliasFile := filepath.Join(configDir, "alias.sh")
 	err := os.WriteFile(aliasFile, []byte(aliasContent), 0644)
