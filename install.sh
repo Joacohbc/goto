@@ -10,7 +10,7 @@ OS="$(uname -s)"
 case "${OS}" in
     Linux*)     OS_NAME=linux;;
     Darwin*)    OS_NAME=darwin;;
-    *)          echo "Unsupported OS: ${OS}"; exit 1;;
+    *)          echo "Unsupported OS: ${OS}" >&2; exit 1;;
 esac
 
 # Determine Architecture
@@ -19,7 +19,7 @@ case "${ARCH}" in
     x86_64)     ARCH_NAME=amd64;;
     aarch64)    ARCH_NAME=arm64;;
     arm64)      ARCH_NAME=arm64;;
-    *)          echo "Unsupported architecture: ${ARCH}"; exit 1;;
+    *)          echo "Unsupported architecture: ${ARCH}" >&2; exit 1;;
 esac
 
 # Create installation directory
@@ -30,8 +30,8 @@ mkdir -p "${INSTALL_DIR}"
 echo "Fetching latest release information..."
 LATEST_URL=$(curl -s https://api.github.com/repos/Joacohbc/goto/releases/latest | grep "browser_download_url" | grep "goto-${OS_NAME}-${ARCH_NAME}\"" | cut -d '"' -f 4)
 
-if [ -z "${LATEST_URL}" ]; then
-    echo "Error: Could not find a binary for ${OS_NAME}-${ARCH_NAME} in the latest release."
+if [[ -z "${LATEST_URL}" ]]; then
+    echo "Error: Could not find a binary for ${OS_NAME}-${ARCH_NAME} in the latest release." >&2
     exit 1
 fi
 

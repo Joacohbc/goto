@@ -9,7 +9,7 @@ echo "Starting Goto uninstallation..."
 INSTALL_DIR="${HOME}/.local/bin"
 BINARY_PATH="${INSTALL_DIR}/goto"
 
-if [ -f "${BINARY_PATH}" ]; then
+if [[ -f "${BINARY_PATH}" ]]; then
     echo "Removing binary from ${BINARY_PATH}..."
     rm -f "${BINARY_PATH}"
 else
@@ -21,13 +21,13 @@ HOME_DIR="${HOME}"
 CONFIG_FILES=()
 
 # Common shell configurations
-if [ -f "${HOME_DIR}/.bashrc" ]; then CONFIG_FILES+=("${HOME_DIR}/.bashrc"); fi
-if [ -f "${HOME_DIR}/.zshrc" ]; then CONFIG_FILES+=("${HOME_DIR}/.zshrc"); fi
-if [ -f "${HOME_DIR}/.config/fish/config.fish" ]; then CONFIG_FILES+=("${HOME_DIR}/.config/fish/config.fish"); fi
-if [ -f "${HOME_DIR}/.profile" ]; then CONFIG_FILES+=("${HOME_DIR}/.profile"); fi
-if [ -f "${HOME_DIR}/.tcshrc" ]; then CONFIG_FILES+=("${HOME_DIR}/.tcshrc"); fi
-if [ -f "${HOME_DIR}/.cshrc" ]; then CONFIG_FILES+=("${HOME_DIR}/.cshrc"); fi
-if [ -f "${HOME_DIR}/.kshrc" ]; then CONFIG_FILES+=("${HOME_DIR}/.kshrc"); fi
+if [[ -f "${HOME_DIR}/.bashrc" ]]; then CONFIG_FILES+=("${HOME_DIR}/.bashrc"); fi
+if [[ -f "${HOME_DIR}/.zshrc" ]]; then CONFIG_FILES+=("${HOME_DIR}/.zshrc"); fi
+if [[ -f "${HOME_DIR}/.config/fish/config.fish" ]]; then CONFIG_FILES+=("${HOME_DIR}/.config/fish/config.fish"); fi
+if [[ -f "${HOME_DIR}/.profile" ]]; then CONFIG_FILES+=("${HOME_DIR}/.profile"); fi
+if [[ -f "${HOME_DIR}/.tcshrc" ]]; then CONFIG_FILES+=("${HOME_DIR}/.tcshrc"); fi
+if [[ -f "${HOME_DIR}/.cshrc" ]]; then CONFIG_FILES+=("${HOME_DIR}/.cshrc"); fi
+if [[ -f "${HOME_DIR}/.kshrc" ]]; then CONFIG_FILES+=("${HOME_DIR}/.kshrc"); fi
 
 ALIAS_SCRIPT_NAME="alias.sh"
 
@@ -50,14 +50,14 @@ done
 
 # Remove fish completion if it exists
 FISH_COMPLETION="${HOME_DIR}/.config/fish/completions/goto.fish"
-if [ -f "${FISH_COMPLETION}" ]; then
+if [[ -f "${FISH_COMPLETION}" ]]; then
     echo "Removing fish completion from ${FISH_COMPLETION}..."
     rm -f "${FISH_COMPLETION}"
 fi
 
 # Ask user if they want to delete the configuration directory
 CONFIG_DIR="${HOME}/.config/goto"
-if [ -d "${CONFIG_DIR}" ]; then
+if [[ -d "${CONFIG_DIR}" ]]; then
     echo ""
     read -p "Do you want to completely remove your goto configuration and saved paths? (${CONFIG_DIR}) [y/N]: " choice
     case "$choice" in
