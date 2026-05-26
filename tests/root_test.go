@@ -211,4 +211,70 @@ func TestResolvePath(t *testing.T) {
 			t.Errorf("expected resolution to local path %q, got %q", expectedAbs, result)
 		}
 	})
+
+	t.Run("resolve explicit path starting with slash", func(t *testing.T) {
+		_, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+
+		tmpDir := t.TempDir()
+		result, err := core.ResolvePath([]string{tmpDir}, false, false)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		expectedAbs, _ := filepath.Abs(tmpDir)
+		if result != expectedAbs {
+			t.Errorf("expected resolution to %q, got %q", expectedAbs, result)
+		}
+	})
+
+	t.Run("resolve explicit path starting with tilde", func(t *testing.T) {
+		_, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+
+		tmpDir := t.TempDir()
+		oldCwd, _ := os.Getwd()
+		defer os.Chdir(oldCwd)
+		_ = os.Chdir(tmpDir)
+
+		targetDir := filepath.Join(tmpDir, "~")
+		if err := os.Mkdir(targetDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+
+		result, err := core.ResolvePath([]string{"~"}, false, false)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		expectedAbs, _ := filepath.Abs(targetDir)
+		if result != expectedAbs {
+			t.Errorf("expected resolution to %q, got %q", expectedAbs, result)
+		}
+	})
+
+	t.Run("resolve explicit path containing slash", func(t *testing.T) {
+		_, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+
+		tmpDir := t.TempDir()
+		nestedDir := filepath.Join(tmpDir, "a", "b")
+		if err := os.MkdirAll(nestedDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+
+		oldCwd, _ := os.Getwd()
+		defer os.Chdir(oldCwd)
+		_ = os.Chdir(tmpDir)
+
+		result, err := core.ResolvePath([]string{"a/b"}, false, false)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		expectedAbs, _ := filepath.Abs(nestedDir)
+		if result != expectedAbs {
+			t.Errorf("expected resolution to %q, got %q", expectedAbs, result)
+		}
+	})
 }
