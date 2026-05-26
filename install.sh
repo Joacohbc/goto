@@ -44,14 +44,6 @@ curl -L -o "${BINARY_PATH}" "${LATEST_URL}"
 chmod +x "${BINARY_PATH}"
 echo "Goto successfully downloaded."
 
-# Detect shell
-if [ -n "$SHELL" ]; then
-    DETECTED_SHELL=$(basename "$SHELL")
-else
-    DETECTED_SHELL="profile (default)"
-fi
-echo "Detected shell: $DETECTED_SHELL"
-
 # Run goto init
 echo "Running goto init..."
 "${BINARY_PATH}" init

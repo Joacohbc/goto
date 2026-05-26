@@ -33,9 +33,15 @@ ALIAS_SCRIPT_NAME="alias.sh"
 
 echo "Checking shell configurations for goto alias..."
 for FILE in "${CONFIG_FILES[@]}"; do
+    # Remove new-style sentinel blocks first
+    if grep -q "# >>> goto initialize >>>" "${FILE}"; then
+        echo "Removing goto alias block from ${FILE}..."
+        sed -i.bak '/# >>> goto initialize >>>/,/# <<< goto initialize <<</d' "${FILE}"
+        rm -f "${FILE}.bak"
+    fi
+    # Also clean up old-style comments and sources just in case
     if grep -q "${ALIAS_SCRIPT_NAME}" "${FILE}"; then
-        echo "Removing goto alias from ${FILE}..."
-        # Using sed to remove the source line and the comment
+        echo "Cleaning up legacy goto alias from ${FILE}..."
         sed -i.bak '/#Aliases to use goto:/d' "${FILE}"
         sed -i.bak "/source.*${ALIAS_SCRIPT_NAME}/d" "${FILE}"
         rm -f "${FILE}.bak"

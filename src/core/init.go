@@ -159,15 +159,47 @@ func configureShell(aliasFile string, notifier *Notifier) error {
 		return err
 	}
 
+	userRC := shellRC
+	if homeDir != "" {
+		if strings.HasPrefix(shellRC, homeDir) {
+			userRC = "~" + strings.TrimPrefix(shellRC, homeDir)
+		}
+	}
+
 	sourceCmd := fmt.Sprintf("source %s", aliasFile)
-	if strings.Contains(string(content), sourceCmd) {
-		notifier.Info("Alias already sourced in %s", shellRC)
-		return nil
-	} else {
-		if _, err := f.WriteString(fmt.Sprintf("\n#Aliases to use goto:\n%s\n", sourceCmd)); err != nil {
+	sentinelStart := "# >>> goto initialize >>>"
+	sentinelEnd := "# <<< goto initialize <<<"
+	sourceBlock := fmt.Sprintf("%s\n# !! Contents within this block are managed by 'goto init' !!\n%s\n%s\n", sentinelStart, sourceCmd, sentinelEnd)
+
+	contentStr := string(content)
+	if strings.Contains(contentStr, sentinelStart) && strings.Contains(contentStr, sentinelEnd) {
+		// Update the existing sentinel block
+		startIndex := strings.Index(contentStr, sentinelStart)
+		endIndex := strings.Index(contentStr, sentinelEnd) + len(sentinelEnd)
+
+		if startIndex < endIndex {
+			newContent := contentStr[:startIndex] + sourceBlock + contentStr[endIndex:]
+			err = os.WriteFile(shellRC, []byte(newContent), 0644)
+			if err != nil {
+				return err
+			}
+			notifier.Info("Updated source block in %s", userRC)
+			notifier.Success("\nTo activate goto in your current shell session, please run:\n    source %s", userRC)
+			return nil
+		}
+	}
+
+	// Otherwise, append the source block
+	// Ensure file ends with a newline before appending to prevent merging lines
+	if len(content) > 0 && content[len(content)-1] != '\n' {
+		if _, err := f.WriteString("\n"); err != nil {
 			return err
 		}
-		notifier.Success("Added source command to %s\nPlease restart your terminal or run 'source %s' to activate goto.", shellRC, shellRC)
-		return nil
 	}
+	if _, err := f.WriteString(sourceBlock); err != nil {
+		return err
+	}
+	notifier.Success("Added source command block to %s", userRC)
+	notifier.Success("\nTo activate goto in your current shell session, please run:\n    source %s", userRC)
+	return nil
 }

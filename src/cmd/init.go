@@ -6,6 +6,7 @@ import (
 	"goto/src/utils"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -62,6 +63,13 @@ func runInit(cmd *cobra.Command, args []string) {
 	// Also attempt to copy fish completion to ~/.config/fish/completions/goto.fish if the folder exists
 	if homeDir, err := os.UserHomeDir(); err == nil {
 		fishUserCompDir := filepath.Join(homeDir, ".config", "fish", "completions")
+		shell := os.Getenv("SHELL")
+
+		// If Fish is the active shell, ensure the completions directory exists
+		if strings.Contains(shell, "fish") {
+			_ = os.MkdirAll(fishUserCompDir, 0755)
+		}
+
 		if _, err := os.Stat(fishUserCompDir); err == nil {
 			fishUserCompFile := filepath.Join(fishUserCompDir, "goto.fish")
 			if f, err := os.Create(fishUserCompFile); err == nil {
