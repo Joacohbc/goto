@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"goto/src/core"
 	"goto/src/utils"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -49,19 +50,48 @@ goto update abbv-abbv --abbv h --new home
 `,
 	Args:   cobra.RangeArgs(0, 1),
 	PreRun: preRunUpdate,
+
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) != 0 {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		modes := []string{
+			"path-path\tUpdate a Path with a new Path",
+			"pp\tUpdate a Path with a new Path (short)",
+			"path-abbv\tUpdate a Path with a new Abbreviation",
+			"pa\tUpdate a Path with a new Abbreviation (short)",
+			"path-indx\tUpdate a Path with a new Index",
+			"pi\tUpdate a Path with a new Index (short)",
+			"abbv-path\tUpdate an Abbreviation with a new Path",
+			"ap\tUpdate an Abbreviation with a new Path (short)",
+			"abbv-abbv\tUpdate an Abbreviation with a new Abbreviation",
+			"aa\tUpdate an Abbreviation with a new Abbreviation (short)",
+			"abbv-indx\tUpdate an Abbreviation with a new Index",
+			"ai\tUpdate an Abbreviation with a new Index (short)",
+			"indx-path\tUpdate an Index with a new Path",
+			"ip\tUpdate an Index with a new Path (short)",
+			"indx-abbv\tUpdate an Index with a new Abbreviation",
+			"ia\tUpdate an Index with a new Abbreviation (short)",
+			"indx-indx\tUpdate an Index with a new Index",
+			"ii\tUpdate an Index with a new Index (short)",
+		}
+		return modes, cobra.ShellCompDirectiveNoFileComp
+	},
+
 	Run:    runUpdate,
 }
 
 func preRunUpdate(cmd *cobra.Command, args []string) {
 
-	// If no arguments are passed and neither the modes flag is passed, return a error.
-	if len(args) == 0 && !utils.FlagPassed(cmd, "modes") {
-		cobra.CheckErr("must be specify a mode to update")
+	// Either positional arg or --modes flag must be passed
+	modesFlag, _ := cmd.Flags().GetString("modes")
+	if len(args) == 0 && modesFlag == "" {
+		cobra.CheckErr("must specify a mode to update")
 	}
 
-	// If no value for new flags is passed, return a error
-	if !utils.FlagPassed(cmd, "new") {
-		cobra.CheckErr("must be specify the new filed to update (path/abbreviation/index)")
+	// If no value for new flags is passed, and we are not listing/showing modes, return a error
+	if modesFlag != "show" && modesFlag != "list" && !utils.FlagPassed(cmd, "new") {
+		cobra.CheckErr("must specify the new field to update (path/abbreviation/index)")
 	}
 
 }
@@ -80,12 +110,25 @@ func runUpdate(cmd *cobra.Command, args []string) {
 		{"indx-indx", "ii"}, // 8
 	}
 
-	//If modes is passed, show all modes
-	if utils.FlagPassed(cmd, "modes") {
+	// Resolve the mode: either from the `--modes`/`-m` flag or from the first positional argument `args[0]`
+	var modeVal string
+	modesFlag, _ := cmd.Flags().GetString("modes")
+	if modesFlag != "" {
+		modeVal = modesFlag
+	} else if len(args) > 0 {
+		modeVal = args[0]
+	}
+
+	// If modes is passed as "show" or "list", show all modes
+	if modeVal == "show" || modeVal == "list" {
 		for i := range modes {
 			fmt.Println("Long form:", modes[i][0], "|", "Short form:", modes[i][1])
 		}
 		return
+	}
+
+	if modeVal == "" {
+		cobra.CheckErr("must specify a mode to update (positional argument or flag --modes / -m)")
 	}
 
 	//Parse the new flag
@@ -96,7 +139,7 @@ func runUpdate(cmd *cobra.Command, args []string) {
 	abbv, _ := cmd.Flags().GetString(utils.FlagAbbreviation)
 	indx, _ := cmd.Flags().GetInt(utils.FlagIndex)
 
-	cobra.CheckErr(core.UpdatePath(args[0], path, abbv, indx, newVal, utils.TemporalFlagPassed(cmd)))
+	cobra.CheckErr(core.UpdatePath(modeVal, path, abbv, indx, newVal, utils.TemporalFlagPassed(cmd)))
 }
 
 func init() {
@@ -113,5 +156,56 @@ func init() {
 	UpdateCmd.Flags().StringP("new", "n", "", "The Path or Abbreviation new")
 
 	//Flag info
-	UpdateCmd.Flags().BoolP("modes", "m", false, "Print all modes formats")
+	UpdateCmd.Flags().StringP("modes", "m", "", "Specify the update mode (or use 'show' to list all modes)")
+
+	_ = UpdateCmd.RegisterFlagCompletionFunc(utils.FlagAbbreviation, CompleteAbbreviationFlag)
+	_ = UpdateCmd.RegisterFlagCompletionFunc(utils.FlagPath, CompleteDirectoryFlag)
+
+	_ = UpdateCmd.RegisterFlagCompletionFunc("modes", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		modes := []string{
+			"path-path\tUpdate a Path with a new Path",
+			"pp\tUpdate a Path with a new Path (short)",
+			"path-abbv\tUpdate a Path with a new Abbreviation",
+			"pa\tUpdate a Path with a new Abbreviation (short)",
+			"path-indx\tUpdate a Path with a new Index",
+			"pi\tUpdate a Path with a new Index (short)",
+			"abbv-path\tUpdate an Abbreviation with a new Path",
+			"ap\tUpdate an Abbreviation with a new Path (short)",
+			"abbv-abbv\tUpdate an Abbreviation with a new Abbreviation",
+			"aa\tUpdate an Abbreviation with a new Abbreviation (short)",
+			"abbv-indx\tUpdate an Abbreviation with a new Index",
+			"ai\tUpdate an Abbreviation with a new Index (short)",
+			"indx-path\tUpdate an Index with a new Path",
+			"ip\tUpdate an Index with a new Path (short)",
+			"indx-abbv\tUpdate an Index with a new Abbreviation",
+			"ia\tUpdate an Index with a new Abbreviation (short)",
+			"indx-indx\tUpdate an Index with a new Index",
+			"ii\tUpdate an Index with a new Index (short)",
+			"show\tShow all modes to update",
+		}
+		var completions []string
+		for _, m := range modes {
+			if toComplete == "" || strings.HasPrefix(m, toComplete) {
+				completions = append(completions, m)
+			}
+		}
+		return completions, cobra.ShellCompDirectiveNoFileComp
+	})
+
+	// This completion function is used for the "new" flag, it checks the mode being updated and if it's a path update, 
+	// it will only show directories for completion
+	_ = UpdateCmd.RegisterFlagCompletionFunc("new", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		var mode string
+		modesFlag, _ := cmd.Flags().GetString("modes")
+		if modesFlag != "" {
+			mode = modesFlag
+		} else if len(args) > 0 {
+			mode = args[0]
+		}
+
+		if mode == "path-path" || mode == "pp" || mode == "abbv-path" || mode == "ap" || mode == "indx-path" || mode == "ip" {
+			return nil, cobra.ShellCompDirectiveFilterDirs
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	})
 }

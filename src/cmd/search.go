@@ -53,4 +53,7 @@ func init() {
 	//Flags
 	SearchCmd.Flags().StringP(utils.FlagPath, "p", "", "The Path to delete")
 	SearchCmd.Flags().StringP(utils.FlagAbbreviation, "a", "", "The Abbreviation of the Path")
+
+	_ = SearchCmd.RegisterFlagCompletionFunc(utils.FlagAbbreviation, CompleteAbbreviationFlag)
+	_ = SearchCmd.RegisterFlagCompletionFunc(utils.FlagPath, CompleteDirectoryFlag)
 }
