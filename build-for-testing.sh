@@ -38,8 +38,3 @@ echo "Detected shell: $DETECTED_SHELL"
 # Run goto init
 echo "Running 'goto init'..."
 "${BINARY_PATH}" init
-
-echo ""
-echo "=== Installation complete for testing! ==="
-echo "Please run: source ~/.bashrc (or your active shell's RC file) to activate completions and alias."
-echo "Then test typing: goto [Tab]"
