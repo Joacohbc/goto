@@ -175,14 +175,14 @@ func TestResolvePath(t *testing.T) {
 		_, cleanup := resetConfigFile(t, false)
 		defer cleanup()
 
-		// Create a local directory named "config" in a temporary folder
+		// Create a local directory named "myconfig" in a temporary folder
 		tmpDir := t.TempDir()
-		localConfigDir := filepath.Join(tmpDir, "config")
+		localConfigDir := filepath.Join(tmpDir, "myconfig")
 		if err := os.Mkdir(localConfigDir, 0755); err != nil {
 			t.Fatal(err)
 		}
 
-		// Load current gpaths and add a "config" abbreviation pointing to a different folder
+		// Load current gpaths and add a "myconfig" abbreviation pointing to a different folder
 		gpathsList, err := utils.LoadGPaths(false)
 		if err != nil {
 			t.Fatalf("failed to load gpaths: %v", err)
@@ -190,18 +190,18 @@ func TestResolvePath(t *testing.T) {
 
 		gpathsList = append(gpathsList, gpath.GotoPath{
 			Path:         "/some/other/path",
-			Abbreviation: "config",
+			Abbreviation: "myconfig",
 		})
 		if err := utils.UpdateGPaths(false, gpathsList); err != nil {
 			t.Fatalf("failed to update gpaths: %v", err)
 		}
 
-		// Resolve "./config" within the tmpDir
+		// Resolve "./myconfig" within the tmpDir
 		oldCwd, _ := os.Getwd()
 		defer os.Chdir(oldCwd)
 		_ = os.Chdir(tmpDir)
 
-		result, err := core.ResolvePath([]string{"./config"}, false, false)
+		result, err := core.ResolvePath([]string{"./myconfig"}, false, false)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
