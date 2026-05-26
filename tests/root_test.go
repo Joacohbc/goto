@@ -170,4 +170,45 @@ func TestResolvePath(t *testing.T) {
 			t.Errorf("got %q, want %q", result, dir)
 		}
 	})
+
+	t.Run("resolve explicit path starting with dot even if matching abbreviation exists", func(t *testing.T) {
+		_, cleanup := resetConfigFile(t, false)
+		defer cleanup()
+
+		// Create a local directory named "config" in a temporary folder
+		tmpDir := t.TempDir()
+		localConfigDir := filepath.Join(tmpDir, "config")
+		if err := os.Mkdir(localConfigDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+
+		// Load current gpaths and add a "config" abbreviation pointing to a different folder
+		gpathsList, err := utils.LoadGPaths(false)
+		if err != nil {
+			t.Fatalf("failed to load gpaths: %v", err)
+		}
+
+		gpathsList = append(gpathsList, gpath.GotoPath{
+			Path:         "/some/other/path",
+			Abbreviation: "config",
+		})
+		if err := utils.UpdateGPaths(false, gpathsList); err != nil {
+			t.Fatalf("failed to update gpaths: %v", err)
+		}
+
+		// Resolve "./config" within the tmpDir
+		oldCwd, _ := os.Getwd()
+		defer os.Chdir(oldCwd)
+		_ = os.Chdir(tmpDir)
+
+		result, err := core.ResolvePath([]string{"./config"}, false, false)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		expectedAbs, _ := filepath.Abs(localConfigDir)
+		if result != expectedAbs {
+			t.Errorf("expected resolution to local path %q, got %q", expectedAbs, result)
+		}
+	})
 }

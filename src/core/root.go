@@ -4,14 +4,27 @@ import (
 	"goto/src/gpath"
 	"goto/src/utils"
 	"path/filepath"
+	"strings"
 )
 
 // ResolvePath resolves the target path based on arguments and flags.
 func ResolvePath(args []string, onlyDirectory bool, useTemporal bool) (string, error) {
+	rawPath := ""
+	if len(args) > 0 {
+		rawPath = args[0]
+	}
+
 	path := filepath.Join(args...)
 
-	if onlyDirectory {
-		// If only directory flag is passed, check if is a directory
+	// If onlyDirectory flag is passed or the raw argument looks like a path, skip abbreviation resolution
+	isExplicitPath := onlyDirectory || 
+		strings.HasPrefix(rawPath, ".") || 
+		strings.HasPrefix(rawPath, "/") || 
+		strings.HasPrefix(rawPath, "~") || 
+		strings.Contains(rawPath, "/")
+
+	if isExplicitPath {
+		// If only directory flag is passed or is an explicit path, check if is a directory
 		if err := gpath.ValidPathVar(&path); err != nil {
 			return "", err
 		}
