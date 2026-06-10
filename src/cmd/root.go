@@ -44,7 +44,7 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 	Args: cobra.ExactArgs(1),
 
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		// Only autocomplete the first positional argument of goto
+		// Only autocomplete abbreviations when completing the single positional argument of goto
 		if len(args) != 0 {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
@@ -69,8 +69,21 @@ goto -d h # This will move to the directory "h" and don't move to the path with 
 			}
 		}
 
-		// Use ShellCompDirectiveNoFileComp to show our abbreviations and subcommands without regular files
-		return completions, cobra.ShellCompDirectiveNoFileComp
+		// Also suggest the directories of the current directory alongside the abbreviations
+		directive := cobra.ShellCompDirectiveNoFileComp
+		if entries, err := os.ReadDir("."); err == nil {
+			for _, entry := range entries {
+				// Skip hidden directories, they are reachable through the path prefix branch (e.g. "./.config")
+				if entry.IsDir() && !strings.HasPrefix(entry.Name(), ".") && strings.HasPrefix(entry.Name(), toComplete) {
+					completions = append(completions, entry.Name()+string(os.PathSeparator))
+					// Avoid adding a space after a directory so the completion can continue into its subdirectories
+					directive = cobra.ShellCompDirectiveNoFileComp | cobra.ShellCompDirectiveNoSpace
+				}
+			}
+		}
+
+		// Use ShellCompDirectiveNoFileComp to show our abbreviations and directories without regular files
+		return completions, directive
 	},
 
 	Run: runRoot,
